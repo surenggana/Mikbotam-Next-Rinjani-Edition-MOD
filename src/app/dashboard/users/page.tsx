@@ -34,7 +34,7 @@ export default async function UsersPage({
                 <Input 
                   name="search" 
                   placeholder="Cari nama atau ID user..." 
-                  className="pl-10 bg-slate-50 border-none focus-visible:ring-teal-500" 
+                  className="pl-10 bg-slate-50 border-none focus-visible:ring-emerald-500" 
                   defaultValue={search}
                 />
                 {/* Submit on Enter is default for single input forms */}
