@@ -2,7 +2,6 @@ import { RouterSelector } from "@/components/layout/router-selector";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { SystemIntegrityProvider } from "@/components/layout/system-info";
 import { UserCircle } from "lucide-react";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 
@@ -63,7 +62,6 @@ export default async function DashboardLayout({
         </div>
         {children}
       </div>
-      <SystemIntegrityProvider />
     </DashboardContainer>
   );
 }

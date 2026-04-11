@@ -35,6 +35,7 @@ import { IncomeChart } from "@/components/dashboard/income-chart";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SystemIntegrityBanner } from "@/components/layout/system-info";
 
 export default async function DashboardPage() {
   const [stats, txData, router] = await Promise.all([
@@ -80,6 +81,9 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
+      {/* Integrity Banner */}
+      <SystemIntegrityBanner />
+
       {/* Header Welcome */}
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Ringkasan Sistem</h1>
