@@ -8,7 +8,6 @@ import {
   Users, 
   History, 
   Settings, 
-  LogOut, 
   ChevronRight, 
   Info, 
   Ticket, 
@@ -25,7 +24,6 @@ import {
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signOut } from "next-auth/react";
 
 const menuItems = [
   { group: "Main", items: [
@@ -226,18 +224,6 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
           </div>
         )}
 
-        <button
-          onClick={() => signOut()}
-          className={cn(
-            "flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 group overflow-hidden relative",
-            isCollapsed ? "justify-center" : ""
-          )}
-        >
-          <div className="p-1.5 rounded-lg bg-transparent group-hover:bg-red-100 transition-all duration-300">
-            <LogOut size={18} className="group-hover:-translate-x-0.5 transition-transform" />
-          </div>
-          {!isCollapsed && <span className="text-sm font-bold tracking-tight">Keluar Sesi</span>}
-        </button>
       </div>
     </div>
   );
