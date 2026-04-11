@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Admin {
+  u_id      Int     @id @default(autoincrement())
+  u_user    String
+  u_pass    String
+  token     String
+  enct      String
+  version   String  @default("")
+  lastlogin String
+  ip        String
+  user      String
+  status    String
+
+  @@map("mikhbotam_id")
+}
+
+model Customer {
+  no                Int     @id @default(autoincrement()) @map("No")
+  namaPelanggan     String? @map("Nama_Pelanggan")
+  alamatPelanggan   String? @map("Alamat_Pelanggan")
+  kapasitasPelanggan String? @map("Kapasitas Pelangan")
+  cid               String? @map("CID")
+  ipRouter          String? @map("IP_Router")
+  ipAccessPoint     String? @map("IP_AcessPoint")
+  ipStation         String? @map("IP_Station")
+  locPop            String? @map("Loc_POP")
+  ssid              String  @map("SSID")
+  frequensi         String  @map("FREQUENSI")
+  vlan              String  @map("Vlan")
+  switch            String  @map("Switch")
+  routing           String  @map("Routing")
+  bgp               String  @map("BGP")
+
+  @@map("re_customer")
+}
+
+model Transaction {
+  no               Int     @id @default(autoincrement()) @map("No")
+  userId           String? @map("id_user")
+  sellerName       String? @map("nama_seller")
+  balanceStart     String? @map("saldo_awal")
+  type             String? @map("Type_")
+  voucherBuy       String? @map("beli_voucher")
+  voucherMarkup    String? @map("markup_voucher")
+  markupFormat     String? @map("format_markup")
+  voucherArithmetic String? @map("armatika_voucher")
+  balanceEnd       String? @map("saldo_akhir")
+  topUp            String? @map("top_up")
+  topUpFromId      String? @map("top_up_fromid")
+  transferToId     String? @map("bagi_saldo_to_id")
+  transferAmount   String? @map("bagi_saldo")
+  voucherUsername  String? @map("username_voucher")
+  voucherPassword  String? @map("password_voucher")
+  voucherExpiry    String? @map("exp_voucher")
+  routerName       String? @map("Router_name")
+  sales            String? @map("penjualan")
+  totalVocSold     String? @map("total_voc_terjual")
+  description      String? @map("keterangan")
+  time             String? @map("Waktu")
+  date             String? @map("Tanggal")
+
+  @@map("re_operating")
+}
+
+model Seller {
+  no                Int     @id @default(autoincrement()) @map("No")
+  userId            String? @map("id_user")
+  sellerName        String? @map("nama_seller")
+  phoneNumber       String? @map("nomer_tlp")
+  balance           String? @default("0") @map("saldo")
+  vouchersSold      String? @default("0") @map("voucher_terjual")
+  debitSold         String? @map("jumlah_debit_terjual")
+  type              String? @map("type")
+  status            String? @map("status")
+  description       String? @map("keterangan")
+  join              String? @map("join")
+  other             String? @map("other")
+  otherTwo          String? @map("othertho")
+  otherThree        String? @map("othertree")
+  settings          String? @map("settings")
+  markupLast        String? @map("markuplast")
+  voucherLast       String? @map("voucherlast")
+  typeLast          String? @map("typelast")
+  time              String  @map("Waktu")
+  date              String  @map("Tanggal")
+
+  @@map("re_settings")
+}
+
+model Graphic {
+  no            Int    @id @default(autoincrement()) @map("No")
+  sum           String @map("_sum")
+  min           String @map("_min")
+  lastDate      String @map("_lastdate")
+  lastTime      String @map("_lasttime")
+  lastMonth     String @map("_lastmonth")
+  lastType      String @map("_lasttpye")
+  lastUpdate    String @map("_lastupdate")
+  textSettings  String @map("_textsettings")
+  setup         String @map("_setup")
+  other         String @map("_other")
+  settings      String @map("_Settings")
+  settingsOther String @map("_settingsother")
+  jsType        String @map("_jstype")
+
+  @@map("st_graffic")
+}
+
+model SystemConfig {
+  no               Int     @id @default(autoincrement()) @map("No")
+  id               String  @map("_id")
+  botToken         String? @map("Token_bot")
+  botUsername      String? @map("Username_bot")
+  routerName       String? @map("Nama_router")
+  routerIp         String? @map("IP_router")
+  routerUsername   String? @map("Username_router")
+  routerPassword   String? @map("Pass_router")
+  port             String? @map("Port")
+  dnsName          String? @map("dnsname")
+  owner            String? @map("Owner")
+  ownerId          String? @map("Id_owner")
+  voucher1         String? @map("Voucher_1")
+  voucherNoBalance String? @map("Voucher_nonsaldo")
+  voucherUserman   String? @map("Voucher_userman")
+  voucherHotel     String? @map("Voucher_hotel")
+  voucherGenerate  String? @map("Voucher_generate")
+  pppManager       String? @map("PPP_Manager")
+  hotspotManager   String? @map("Hotspot_Manager")
+  levelPlan        String? @map("Level_Plan")
+  userPlan         String? @map("User_Plan")
+  managerPlan      String? @map("Manager_Plan")
+  textSetup        String? @map("Text_setup")
+  settings         String? @map("settings")
+  settingsText     String? @map("setingstext")
+  settingsOther    String? @map("settingsother")
+  theme            String? @map("theme")
+  ether            String? @map("ether")
+  autoRefresh      String? @map("autoreflash")
+  other            String? @map("other")
+  otherTwo         String? @map("othertho")
+  otherThree       String? @map("othertree")
+  dateModified     String? @map("Tanggal_diubah")
+
+  @@map("st_mikbotam")
+}
+
+model Monitoring {
+  id     Int     @id @default(autoincrement())
+  name   String? @map("Name")
+  host   String? @map("Host")
+  location String? @map("Lokasi")
+
+  @@map("st_monitoring")
+}
+
+model PppConfig {
+  no            Int    @id @default(autoincrement()) @map("No")
+  type          String @map("_type")
+  lastDate      String @map("_lastdate")
+  lastUpdate    String @map("_lastupdate")
+  expiryMode    String @map("_experidmode")
+  username      String @map("_username")
+  password      String @map("_pass")
+  expiryDate    String @map("_experiddate")
+  settings      String @map("_settings")
+  settingsOther String @map("_settingsother")
+  voucherPpp    String @map("_voucherppp")
+  profilePpp    String @map("_profileppp")
+  curPp         String @map("_curpp")
+  notNow        String @map("_notnow")
+  other         String @map("_other")
+
+  @@map("st_ppp")
+}
+
+model Report {
+  no         Int     @id @default(autoincrement()) @map("No")
+  userId     String? @map("id_user")
+  userName   String? @map("nama_user")
+  transaction String? @map("transaksi")
+  price      String? @default("0") @map("harga")
+  status     String? @map("status")
+  revenue    String? @default("0") @map("pendapatan")
+  time       String? @map("Waktu")
+  date       String? @map("Tanggal")
+
+  @@map("st_reportdata")
+}
+
+model SmsGateway {
+  no             Int     @id @default(autoincrement())
+  id             String? @map("_id")
+  token          String? @map("Token")
+  ipServer       String? @map("ipserver")
+  callbackServer String? @map("callbackserver")
+
+  @@map("st_smsgateway")
+}
+
+model VoucherConfig {
+  no            Int    @id @default(autoincrement()) @map("No")
+  type          String @map("_type")
+  generate      String @map("_generate")
+  lastDate      String @map("_lastdate")
+  settings      String @map("_settings")
+  settingsOther String @map("_setingsother")
+  voucherHotspot String @map("_voucherhotpot")
+  hotspotUser   String @map("_hotspotuser")
+  hotspotPass   String @map("_hospotpass")
+  username      String @map("_usernamaner")
+  usermanUser   String @map("_usermanuser")
+  usermanPass   String @map("_usermanpass")
+  expiry        String @map("_experide")
+  routerName    String @map("_routername")
+  user          String @map("_user")
+  ip            String @map("_ip")
+  setNow        String @map("_setnow")
+  other         String @map("_other")
+  updateDate    String @map("_updatedate")
+
+  @@map("st_voucher")
+}
