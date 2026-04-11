@@ -23,7 +23,7 @@ export default async function SystemLogsPage() {
 
       <Card className="border-none shadow-xl bg-slate-950 text-slate-300">
         <CardHeader className="border-b border-slate-800 bg-slate-900/50">
-          <CardTitle className="text-sm font-mono flex items-center gap-2 text-teal-400">
+          <CardTitle className="text-sm font-mono flex items-center gap-2 text-emerald-400">
             <Terminal size={18} />
             mikrotik@system_logs ~ % tail -n 50
           </CardTitle>
@@ -45,7 +45,7 @@ export default async function SystemLogsPage() {
               ) : (
                 logs.map((log: any, idx: number) => (
                   <TableRow key={idx} className="border-slate-900 hover:bg-slate-900/50 transition-colors">
-                    <TableCell className="text-teal-500/70">{log.time}</TableCell>
+                    <TableCell className="text-emerald-500/70">{log.time}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {log.topics.split(',').map((topic: string) => (

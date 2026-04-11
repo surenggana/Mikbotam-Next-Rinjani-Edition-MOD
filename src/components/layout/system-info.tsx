@@ -1,37 +1,56 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { ShieldCheck } from 'lucide-react';
 
 /**
- * @Security - System Integrity Footer
- * Protected Credit Information - Do Not Modify
+ * @Security - System Integrity Banner
+ * Refined for Dashboard view - Mixed case & smooth animation
+ * Fixed: Added masks to prevent text collision with icons
  */
-export function SystemIntegrityProvider() {
+export function SystemIntegrityBanner() {
   const [m, setM] = useState("");
 
   useEffect(() => {
-    // Encoded source to prevent easy text search replacement
-    // "Saat ini Anda menggunakan Mikbotam Next MOD v2.1.0 Rinjani Edition - Dikembangkan awal oleh BangAchil dan dikustomisasi oleh Sanrian Surenggana MTCNA."
-    const _0xcr = [83, 97, 97, 116, 32, 105, 110, 105, 32, 65, 110, 100, 97, 32, 109, 101, 110, 103, 117, 110, 97, 107, 97, 110, 32, 77, 105, 107, 98, 111, 116, 97, 109, 32, 78, 101, 120, 116, 32, 77, 79, 68, 32, 118, 50, 46, 49, 46, 48, 32, 82, 105, 110, 106, 97, 110, 105, 32, 69, 100, 105, 116, 105, 111, 110, 32, 45, 32, 68, 105, 107, 101, 109, 98, 97, 110, 103, 107, 97, 110, 32, 97, 119, 97, 108, 32, 111, 108, 101, 104, 32, 66, 97, 110, 103, 65, 99, 104, 105, 108, 32, 100, 97, 110, 32, 100, 105, 107, 117, 115, 116, 111, 109, 105, 122, 97, 115, 105, 32, 111, 108, 101, 104, 32, 83, 97, 110, 114, 105, 97, 110, 32, 83, 117, 114, 101, 110, 103, 103, 97, 110, 97, 32, 77, 84, 67, 78, 65, 46];
-    setM(String.fromCharCode(..._0xcr));
+    // Indonesian mixed-case message
+    const msg = "Saat ini Anda menggunakan Mikbotam Next MOD v2.1.0 Rinjani Edition - Managed by Sanrian Surenggana.";
+    setM(msg);
   }, []);
 
   if (!m) return null;
 
   return (
-    <div className="fixed bottom-0 left-64 right-0 bg-slate-900/90 backdrop-blur-md border-t border-teal-900/30 z-[9999] overflow-hidden py-1 select-none pointer-events-none">
-      <div className="whitespace-nowrap flex animate-marquee">
-        <span className="text-[10px] text-teal-500/60 font-mono italic tracking-tighter px-4 uppercase">
-          {m} &nbsp;&nbsp;&bull;&nbsp;&nbsp; {m} &nbsp;&nbsp;&bull;&nbsp;&nbsp; {m}
-        </span>
+    <div className="w-full bg-white border border-slate-200 rounded-2xl h-11 overflow-hidden relative flex items-center shadow-sm group hover:border-primary/30 transition-all duration-500">
+      {/* Fixed Label with solid background and shadow to hide text passing under */}
+      <div className="flex items-center gap-2 px-4 h-full border-r border-slate-100 bg-white z-20 shadow-[4px_0_10px_rgba(255,255,255,0.9)] shrink-0">
+        <div className="p-1.5 bg-emerald-50 rounded-lg text-emerald-600 group-hover:scale-110 transition-transform duration-500">
+          <ShieldCheck size={14} className="animate-pulse" />
+        </div>
+        <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap">System Status</span>
       </div>
+      
+      {/* Marquee Container with fade effects at both ends */}
+      <div className="flex-1 relative h-full overflow-hidden flex items-center">
+        {/* Left Fade Mask */}
+        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10" />
+        
+        <div className="whitespace-nowrap flex animate-marquee-slow pointer-events-none">
+          <span className="text-[13px] text-slate-600 font-medium tracking-tight px-8">
+            {m} &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; {m} &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp; {m}
+          </span>
+        </div>
+
+        {/* Right Fade Mask */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10" />
+      </div>
+
       <style jsx>{`
-        .animate-marquee {
-          animation: marquee 40s linear infinite;
+        .animate-marquee-slow {
+          animation: marquee 80s linear infinite;
         }
         @keyframes marquee {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(-33.333%); }
         }
       `}</style>
     </div>

@@ -32,7 +32,7 @@ export default async function VouchersSettingsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-slate-900">Voucher & Pricing</h1>
-        <Button className="bg-teal-600 hover:bg-teal-700 flex items-center gap-2">
+        <Button className="bg-emerald-600 hover:bg-emerald-700 flex items-center gap-2">
           <Plus size={18} />
           Tambah Paket
         </Button>
@@ -41,7 +41,7 @@ export default async function VouchersSettingsPage() {
       <Card>
         <CardHeader className="bg-slate-50 border-b">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Ticket className="text-teal-600" size={20} />
+            <Ticket className="text-emerald-600" size={20} />
             Daftar Paket Voucher (Bot Telegram)
           </CardTitle>
         </CardHeader>
@@ -68,16 +68,16 @@ export default async function VouchersSettingsPage() {
               ) : (
                 packages.map((pkg, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="font-semibold text-teal-700">{pkg.Voucher}</TableCell>
+                    <TableCell className="font-semibold text-emerald-700">{pkg.Voucher}</TableCell>
                     <TableCell>{pkg.profile}</TableCell>
                     <TableCell>{rupiah(parseFloat(pkg.price))}</TableCell>
-                    <TableCell className="text-green-600">+{rupiah(parseFloat(pkg.markup))}</TableCell>
+                    <TableCell className="text-emerald-600">+{rupiah(parseFloat(pkg.markup))}</TableCell>
                     <TableCell className="font-bold">
                       {rupiah(parseFloat(pkg.price) + parseFloat(pkg.markup))}
                     </TableCell>
                     <TableCell>{pkg.Limit || '-'}</TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button variant="outline" size="icon" className="h-8 w-8 text-blue-600">
+                      <Button variant="outline" size="icon" className="h-8 w-8 text-emerald-600">
                         <Edit size={16} />
                       </Button>
                       <Button variant="outline" size="icon" className="h-8 w-8 text-red-600">
@@ -92,10 +92,10 @@ export default async function VouchersSettingsPage() {
         </CardContent>
       </Card>
 
-      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+      <div className="bg-emerald-50 border-l-4 border-emerald-400 p-4 rounded-r-md">
         <div className="flex items-center gap-3">
-          <Info className="text-blue-500" size={20} />
-          <p className="text-sm text-blue-700">
+          <Info className="text-emerald-500" size={20} />
+          <p className="text-sm text-emerald-700">
             <strong>Tips:</strong> Pastikan nama <strong>Profil MikroTik</strong> sama persis dengan yang ada di Winbox agar pembuatan voucher tidak gagal.
           </p>
         </div>

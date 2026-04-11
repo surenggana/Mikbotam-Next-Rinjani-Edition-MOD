@@ -58,6 +58,21 @@ export async function getRouterStats() {
     console.error('Gagal mengambil statistik router:', error);
     throw error;
   } finally {
-    conn.close();
+  conn.close();
   }
-}
+  }
+
+  export async function getInterfaces() {
+  const conn = await getMikrotikConnection();
+  try {
+  await conn.connect();
+  const data = await conn.write('/interface/print');
+  return data;
+  } catch (error) {
+  console.error('Gagal mengambil data interface:', error);
+  throw error;
+  } finally {
+  conn.close();
+  }
+  }
+
