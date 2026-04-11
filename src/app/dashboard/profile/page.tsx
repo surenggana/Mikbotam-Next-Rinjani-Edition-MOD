@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { User, ShieldLock, Save } from "lucide-react";
+import { User, ShieldCheck, Save } from "lucide-react";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 
@@ -45,7 +45,7 @@ export default async function AdminProfilePage() {
         <Card className="border-none shadow-lg">
           <CardHeader className="bg-slate-900 text-white rounded-t-lg">
             <CardTitle className="text-lg flex items-center gap-2">
-              <ShieldLock size={20} className="text-teal-400" />
+              <ShieldCheck size={20} className="text-teal-400" />
               Account Settings
             </CardTitle>
             <CardDescription className="text-slate-400">Pastikan password Anda kuat dan unik.</CardDescription>
