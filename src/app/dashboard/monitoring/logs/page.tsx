@@ -1,6 +1,5 @@
 import { getSystemLogs } from "@/lib/mikrotik/automation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Terminal, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,65 +40,67 @@ export default async function SystemLogsPage() {
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 max-h-[70vh] overflow-auto">
-          <Table>
-            <TableHeader className="bg-slate-50/50 sticky top-0 z-10">
-              <TableRow className="hover:bg-transparent border-slate-100">
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 px-6 w-[130px]">Time</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 w-[160px]">Topics</TableHead>
-                <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 px-6">Message</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="font-mono text-xs">
-              {sorted.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-20 text-slate-400 italic text-xs font-medium">
-                    Gagal mengambil log atau log kosong.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sorted.map((log: any, idx: number) => (
-                  <TableRow key={idx} className="border-slate-50 hover:bg-slate-50/60 transition-colors">
-                    <TableCell className="text-emerald-600 font-mono py-3 px-6 text-[11px]">
-                      {log.time}
-                    </TableCell>
-                    <TableCell className="py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {log.topics.split(",").map((topic: string) => (
-                          <span
-                            key={topic}
-                            className={cn(
-                              "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border",
-                              topic.trim() === "error"
-                                ? "bg-red-50 text-red-600 border-red-100"
-                                : topic.trim() === "warning"
-                                ? "bg-amber-50 text-amber-600 border-amber-100"
-                                : topic.trim() === "critical"
-                                ? "bg-rose-50 text-rose-600 border-rose-100"
-                                : "bg-slate-100 text-slate-500 border-slate-200"
-                            )}
-                          >
-                            {topic.trim()}
-                          </span>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "py-3 px-6 text-[11px]",
-                        log.message.toLowerCase().includes("fail") ||
-                        log.message.toLowerCase().includes("error")
-                          ? "text-red-500 font-bold"
-                          : "text-slate-600"
-                      )}
-                    >
-                      {log.message}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0">
+          <div className="max-h-[65vh] overflow-auto">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 z-10 bg-white border-b border-slate-100">
+                <tr>
+                  <th className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-3 px-6 text-left w-[120px] whitespace-nowrap">Time</th>
+                  <th className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-3 px-4 text-left w-[200px]">Topics</th>
+                  <th className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-3 px-6 text-left">Message</th>
+                </tr>
+              </thead>
+              <tbody className="font-mono text-[11px] divide-y divide-slate-50">
+                {sorted.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="text-center py-20 text-slate-400 italic text-xs font-medium">
+                      Gagal mengambil log atau log kosong.
+                    </td>
+                  </tr>
+                ) : (
+                  sorted.map((log: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="text-emerald-600 py-3 px-6 align-top whitespace-nowrap">
+                        {log.time}
+                      </td>
+                      <td className="py-3 px-4 align-top">
+                        <div className="flex flex-wrap gap-1 max-w-[190px]">
+                          {log.topics.split(",").map((topic: string) => (
+                            <span
+                              key={topic}
+                              className={cn(
+                                "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border whitespace-nowrap",
+                                topic.trim() === "error"
+                                  ? "bg-red-50 text-red-600 border-red-100"
+                                  : topic.trim() === "warning"
+                                  ? "bg-amber-50 text-amber-600 border-amber-100"
+                                  : topic.trim() === "critical"
+                                  ? "bg-rose-50 text-rose-600 border-rose-100"
+                                  : "bg-slate-100 text-slate-500 border-slate-200"
+                              )}
+                            >
+                              {topic.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td
+                        className={cn(
+                          "py-3 px-6 align-top break-words max-w-[500px]",
+                          log.message.toLowerCase().includes("fail") ||
+                          log.message.toLowerCase().includes("error")
+                            ? "text-red-500 font-bold"
+                            : "text-slate-600"
+                        )}
+                      >
+                        {log.message}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
     </div>
