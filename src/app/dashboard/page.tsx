@@ -166,7 +166,7 @@ export default async function DashboardPage() {
                   <span className="text-sm text-slate-400 flex items-center gap-2"><Calendar size={16}/> Tanggal</span>
                   <span className="text-sm font-medium text-slate-200">{new Date().toLocaleDateString('id-ID')}</span>
                 </div>
-              </>
+              </div>
             ) : (
               <div className="py-8 text-center text-red-400 text-sm italic">
                 Gagal terhubung ke router. Periksa konfigurasi API.
