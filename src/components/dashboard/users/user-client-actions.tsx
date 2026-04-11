@@ -43,7 +43,7 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
   if (mode === "page-header") {
     return (
       <>
-        <Button onClick={() => setIsModalOpen(true)} className="bg-teal-600 hover:bg-teal-700 flex items-center gap-2 shadow-sm">
+        <Button onClick={() => setIsModalOpen(true)} className="bg-primary hover:bg-emerald-700 flex items-center gap-2 shadow-sm">
           <UserPlus size={18} />
           Tambah User
         </Button>
@@ -63,7 +63,7 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
 
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-            <Wallet className="h-4 w-4 text-blue-600" />
+            <Wallet className="h-4 w-4 text-emerald-600" />
             Topup Saldo
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 cursor-pointer">

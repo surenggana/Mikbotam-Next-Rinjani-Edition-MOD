@@ -20,10 +20,10 @@ export function SystemIntegrityBanner() {
   if (!m) return null;
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-2xl h-11 overflow-hidden relative flex items-center shadow-sm group hover:border-teal-500/30 transition-all duration-500">
+    <div className="w-full bg-white border border-slate-200 rounded-2xl h-11 overflow-hidden relative flex items-center shadow-sm group hover:border-primary/30 transition-all duration-500">
       {/* Fixed Label with solid background and shadow to hide text passing under */}
       <div className="flex items-center gap-2 px-4 h-full border-r border-slate-100 bg-white z-20 shadow-[4px_0_10px_rgba(255,255,255,0.9)] shrink-0">
-        <div className="p-1.5 bg-teal-50 rounded-lg text-teal-600 group-hover:scale-110 transition-transform duration-500">
+        <div className="p-1.5 bg-emerald-50 rounded-lg text-emerald-600 group-hover:scale-110 transition-transform duration-500">
           <ShieldCheck size={14} className="animate-pulse" />
         </div>
         <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] whitespace-nowrap">System Status</span>

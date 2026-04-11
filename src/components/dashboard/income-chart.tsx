@@ -24,7 +24,7 @@ export function IncomeChart({ data }: { data: any[] }) {
       return (
         <div className="bg-slate-900 border border-slate-800 p-3 shadow-2xl rounded-xl">
           <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{label}</p>
-          <p className="text-sm font-bold text-teal-400">{rupiah(payload[0].value)}</p>
+          <p className="text-sm font-bold text-emerald-400">{rupiah(payload[0].value)}</p>
         </div>
       );
     }
@@ -40,8 +40,8 @@ export function IncomeChart({ data }: { data: any[] }) {
         >
           <defs>
             <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#0d9488" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#0d9488" stopOpacity={0} />
+              <stop offset="5%" stopColor="#059669" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#059669" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid 
@@ -64,12 +64,12 @@ export function IncomeChart({ data }: { data: any[] }) {
           />
           <Tooltip 
             content={<CustomTooltip />}
-            cursor={{ stroke: '#0d9488', strokeWidth: 1, strokeDasharray: '4 4' }}
+            cursor={{ stroke: '#059669', strokeWidth: 1, strokeDasharray: '4 4' }}
           />
           <Area
             type="monotone" // Smooth curve
             dataKey="amount"
-            stroke="#0d9488"
+            stroke="#059669"
             strokeWidth={4}
             fillOpacity={1}
             fill="url(#colorIncome)"
@@ -79,8 +79,8 @@ export function IncomeChart({ data }: { data: any[] }) {
               r: 6, 
               stroke: '#ffffff', 
               strokeWidth: 3, 
-              fill: '#0d9488',
-              className: "shadow-lg shadow-teal-500/50"
+              fill: '#059669',
+              className: "shadow-lg shadow-emerald-500/50"
             }}
           />
         </AreaChart>
