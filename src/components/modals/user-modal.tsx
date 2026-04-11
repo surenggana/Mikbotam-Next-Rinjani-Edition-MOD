@@ -138,7 +138,7 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
               <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                 Batal
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-teal-600 hover:bg-teal-700">
+              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-emerald-700">
                 {isSubmitting && <Loader2 className="animate-spin mr-2" size={16} />}
                 {user ? "Simpan Perubahan" : "Tambah User"}
               </Button>

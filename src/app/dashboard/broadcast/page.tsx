@@ -44,7 +44,7 @@ export default function BroadcastPage() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-xl">
-                <Send size={20} className="text-teal-400" />
+                <Send size={20} className="text-emerald-400" />
                 Buat Pesan Baru
               </CardTitle>
               <CardDescription className="text-slate-400 mt-1">
@@ -57,7 +57,7 @@ export default function BroadcastPage() {
           <div className="space-y-2">
             <Textarea 
               placeholder="Tulis pesan pengumuman di sini..." 
-              className="min-h-[250px] text-base bg-slate-50 border-slate-200 focus:bg-white focus:ring-teal-500 transition-all"
+              className="min-h-[250px] text-base bg-slate-50 border-slate-200 focus:bg-white focus:ring-emerald-500 transition-all"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               disabled={loading}
@@ -78,7 +78,7 @@ export default function BroadcastPage() {
           <Button 
             onClick={() => setIsConfirmOpen(true)} 
             disabled={loading || !message.trim()}
-            className="w-full bg-teal-600 hover:bg-teal-700 h-12 text-lg font-semibold shadow-lg shadow-teal-900/20"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 text-lg font-semibold shadow-lg shadow-emerald-900/20"
           >
             {loading ? (
               <>

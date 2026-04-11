@@ -12,6 +12,7 @@ import {
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { formatBytes, formatUptime } from "@/lib/formatters";
 
 export default function ActiveSessionsPage() {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -231,11 +232,11 @@ function InterfacesTable({ interfaces }: any) {
               <div className="flex items-center gap-4 text-[11px] font-mono font-black">
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-[8px] uppercase">Upload</span>
-                  <span className="text-blue-600 flex items-center gap-1"><ArrowDownUp size={10} className="rotate-180" /> {iface["tx-byte"] || "0"}</span>
+                  <span className="text-blue-600 flex items-center gap-1"><ArrowDownUp size={10} className="rotate-180" /> {formatBytes(iface["tx-byte"])}</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-[8px] uppercase">Download</span>
-                  <span className="text-emerald-600 flex items-center gap-1"><ArrowDownUp size={10} /> {iface["rx-byte"] || "0"}</span>
+                  <span className="text-emerald-600 flex items-center gap-1"><ArrowDownUp size={10} /> {formatBytes(iface["rx-byte"])}</span>
                 </div>
               </div>
             </TableCell>
@@ -285,7 +286,7 @@ function HotspotTable({ users }: any) {
             </TableCell>
             <TableCell className="px-6 text-right">
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-sky-50 text-[#0ea5e9] text-xs font-mono font-black border border-sky-100">
-                <Clock size={12} /> {user.uptime}
+                <Clock size={12} /> {formatUptime(user.uptime)}
               </span>
             </TableCell>
           </TableRow>
@@ -324,7 +325,7 @@ function PppTable({ users }: any) {
             </TableCell>
             <TableCell className="px-6 text-right">
               <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-mono font-black border border-emerald-100">
-                <Activity size={12} /> {user.uptime}
+                <Activity size={12} /> {formatUptime(user.uptime)}
               </span>
             </TableCell>
           </TableRow>

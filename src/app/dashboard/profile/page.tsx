@@ -45,7 +45,7 @@ export default async function AdminProfilePage() {
         <Card className="border-none shadow-lg">
           <CardHeader className="bg-slate-900 text-white rounded-t-lg">
             <CardTitle className="text-lg flex items-center gap-2">
-              <ShieldCheck size={20} className="text-teal-400" />
+              <ShieldCheck size={20} className="text-emerald-400" />
               Account Settings
             </CardTitle>
             <CardDescription className="text-slate-400">Pastikan password Anda kuat dan unik.</CardDescription>
@@ -65,7 +65,7 @@ export default async function AdminProfilePage() {
               <p className="text-[10px] text-slate-400 italic">Password akan di-hash otomatis menggunakan BCrypt saat disimpan.</p>
             </div>
 
-            <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 h-12">
+            <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 h-12">
               <Save size={18} className="mr-2" />
               Simpan Perubahan Profil
             </Button>

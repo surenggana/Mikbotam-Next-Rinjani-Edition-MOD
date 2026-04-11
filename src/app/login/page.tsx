@@ -42,11 +42,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <Card className="w-full max-w-md shadow-xl border-t-4 border-t-teal-600 animate-in fade-in zoom-in-95 duration-500">
+      <Card className="w-full max-w-md shadow-xl border-t-4 border-t-primary animate-in fade-in zoom-in-95 duration-500">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
              <div className="bg-slate-950 p-5 rounded-3xl shadow-2xl border border-white/10 relative group">
-                <div className="absolute -inset-2 bg-gradient-to-tr from-[#0ea5e9] to-[#14b8a6] rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                <div className="absolute -inset-2 bg-gradient-to-tr from-[#10b981] to-[#059669] rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition duration-500"></div>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10">
                   <path 
                     d="M4 18V6L12 14L20 6V18" 
@@ -57,8 +57,8 @@ export default function LoginPage() {
                   />
                   <defs>
                     <linearGradient id="login-logo-gradient" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="#0ea5e9" />
-                      <stop offset="100%" stopColor="#14b8a6" />
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#059669" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -108,7 +108,7 @@ export default function LoginPage() {
 
             <Button 
               type="submit" 
-              className="w-full bg-teal-600 hover:bg-teal-700 h-11"
+              className="w-full bg-primary hover:bg-emerald-700 h-11"
               disabled={loading}
             >
               {loading ? "Mencoba Masuk..." : "Masuk"}

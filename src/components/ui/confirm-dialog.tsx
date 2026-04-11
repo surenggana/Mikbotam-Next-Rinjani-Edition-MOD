@@ -53,7 +53,7 @@ export function ConfirmDialog({
             }}
             disabled={isLoading}
             className={cn(
-              variant === "destructive" ? "bg-red-600 hover:bg-red-700" : "bg-teal-600 hover:bg-teal-700",
+              variant === "destructive" ? "bg-red-600 hover:bg-red-700" : "bg-primary hover:bg-emerald-700",
               "text-white"
             )}
           >
