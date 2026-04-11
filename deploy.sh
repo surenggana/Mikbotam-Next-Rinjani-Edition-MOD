@@ -1,50 +1,48 @@
 #!/bin/bash
 
-# --- MIKBOTAM NEXT AUTO DEPLOY ---
-# Support: Ubuntu / Debian
+# --- MIKBOTAM NEXT - RINJANI EDITION (MOD v2.1.0) ---
+# Auto Deployment Script for Linux (Ubuntu/Debian)
 
 echo "🚀 Starting Mikbotam Next Deployment..."
 
-# 1. Update System
-sudo apt update && sudo apt upgrade -y
-
-# 2. Install Node.js (Version 20+)
+# 1. Update & Check Node.js
+sudo apt update
 if ! command -v node &> /dev/null
 then
-    echo "📦 Installing Node.js..."
+    echo "📦 Installing Node.js 20..."
     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt install -y nodejs
 fi
 
-# 3. Install PM2 (Process Manager)
+# 2. Install PM2
 if ! command -v pm2 &> /dev/null
 then
-    echo "📦 Installing PM2..."
+    echo "📦 Installing PM2 Manager..."
     sudo npm install -g pm2
 fi
 
-# 4. Install Dependencies
-echo "📦 Installing Project Dependencies..."
+# 3. Fresh Install Dependencies
+echo "📦 Installing/Refreshing Dependencies..."
+rm -rf node_modules package-lock.json
 npm install
 
-# 5. Setup Database
-echo "🗄️ Setting up Database..."
+# 4. Database Setup
+echo "🗄️ Syncing Database Schema..."
 npx prisma generate
 npx prisma db push
 
-# 6. Build Project
-echo "🏗️ Building Project (this may take a while)..."
+# 5. Build Project
+echo "🏗️ Building Next.js Application..."
 npm run build
 
-# 7. Start with PM2
-echo "🏁 Starting Application with PM2..."
+# 6. Run with PM2
+echo "🏁 Launching Application..."
 pm2 delete mikbotam-next 2>/dev/null
 pm2 start npm --name "mikbotam-next" -- start
 
-# 8. Bot Polling (Optional - if webhook not used)
-# pm2 start npm --name "mikbotam-bot" -- run bot:polling
+# 7. Auto Start on Reboot
+pm2 save
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u $USER --hp $HOME
 
-echo "✅ Deployment Finished!"
-echo "🔗 Access your dashboard at http://YOUR_SERVER_IP:3000"
-echo "---"
-pm2 list
+echo "✅ Mikbotam Next is now running!"
+echo "🔗 Dashboard: http://YOUR_SERVER_IP:3000"

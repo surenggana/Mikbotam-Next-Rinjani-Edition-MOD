@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info, ExternalLink, Facebook, Github } from "lucide-react";
+import { Info, ExternalLink, FacebookIcon, GithubIcon } from "lucide-react";
 import Image from "next/image";
 
 export default function AboutPage() {
@@ -81,7 +81,7 @@ export default function AboutPage() {
                     target="_blank" 
                     className="flex items-center gap-2 text-slate-600 hover:text-blue-600 font-medium"
                   >
-                    <Facebook size={18} />
+                    <FacebookIcon size={18} />
                     fb.com/bangachiill
                   </a>
                 </div>
