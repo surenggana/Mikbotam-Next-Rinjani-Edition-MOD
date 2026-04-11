@@ -11,15 +11,20 @@ export default function AboutPage() {
           <div className="p-8 flex flex-col items-center text-center relative z-10">
             <div className="w-32 h-32 rounded-3xl bg-teal-500/10 p-3 mb-6 border border-teal-500/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
               <div className="w-full h-full rounded-2xl bg-slate-900 flex items-center justify-center overflow-hidden shadow-inner">
-                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path 
                     d="M4 18V6L12 14L20 6V18" 
-                    stroke="currentColor" 
+                    stroke="url(#about-logo-gradient)" 
                     strokeWidth="2.5" 
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
-                    className="text-teal-400"
                   />
+                  <defs>
+                    <linearGradient id="about-logo-gradient" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#0ea5e9" />
+                      <stop offset="100%" stopColor="#14b8a6" />
+                    </linearGradient>
+                  </defs>
                 </svg>
               </div>
             </div>

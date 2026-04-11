@@ -1,19 +1,16 @@
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="512" height="512" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="24" height="24" rx="6" fill="#020617"/>
+  <path 
+    d="M4 18V6L12 14L20 6V18" 
+    stroke="url(#paint0_linear)" 
+    stroke-width="2.5" 
+    stroke-linecap="round" 
+    stroke-linejoin="round"
+  />
   <defs>
-    <linearGradient id="paint0_linear" x1="20" y1="20" x2="180" y2="180" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0D9488"/>
-      <stop offset="1" stop-color="#2DD4BF"/>
+    <linearGradient id="paint0_linear" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#14b8a6"/>
     </linearGradient>
   </defs>
-  <!-- Background Shield -->
-  <path d="M100 20L160 45V95C160 135 135 170 100 185C65 170 40 135 40 95V45L100 20Z" fill="url(#paint0_linear)" fill-opacity="0.1" stroke="url(#paint0_linear)" stroke-width="4"/>
-  <!-- Router Symbol -->
-  <rect x="70" y="85" width="60" height="30" rx="4" fill="url(#paint0_linear)"/>
-  <path d="M80 85V65M100 85V55M120 85V65" stroke="url(#paint0_linear)" stroke-width="4" stroke-linecap="round"/>
-  <!-- Bot Head Circle -->
-  <circle cx="100" cy="105" r="12" fill="white"/>
-  <circle cx="96" cy="105" r="2" fill="#0D9488"/>
-  <circle cx="104" cy="105" r="2" fill="#0D9488"/>
-  <!-- Next Symbol -->
-  <path d="M140 100L155 110L140 120" stroke="url(#paint0_linear)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

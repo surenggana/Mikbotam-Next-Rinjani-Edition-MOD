@@ -45,17 +45,22 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-xl border-t-4 border-t-teal-600 animate-in fade-in zoom-in-95 duration-500">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-             <div className="bg-slate-900 p-4 rounded-2xl shadow-xl border border-teal-500/20 relative group">
-                <div className="absolute -inset-1 bg-teal-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10">
+             <div className="bg-slate-950 p-5 rounded-3xl shadow-2xl border border-white/10 relative group">
+                <div className="absolute -inset-2 bg-gradient-to-tr from-[#0ea5e9] to-[#14b8a6] rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition duration-500"></div>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10">
                   <path 
                     d="M4 18V6L12 14L20 6V18" 
-                    stroke="currentColor" 
+                    stroke="url(#login-logo-gradient)" 
                     strokeWidth="2.5" 
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
-                    className="text-teal-400"
                   />
+                  <defs>
+                    <linearGradient id="login-logo-gradient" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#0ea5e9" />
+                      <stop offset="100%" stopColor="#14b8a6" />
+                    </linearGradient>
+                  </defs>
                 </svg>
              </div>
           </div>

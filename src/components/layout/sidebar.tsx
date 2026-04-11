@@ -63,34 +63,35 @@ interface SidebarProps {
 const Logo = ({ isCollapsed }: { isCollapsed: boolean }) => (
   <div className="flex items-center gap-3">
     <div className="relative group cursor-pointer">
-      <div className="absolute -inset-1 bg-gradient-to-tr from-primary to-teal-400 rounded-xl blur-md opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
-      <div className="relative w-11 h-11 bg-slate-900 rounded-xl flex items-center justify-center border border-slate-800 group-hover:border-primary/50 transition-all duration-500 shadow-2xl">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:scale-110 transition-transform duration-500">
-          {/* Main Stylized 'M' with sharp outline */}
+      {/* High-vibrancy glow effect */}
+      <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#0ea5e9] to-[#14b8a6] rounded-xl blur-lg opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-300"></div>
+      
+      <div className="relative w-11 h-11 bg-slate-950 rounded-xl flex items-center justify-center border border-white/10 shadow-2xl group-hover:border-[#0ea5e9]/50 transition-all duration-500 overflow-hidden">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:8px_8px]"></div>
+        
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 group-hover:scale-110 transition-transform duration-500">
+          {/* Main Stylized 'M' - High Clarity Outline */}
           <path 
             d="M4 18V6L12 14L20 6V18" 
-            stroke="currentColor" 
+            stroke="url(#logo-gradient)" 
             strokeWidth="2.5" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
-            className="text-primary"
           />
-          {/* Subtle accent line */}
-          <path 
-            d="M8 14L12 18L16 14" 
-            stroke="currentColor" 
-            strokeWidth="1.5" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className="text-teal-600/30"
-          />
+          <defs>
+            <linearGradient id="logo-gradient" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#0ea5e9" />
+              <stop offset="100%" stopColor="#14b8a6" />
+            </linearGradient>
+          </defs>
         </svg>
       </div>
     </div>
     {!isCollapsed && (
       <div className="animate-in fade-in slide-in-from-left-2 duration-500">
-        <h1 className="text-xl font-black tracking-tighter text-sidebar-foreground leading-none">MIKBOTAM</h1>
-        <p className="text-[9px] font-black text-primary uppercase tracking-[0.25em] mt-1">Rinjani Edition</p>
+        <h1 className="text-xl font-black tracking-tighter text-white leading-none">MIKBOTAM</h1>
+        <p className="text-[9px] font-black text-[#0ea5e9] uppercase tracking-[0.25em] mt-1">Rinjani Edition</p>
       </div>
     )}
   </div>
