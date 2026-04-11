@@ -1,107 +1,89 @@
 # 🚀 Mikbotam Next - Rinjani Edition
-### *Modern Evolution MOD v2.1.0*
+### *The Modern Evolution of MikroTik Bot Management (MOD v2.1.0)*
 
-![Mikbotam Next Logo](public/logo-next.svg)
+![Mikbotam Banner](https://img.shields.io/badge/Mikrotik-Hotspot%20Bot-teal?style=for-the-badge&logo=mikrotik)
+![Next.js 15](https://img.shields.io/badge/Next.js%2015-black?style=for-the-badge&logo=next.js)
+![Prisma ORM](https://img.shields.io/badge/Prisma%20ORM-blue?style=for-the-badge&logo=prisma)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
 
-**Mikbotam Next (MOD v2.1.0)** adalah kelanjutan revolusioner dari versi **Krakatau (Master)**.
- Dibangun ulang dari nol menggunakan stack teknologi terbaru, proyek ini menghadirkan performa, keamanan, dan stabilitas yang belum pernah ada sebelumnya bagi komunitas pengusaha ISP dan Hotspot di Indonesia.
+**Mikbotam Next (MOD v2.1.0)** adalah evolusi revolusioner dari versi **Krakatau (Master)**. Dibangun ulang menggunakan framework **Next.js 15**, aplikasi ini menawarkan stabilitas tinggi, keamanan data, dan antarmuka pengguna (UI/UX) yang dirancang khusus untuk pengusaha ISP dan pengelola jaringan hotspot di Indonesia.
 
 ---
 
 ## 🎖️ Credits & Legacy
-Proyek ini berdiri di atas bahu para raksasa:
-- **Original Founder:** [BangAchil](https://github.com/bangachil) (Pencetus konsep Mikbotam Master).
+Proyek ini dikembangkan dengan rasa hormat kepada akar sejarahnya:
+- **Original Founder:** [BangAchil](https://github.com/bangachil) (Pencetus konsep Mikbotam Master PHP).
 - **Lead Developer (Next Gen):** **Sanrian Surenggana, MTCNA**.
-- **Special Thanks:** Seluruh kontributor dan donatur versi Krakatau yang telah menjaga semangat proyek ini tetap hidup.
+- **Special Thanks:** Komunitas MikroTik Indonesia yang terus memberikan inspirasi.
 
 ---
 
-## ✨ Apa yang Baru di Versi Rinjani?
+## 📊 Perbandingan Fitur: Krakatau vs Rinjani Edition
 
-### 1. 🛰️ Arsitektur "Cloud-Native" MikroTik
-Kami meninggalkan skrip PHP prosedural dan berpindah ke **Next.js 15 (Node.js)**. Hasilnya? Aplikasi yang jauh lebih cepat, asinkron, dan mampu menangani ribuan transaksi tanpa hambatan.
-
-### 2. 🛡️ RouterOS 7 (ROS 7) Native Support
-Kami memecahkan masalah klasik pada ROS 7 di mana voucher sering gagal terhapus otomatis. Mikbotam Next menggunakan logika **Cloud Cleaner** yang memaksa penghapusan user dan pemutusan sesi langsung dari server dashboard secara presisi.
-
-### 3. 👥 Multi-Router & Multi-Bot Control
-Satu instalasi untuk mengelola seluruh jaringan Anda.
-- **Dynamic Webhooks:** `/api/telegram/[token]` memungkinkan satu dashboard menerima pesan dari banyak bot sekaligus.
-- **Router Isolation:** Statistik dan log transaksi dipisahkan dengan jelas antar router.
-
-### 4. ⚡ Advanced Bandwidth Suite
-Konfigurasi MikroTik tingkat lanjut kini tersedia dalam format yang ramah pengguna:
-- **Burst Support:** Atur Burst Limit, Threshold, dan Time secara visual.
-- **Priority:** Prioritaskan traffic penting (skala 1-8).
-- **Limit At:** Jaminan bandwidth minimal untuk setiap pelanggan.
+| Fitur | Krakatau (Legacy PHP) | Rinjani Edition (Next.js) |
+| :--- | :--- | :--- |
+| **Arsitektur** | Prosedural PHP 7.x | **Next.js 15 (React + Node.js)** |
+| **Database** | Medoo / SQLite | **Prisma ORM / SQLite** |
+| **Keamanan** | Plain-text Password | **BCrypt Password Hashing** |
+| **RouterOS 7** | Sering gagal hapus voucher | **Native ROS 7 (Cloud Cleaner)** |
+| **Bandwidth** | Standar Speed Limit | **Advanced Burst & Priority Support** |
+| **Antarmuka** | Bootstrap 4 (Statis) | **Tailwind + Shadcn (Reaktif)** |
+| **Multi-Router** | Terbatas / Kompleks | **Dynamic Multi-Router Dashboard** |
 
 ---
 
-## 🛠️ Persyaratan Sistem
-- VPS atau Server Lokal (Ubuntu 20.04+ disarankan).
-- RAM minimal 1GB.
-- Node.js v20.x atau lebih baru.
-- Port 8728 (API) terbuka di MikroTik.
+## ✨ Fitur Unggulan Terbaru
+
+### 🛡️ Native RouterOS 7 (ROS 7) Failsafe
+Kami memecahkan bug klasik di mana voucher kadaluarsa tidak terhapus otomatis di ROS 7. Mikbotam Next menggunakan logika **Cloud Cleaner** yang melakukan pembersihan ganda (User & Active Sessions) langsung dari server dashboard.
+
+### ⚡ Power User Bandwidth Management
+Konfigurasi MikroTik tingkat lanjut kini tersedia dalam format visual yang mudah:
+- **Burst Support:** Atur Burst Limit, Threshold, dan Time secara akurat.
+- **Priority:** Skalakan prioritas traffic jaringan (1-8).
+- **Rate-Limit Utility:** Generator string rate-limit otomatis yang presisi.
+
+### 👥 Hybrid Bot Engine
+Mendukung dua metode koneksi bot sekaligus:
+1. **Webhook Mode:** Sangat cepat untuk produksi (Membutuhkan HTTPS).
+2. **Long Polling Mode:** Stabil untuk development atau jika server tidak memiliki SSL.
 
 ---
 
-## 🚀 Panduan Instalasi Berurutan
+## 🚀 Panduan Instalasi Cepat
 
-### Metode A: Instalasi Otomatis (Direkomendasikan untuk VPS)
-Jalankan perintah ini di terminal VPS Anda:
+### Opsi 1: One-Click Deploy (VPS Ubuntu/Debian)
+Jalankan perintah ini di terminal Anda:
 ```bash
-wget -qO- https://raw.githubusercontent.com/username/mikbotam-next/main/deploy.sh | bash
+wget -qO- https://raw.githubusercontent.com/theworldinyourhand/Mikbotam-Next-Rinjani-Edition-MOD/main/deploy.sh | bash
 ```
 
-### Metode B: Instalasi Docker (Paling Bersih)
-Cocok bagi Anda yang tidak ingin mengotori sistem dengan banyak library:
-1. Pastikan Docker & Docker Compose sudah terinstall.
-2. Jalankan:
-   ```bash
-   docker-compose up -d
-   ```
-
-### Metode C: Instalasi Manual (Developer)
-1. **Clone & Install:**
-   ```bash
-   git clone https://github.com/username/mikbotam-next.git
-   cd mikbotam-next
-   npm install
-   ```
-2. **Konfigurasi Database:**
-   ```bash
-   npx prisma db push
-   npx prisma generate
-   ```
-3. **Build & Jalankan:**
-   ```bash
-   npm run build
-   npm start
-   ```
+### Opsi 2: Docker Deployment
+```bash
+docker-compose up -d
+```
 
 ---
 
-## ⚙️ Langkah Konfigurasi Awal (PENTING)
-Setelah berhasil menginstal, ikuti urutan ini:
+## 🛠️ Konfigurasi Setelah Instalasi
 1. **Akses Dashboard:** Buka `http://ip-anda:3000`.
-2. **Login:** Gunakan kredensial admin default Anda.
+2. **Setup Kredensial:** Gunakan akun admin default Anda.
 3. **Menu Settings:**
-   - Hubungkan MikroTik (IP, User, Pass). Klik **Test Connection**.
-   - Masukkan Bot Token dari @BotFather. Klik **Set Webhook**.
-4. **Voucher Pricing:** Atur paket voucher Anda agar sinkron dengan Bot Telegram.
-5. **Start Selling:** Bot Anda kini siap melayani pelanggan!
+   - Masukkan IP, User, Pass MikroTik. Gunakan tombol **Test Connection**.
+   - Masukkan Bot Token. Gunakan tombol **Set Webhook**.
+4. **Bot Message Editor:** Kustomisasi teks balasan bot langsung dari dashboard tanpa menyentuh kode.
 
 ---
 
-## 🔒 Standar Keamanan Baru
-- **Password:** Semua password di database di-hash menggunakan **BCrypt**.
-- **Session:** Menggunakan **Stateless JWT** (NextAuth v5).
-- **Validation:** Proteksi input sisi server dengan **Zod**.
+## 🔧 Troubleshooting Umum
+- **Gagal Konek Router:** Pastikan port 8728 (API) di MikroTik sudah di-enable (IP > Services).
+- **Bot Tidak Merespon:** Gunakan fitur **Test Bot Connection** di Settings untuk memvalidasi token.
+- **Database Error:** Pastikan folder `prisma/` memiliki izin tulis (write permission) jika menggunakan VPS manual.
 
 ---
 
-## 📄 Lisensi & Kontribusi
-Proyek ini bersifat **Open Source**. Kami sangat menghargai kontribusi berupa Pull Request atau pelaporan bug. Tetaplah menjadi bagian dari ekosistem yang saling mendukung.
+## 🤝 Kontribusi
+Kami sangat terbuka bagi siapa pun yang ingin berkontribusi memperbaiki bug atau menambah fitur baru. Silakan kirimkan **Pull Request** Anda!
 
 ---
-**Mikbotam Next - Empowering Your Network with Modern Technology.**
+**Mikbotam Next - Empowering Your Network Management with Speed and Security.**
