@@ -22,7 +22,7 @@ export default async function DashboardLayout({
 
   const headerContent = (
     <div className="flex flex-col">
-      <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest mb-0.5">Administrator</span>
+      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Administrator</span>
       <h1 className="text-sm md:text-xl font-bold text-slate-900 flex items-center gap-2 truncate max-w-[150px] md:max-w-none">
         {session.user?.name}
       </h1>
@@ -30,18 +30,18 @@ export default async function DashboardLayout({
   );
 
   const headerActions = (
-    <div className="flex items-center gap-2 md:gap-6">
+    <>
       <div className="hidden md:block">
         <RouterSelector routers={routers} />
       </div>
-      
+
       <div className="hidden md:block h-8 w-[1px] bg-slate-200" />
-      
+
       <div className="flex items-center gap-2 md:gap-3 md:pl-2">
         <div className="hidden sm:flex flex-col items-end">
           <span className="text-xs font-bold text-slate-900">{session.user?.name}</span>
-          <span className="text-[10px] text-green-500 font-bold flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
             ONLINE
           </span>
         </div>
@@ -49,8 +49,9 @@ export default async function DashboardLayout({
           <UserCircle size={20} className="md:size-6" />
         </div>
       </div>
-    </div>
+    </>
   );
+
 
   return (
     <DashboardContainer 

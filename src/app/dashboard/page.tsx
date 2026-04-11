@@ -87,10 +87,10 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border-slate-200/60">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Voucher Terjual</CardTitle>
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
               <Ticket size={16} />
             </div>
           </CardHeader>
@@ -100,15 +100,15 @@ export default async function DashboardPage() {
               <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                 <TrendingUp size={10} /> TERJUAL
               </span>
-              <span className="text-[10px] font-bold text-slate-400">Bulan ini</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Bulan ini</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border-slate-200/60">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Top Up</CardTitle>
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
               <ArrowUpCircle size={16} />
             </div>
           </CardHeader>
@@ -120,10 +120,10 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border-slate-200/60">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pendapatan</CardTitle>
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
               <Zap size={16} />
             </div>
           </CardHeader>
@@ -135,10 +135,10 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="shadow-sm border-slate-200/60">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reseller Baru</CardTitle>
-            <div className="p-2 rounded-lg bg-slate-50 text-slate-400">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
               <UserPlus size={16} />
             </div>
           </CardHeader>
@@ -152,7 +152,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 shadow-sm">
+        <Card className="lg:col-span-2 shadow-sm border-slate-200/60">
           <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-6">
             <div>
               <CardTitle>Tren Pendapatan</CardTitle>
@@ -169,137 +169,77 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Upgraded MikroTik Status Card */}
-        <Card className="lg:col-span-1 shadow-md flex flex-col bg-slate-950 text-white overflow-hidden relative group border-none">
-          {/* Subtle background glow */}
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#0ea5e9]/10 blur-[80px] group-hover:bg-[#0ea5e9]/20 transition-all duration-700" />
-          
-          <CardHeader className="border-b border-white/5 bg-white/5 relative z-10">
+        <Card className="lg:col-span-1 shadow-sm border-slate-200/60 flex flex-col">
+          <CardHeader className="border-b border-slate-50 bg-slate-50/20 pb-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#0ea5e9]/10 rounded-xl border border-[#0ea5e9]/20">
-                  <Activity className="h-4 w-4 text-[#0ea5e9] animate-pulse" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm font-black uppercase tracking-widest text-white/90">MikroTik Engine</CardTitle>
-                  <CardDescription className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">Live Monitoring</CardDescription>
-                </div>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-base text-slate-900">
+                <Activity className="h-4 w-4 text-emerald-500" />
+                MikroTik Status
+              </CardTitle>
               {router && (
-                <div className="flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[8px] font-black text-emerald-400 uppercase tracking-tighter">Active</span>
+                <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[9px] font-black text-emerald-600 uppercase tracking-wider">Online</span>
                 </div>
               )}
             </div>
           </CardHeader>
-
-          <CardContent className="p-6 flex-1 flex flex-col gap-6 relative z-10">
+          <CardContent className="p-0 flex-1 flex flex-col">
             {router ? (
-              <>
-                {/* Large Center Icon & CPU Metric */}
-                <div className="flex flex-col items-center justify-center py-2 gap-4">
-                  <div className="relative group-hover:scale-105 transition-transform duration-500">
-                    <div className="absolute inset-0 bg-[#0ea5e9]/20 blur-2xl rounded-full animate-pulse" />
-                    <div className="relative w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center border border-white/10 shadow-2xl overflow-hidden group-hover:border-[#0ea5e9]/50 transition-all duration-500">
-                       {/* Subtle tech pattern inside icon box */}
-                       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:10px_10px]" />
-                       <Wifi size={40} className="text-[#0ea5e9] relative z-10" />
-                    </div>
+              <div className="divide-y divide-slate-50">
+                <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <Cpu size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">CPU Load</span>
                   </div>
-                  <div className="text-center">
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-black tracking-tighter text-white">{router.cpuLoad}</span>
-                      <span className="text-sm font-bold text-[#0ea5e9]">%</span>
-                    </div>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">CPU Utilization</p>
-                  </div>
+                  <span className={cn("text-xs font-mono font-black", parseInt(router.cpuLoad) > 80 ? "text-red-500" : "text-emerald-600")}>
+                    {router.cpuLoad}%
+                  </span>
                 </div>
-
-                {/* Metrics with Progress Bars */}
-                <div className="space-y-5">
-                  {/* CPU Progress */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-end">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Cpu size={12} className="text-[#0ea5e9]" /> Processor
-                      </span>
-                      <span className="text-[10px] font-mono font-bold text-[#0ea5e9]">{router.cpuLoad}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden p-[1px] border border-white/5">
-                      <div 
-                        className={cn(
-                          "h-full rounded-full transition-all duration-1000 ease-out",
-                          parseInt(router.cpuLoad) > 80 ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]" : "bg-[#0ea5e9] shadow-[0_0_8px_rgba(14,165,233,0.4)]"
-                        )}
-                        style={{ width: `${router.cpuLoad}%` }}
-                      />
-                    </div>
+                <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <Zap size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Model</span>
                   </div>
-
-                  {/* RAM Usage */}
-                  {(() => {
-                    const freeMem = parseInt(router.freeMemory);
-                    const totalMem = 128 * 1024 * 1024; // Fallback estimate
-                    const usedPercent = Math.min(Math.round(((totalMem - freeMem) / totalMem) * 100), 100);
-                    return (
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-end">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                            <HardDrive size={12} className="text-teal-400" /> Memory
-                          </span>
-                          <span className="text-[10px] font-mono font-bold text-teal-400">{Math.round(freeMem / 1024 / 1024)}MB Free</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden p-[1px] border border-white/5">
-                          <div 
-                            className="h-full bg-teal-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(20,184,166,0.4)]"
-                            style={{ width: `${usedPercent}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })()}
+                  <span className="text-xs font-bold text-slate-700">{router.board}</span>
                 </div>
-
-                {/* Details Footer Grid */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                    <span className="text-[8px] font-black text-slate-500 uppercase block mb-1 tracking-tighter">OS Version</span>
-                    <span className="text-[11px] font-mono font-bold text-slate-200 truncate">v{router.version}</span>
+                <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <Activity size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">RouterOS</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                    <span className="text-[8px] font-black text-slate-500 uppercase block mb-1 tracking-tighter">Hardware</span>
-                    <span className="text-[11px] font-mono font-bold text-slate-200 truncate">{router.board}</span>
-                  </div>
-                  <div className="p-3 rounded-2xl bg-[#0ea5e9]/5 border border-[#0ea5e9]/10 col-span-2 flex items-center justify-between">
-                    <span className="text-[8px] font-black text-[#0ea5e9] uppercase tracking-widest">Uptime</span>
-                    <span className="text-[11px] font-mono font-black text-[#0ea5e9]">{router.uptime}</span>
-                  </div>
+                  <span className="text-xs font-bold text-slate-700">v{router.version}</span>
                 </div>
-              </>
+                <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <Clock size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Uptime</span>
+                  </div>
+                  <span className="text-xs font-bold text-slate-700">{router.uptime}</span>
+                </div>
+                <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
+                  <div className="flex items-center gap-2.5">
+                    <HardDrive size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Memory</span>
+                  </div>
+                  <span className="text-xs font-bold text-slate-700">{Math.round(parseInt(router.freeMemory) / 1024 / 1024)} MB</span>
+                </div>
+              </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4">
-                <div className="w-16 h-16 bg-red-500/10 rounded-3xl flex items-center justify-center border border-red-500/20 animate-bounce">
-                  <Zap size={32} className="text-red-500" />
-                </div>
-                <div>
-                  <p className="text-red-400 text-sm font-black uppercase tracking-widest mb-1">Link Broken</p>
-                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">Connection Failed</p>
-                </div>
-                <Button variant="outline" size="sm" className="mt-2 border-white/10 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl text-[10px] uppercase font-black" asChild>
-                  <Link href="/dashboard/settings">Troubleshoot</Link>
-                </Button>
+              <div className="p-12 text-center text-slate-400 italic text-xs font-medium">
+                Gagal memuat status router.
               </div>
             )}
           </CardContent>
-          
-          <div className="p-4 bg-black/40 border-t border-white/5 text-[8px] font-bold text-slate-600 flex justify-between items-center font-mono relative z-10 tracking-widest">
-            <span className="flex items-center gap-1.5 uppercase"><Clock size={10}/> Synced</span>
-            <span className="text-[#0ea5e9]/50">{new Date().toLocaleTimeString('id-ID')}</span>
-          </div>
+          {router && (
+            <div className="p-3 bg-slate-50/50 border-t border-slate-100 text-[9px] text-slate-400 flex justify-between items-center font-mono font-bold px-4">
+              <span>LAST SYNC</span>
+              <span>{new Date().toLocaleTimeString('id-ID')}</span>
+            </div>
+          )}
         </Card>
 
-        <Card className="lg:col-span-3 shadow-sm overflow-hidden">
+        <Card className="lg:col-span-3 shadow-sm border-slate-200/60 overflow-hidden">
           <CardHeader className="border-b border-slate-50 bg-slate-50/30">
             <CardTitle>10 Transaksi Terakhir</CardTitle>
           </CardHeader>
@@ -326,7 +266,7 @@ export default async function DashboardPage() {
                     <TableRow key={tx.no} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell className="font-bold text-slate-700 py-4 px-6">{tx.sellerName}</TableCell>
                       <TableCell className="text-slate-500 text-sm py-4">{tx.description}</TableCell>
-                      <TableCell className={cn("font-black text-right py-4", tx.topUp ? "text-blue-600" : "text-slate-900")}>
+                      <TableCell className={cn("font-black text-right py-4", tx.topUp ? "text-emerald-600" : "text-slate-900")}>
                         {tx.topUp ? "+" : ""}{rupiah(parseFloat(tx.voucherBuy || tx.topUp || "0"))}
                       </TableCell>
                       <TableCell className="text-[10px] text-slate-400 font-mono py-4">{tx.date} {tx.time}</TableCell>
