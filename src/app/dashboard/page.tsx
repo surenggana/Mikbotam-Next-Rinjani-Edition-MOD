@@ -87,59 +87,72 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-gradient-to-br from-white to-teal-50/30">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-teal-500/50" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wider">Voucher Terjual</CardTitle>
-            <div className="p-2 bg-teal-100 rounded-lg text-teal-600 group-hover:scale-110 transition-transform">
-              <Ticket size={20} />
+            <CardTitle className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Voucher Terjual</CardTitle>
+            <div className="p-2.5 bg-teal-50 rounded-xl text-teal-600 group-hover:bg-teal-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:shadow-teal-500/20">
+              <Ticket size={18} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{stats.voucherCount}</div>
-            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-              <TrendingUp size={12} className="text-teal-500" /> 
-              Akumulasi bulan ini
+            <div className="text-3xl font-black text-slate-900 tracking-tight">{stats.voucherCount}</div>
+            <p className="text-[10px] font-bold text-slate-400 mt-2 flex items-center gap-1.5 bg-slate-50 w-fit px-2 py-1 rounded-full border border-slate-100">
+              <TrendingUp size={10} className="text-teal-500" /> 
+              PERFORMA BULAN INI
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-gradient-to-br from-white to-blue-50/30">
+        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-blue-500/50" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wider">Total Top Up</CardTitle>
-            <div className="p-2 bg-blue-100 rounded-lg text-blue-600 group-hover:scale-110 transition-transform">
-              <ArrowUpCircle size={20} />
+            <CardTitle className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Total Top Up</CardTitle>
+            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:shadow-blue-500/20">
+              <ArrowUpCircle size={18} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{rupiah(stats.totalTopup)}</div>
-            <p className="text-xs text-slate-400 mt-1">Setoran saldo reseller</p>
+            <div className="text-3xl font-black text-slate-900 tracking-tight">{rupiah(stats.totalTopup)}</div>
+            <p className="text-[10px] font-bold text-slate-400 mt-2 flex items-center gap-1.5 bg-slate-50 w-fit px-2 py-1 rounded-full border border-slate-100">
+              <Calendar size={10} className="text-blue-500" /> 
+              SETORAN RESELLER
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-gradient-to-br from-white to-emerald-50/30">
+        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/50" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wider">Pendapatan</CardTitle>
-            <div className="p-2 bg-emerald-100 rounded-lg text-emerald-600 group-hover:scale-110 transition-transform">
-              <TrendingUp size={20} />
+            <CardTitle className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Pendapatan</CardTitle>
+            <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:shadow-emerald-500/20">
+              <TrendingUp size={18} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{rupiah(stats.totalRevenue)}</div>
-            <p className="text-xs text-slate-400 mt-1">Total mutasi voucher</p>
+            <div className="text-3xl font-black text-slate-900 tracking-tight">{rupiah(stats.totalRevenue)}</div>
+            <p className="text-[10px] font-bold text-slate-400 mt-2 flex items-center gap-1.5 bg-slate-50 w-fit px-2 py-1 rounded-full border border-slate-100">
+              <Zap size={10} className="text-emerald-500" /> 
+              MUTASI VOUCHER
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-gradient-to-br from-white to-purple-50/30">
+        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-300 group bg-white relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-purple-500/50" />
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wider">Reseller Baru</CardTitle>
-            <div className="p-2 bg-purple-100 rounded-lg text-purple-600 group-hover:scale-110 transition-transform">
-              <UserPlus size={20} />
+            <CardTitle className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Reseller Baru</CardTitle>
+            <div className="p-2.5 bg-purple-50 rounded-xl text-purple-600 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:shadow-purple-500/20">
+              <UserPlus size={18} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{stats.newUserCount}</div>
-            <p className="text-xs text-slate-400 mt-1">Bergabung bulan ini</p>
+            <div className="text-3xl font-black text-slate-900 tracking-tight">{stats.newUserCount}</div>
+            <p className="text-[10px] font-bold text-slate-400 mt-2 flex items-center gap-1.5 bg-slate-50 w-fit px-2 py-1 rounded-full border border-slate-100">
+              <UserPlus size={10} className="text-purple-500" /> 
+              DATABASE RESELLER
+            </p>
           </CardContent>
         </Card>
       </div>

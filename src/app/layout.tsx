@@ -4,13 +4,15 @@ import "./globals.css";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-geist-sans',
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-geist-mono',
 });
 
 export const metadata: Metadata = {
@@ -30,9 +32,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-screen bg-background font-sans">
         {children}
         <Toaster position="top-right" richColors closeButton />
       </body>
