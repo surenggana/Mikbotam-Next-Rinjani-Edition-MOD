@@ -87,7 +87,7 @@ export function HotspotProfileModal({ isOpen, onClose }: { isOpen: boolean, onCl
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Batal</Button>
-            <Button type="submit" disabled={loading} className="bg-teal-600 hover:bg-teal-700">
+            <Button type="submit" disabled={loading} className="bg-emerald-600 hover:bg-emerald-700">
               {loading && <Loader2 className="animate-spin mr-2" size={16} />}
               Simpan Profil
             </Button>
