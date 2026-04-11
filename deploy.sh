@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# --- MIKBOTAM NEXT - RINJANI EDITION (MOD v2.1.0) ---
+# --- MIKBOTAM NEXT - RINJANI EDITION (MOD v2.2.0) ---
 # Auto Deployment Script for Linux (Ubuntu/Debian)
 
 echo "🚀 Starting Mikbotam Next Deployment..."
