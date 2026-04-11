@@ -1,8 +1,16 @@
 // @ts-nocheck
 const { Telegraf } = require("telegraf");
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient } = require("../src/generated/client/client");
+const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
 
-const prisma = new PrismaClient();
+function initializePrisma() {
+  const dbUrl = process.env.DATABASE_URL || 'file:./prisma/mikbotam.db';
+  const adapter = new PrismaBetterSqlite3({ url: dbUrl });
+  
+  return new PrismaClient({ adapter });
+}
+
+const prisma = initializePrisma();
 
 async function startMultiBotPolling() {
   try {

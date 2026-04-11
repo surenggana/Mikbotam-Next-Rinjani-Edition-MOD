@@ -2,10 +2,10 @@ import { getBotInstance } from "@/lib/bot";
 
 export async function POST(
   req: Request,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = params;
+    const { token } = await params;
     const bot = await getBotInstance(token);
     const body = await req.json();
     
@@ -14,7 +14,7 @@ export async function POST(
     
     return Response.json({ status: "ok" });
   } catch (err: any) {
-    console.error(`Bot Error (Webhook - ${params.token}):`, err);
+    console.error(`Bot Error (Webhook):`, err);
     return Response.json({ status: "error", message: err.message }, { status: 500 });
   }
 }

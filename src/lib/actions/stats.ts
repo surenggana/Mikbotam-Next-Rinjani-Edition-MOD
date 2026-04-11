@@ -18,7 +18,7 @@ export async function getDashboardStats() {
   });
 
   // 2. Total Topup (re_operating where keterangan = 'topup')
-  const topupSum = await prisma.transaction.aggregate({
+  const topupData = await prisma.transaction.findMany({
     where: {
       description: "topup",
       date: {
@@ -26,23 +26,21 @@ export async function getDashboardStats() {
         lte: end,
       },
     },
-    _sum: {
-      topUp: true,
-    },
+    select: { topUp: true }
   });
+  const totalTopup = topupData.reduce((acc, curr) => acc + parseFloat(curr.topUp || "0"), 0);
 
   // 3. Mutation Estimasi (st_reportdata sum pendapatan)
-  const revenueSum = await prisma.report.aggregate({
+  const revenueData = await prisma.report.findMany({
     where: {
       date: {
         gte: start,
         lte: end,
       },
     },
-    _sum: {
-      revenue: true,
-    },
+    select: { revenue: true }
   });
+  const totalRevenue = revenueData.reduce((acc, curr) => acc + parseFloat(curr.revenue || "0"), 0);
 
   // 4. New Users (re_settings)
   const newUserCount = await prisma.seller.count({
@@ -56,8 +54,8 @@ export async function getDashboardStats() {
 
   return {
     voucherCount,
-    totalTopup: parseFloat(topupSum._sum.topUp || "0"),
-    totalRevenue: parseFloat(revenueSum._sum.revenue || "0"),
+    totalTopup,
+    totalRevenue,
     newUserCount,
   };
 }

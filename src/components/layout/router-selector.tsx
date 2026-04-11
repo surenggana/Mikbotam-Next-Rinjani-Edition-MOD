@@ -19,10 +19,10 @@ export function RouterSelector({ routers }: { routers: any[] }) {
     else if (routers.length > 0) setSelected(routers[0].no.toString());
   }, [routers]);
 
-  const handleSelect = (val: string) => {
+  const handleSelect = (val: string | null) => {
+    if (!val) return;
     setSelected(val);
     localStorage.setItem("selected_router", val);
-    // Kita bisa gunakan cookies atau refresh page untuk mengupdate Server Components
     document.cookie = `selected_router=${val}; path=/`;
     window.location.reload();
   };

@@ -54,8 +54,7 @@ export async function getBotInstance(token: string) {
 export async function getAllBots() {
   const configs = await prisma.systemConfig.findMany({
     where: { 
-      botToken: { not: null },
-      status: "Active" // Pastikan hanya bot aktif yang jalan
+      botToken: { not: null }
     }
   });
   return configs;

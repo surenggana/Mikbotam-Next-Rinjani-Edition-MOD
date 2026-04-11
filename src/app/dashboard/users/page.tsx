@@ -136,11 +136,12 @@ export default function UsersPage({
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                            <DropdownMenuTrigger>
                               <Button variant="ghost" className="h-8 w-8 p-0">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
+
                             <DropdownMenuContent align="end" className="w-40">
                               <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
                                 <Wallet className="h-4 w-4 text-blue-600" />

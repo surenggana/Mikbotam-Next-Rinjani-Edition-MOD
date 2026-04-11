@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { getRecentTransactions } from "@/lib/actions/stats";
 import {
   Table,
   TableBody,
@@ -12,13 +12,21 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
-export default async function TransactionsPage() {
-  const transactions = await prisma.transaction.findMany({
-    orderBy: [
-      { date: 'desc' },
-      { time: 'desc' }
-    ],
+export default async function TransactionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; search?: string }>;
+}) {
+  const resolvedParams = await searchParams;
+  const page = parseInt(resolvedParams.page || "1");
+  const search = resolvedParams.search || "";
+
+  const { transactions, totalPages, totalCount } = await getRecentTransactions({
+    page,
+    limit: 20,
+    search,
   });
 
   const rupiah = (amount: string | null) => {
@@ -39,20 +47,25 @@ export default async function TransactionsPage() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="shadow-sm border-none">
         <CardHeader className="pb-3 border-b bg-slate-50/50">
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <form className="flex flex-col md:flex-row md:items-center gap-4">
              <div className="relative flex-1">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                <Input placeholder="Cari seller, voucher, atau keterangan..." className="pl-10 bg-white" />
+                <Input 
+                  name="search"
+                  placeholder="Cari seller, voucher, atau keterangan..." 
+                  className="pl-10 bg-white" 
+                  defaultValue={search}
+                />
              </div>
              <div className="flex gap-2">
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button type="submit" variant="secondary" className="flex items-center gap-2">
                   <Filter size={16} />
-                  Filter
+                  Cari Data
                 </Button>
              </div>
-          </div>
+          </form>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -68,44 +81,58 @@ export default async function TransactionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions.map((tx) => (
-                <TableRow key={tx.no} className="hover:bg-slate-50/50">
-                  <TableCell className="text-xs text-slate-500 font-mono">
-                    {tx.date} <br/> {tx.time}
-                  </TableCell>
-                  <TableCell className="font-medium text-slate-700">
-                    {tx.sellerName}
-                    <div className="text-[10px] text-slate-400 font-mono">{tx.userId}</div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm font-medium">
-                      {tx.description === 'Success' ? `Voucher ${tx.voucherExpiry}` : tx.description}
-                    </div>
-                    {tx.voucherUsername && (
-                      <div className="text-[10px] bg-slate-100 px-1 py-0.5 rounded inline-block mt-1 font-mono">
-                        User: {tx.voucherUsername}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className={tx.topUp ? "text-blue-600 font-bold" : "text-slate-700"}>
-                    {rupiah(tx.voucherBuy || tx.topUp)}
-                  </TableCell>
-                  <TableCell className="text-slate-500 italic">
-                    {rupiah(tx.balanceEnd)}
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {tx.routerName || '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={tx.description === 'Success' || tx.description === 'topup' ? 'default' : 'outline'} 
-                      className={tx.description === 'Success' || tx.description === 'topup' ? "bg-green-500 hover:bg-green-600" : "text-amber-600 border-amber-200"}>
-                      {tx.description === 'Success' || tx.description === 'topup' ? 'Success' : 'Pending'}
-                    </Badge>
+              {transactions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-10 text-slate-400 italic">
+                    Tidak ada riwayat transaksi ditemukan.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                transactions.map((tx) => (
+                  <TableRow key={tx.no} className="hover:bg-slate-50/50">
+                    <TableCell className="text-xs text-slate-500 font-mono">
+                      {tx.date} <br/> {tx.time}
+                    </TableCell>
+                    <TableCell className="font-medium text-slate-700">
+                      {tx.sellerName}
+                      <div className="text-[10px] text-slate-400 font-mono">{tx.userId}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm font-medium">
+                        {tx.description === 'Success' ? `Voucher ${tx.voucherExpiry}` : tx.description}
+                      </div>
+                      {tx.voucherUsername && (
+                        <div className="text-[10px] bg-slate-100 px-1 py-0.5 rounded inline-block mt-1 font-mono">
+                          User: {tx.voucherUsername}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className={tx.topUp ? "text-blue-600 font-bold" : "text-slate-700"}>
+                      {rupiah(tx.voucherBuy || tx.topUp)}
+                    </TableCell>
+                    <TableCell className="text-slate-500 italic">
+                      {rupiah(tx.balanceEnd)}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {tx.routerName || '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={tx.description === 'Success' || tx.description === 'topup' ? 'default' : 'outline'} 
+                        className={tx.description === 'Success' || tx.description === 'topup' ? "bg-green-500 hover:bg-green-600" : "text-amber-600 border-amber-200"}>
+                        {tx.description === 'Success' || tx.description === 'topup' ? 'Success' : 'Pending'}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
+          
+          <PaginationControls 
+            currentPage={page} 
+            totalPages={totalPages} 
+            totalCount={totalCount} 
+          />
         </CardContent>
       </Card>
     </div>

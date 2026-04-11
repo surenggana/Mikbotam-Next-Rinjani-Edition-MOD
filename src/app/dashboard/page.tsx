@@ -26,7 +26,8 @@ import {
   HardDrive,
   Activity,
   Calendar,
-  Zap
+  Zap,
+  Clock
 } from "lucide-react";
 import { IncomeChart } from "@/components/dashboard/income-chart";
 
@@ -43,19 +44,22 @@ export default async function DashboardPage() {
     return formatDate(d, "yyyy-MM-dd");
   }).reverse();
 
-  const chartDataRaw = await prisma.report.groupBy({
-    by: ['date'],
+  const chartDataRaw = await prisma.report.findMany({
     where: {
       date: { in: last7Days }
     },
-    _sum: { revenue: true }
+    select: {
+      date: true,
+      revenue: true
+    }
   });
 
   const chartData = last7Days.map(date => {
-    const found = chartDataRaw.find(d => d.date === date);
+    const dayRecords = chartDataRaw.filter(d => d.date === date);
+    const totalDayRevenue = dayRecords.reduce((acc, curr) => acc + parseFloat(curr.revenue || "0"), 0);
     return {
       date: formatDate(new Date(date), "dd MMM"),
-      amount: parseFloat(found?._sum.revenue || "0")
+      amount: totalDayRevenue
     };
   });
 

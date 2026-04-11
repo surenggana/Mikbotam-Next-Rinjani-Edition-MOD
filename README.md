@@ -1,5 +1,6 @@
 # 🚀 Mikbotam Next - Rinjani Edition
-### *Modern Evolution MOD v2.1.0*
+
+### _Modern Evolution MOD v2.1.0_
 
 ![Mikbotam Banner](https://img.shields.io/badge/Mikrotik-Hotspot%20Bot-teal?style=for-the-badge&logo=mikrotik)
 ![Next.js 15](https://img.shields.io/badge/Next.js%2015-black?style=for-the-badge&logo=next.js)
@@ -10,15 +11,18 @@
 ---
 
 ## 🎖️ Credits & Appreciation
+
 - **Original Founder:** [BangAchil](https://github.com/bangachil) (Mikbotam Master PHP)
 - **Lead Developer (Next Gen):** **Sanrian Surenggana, MTCNA**
 
 ---
 
 ## 🌩️ Deployment Gratis (Vercel)
+
 Anda bisa menjalankan Mikbotam Next secara gratis selamanya menggunakan Vercel.
 
 ### Langkah-langkah:
+
 1.  **Fork** repository ini ke akun GitHub Anda.
 2.  Buka [Vercel.com](https://vercel.com) dan hubungkan dengan GitHub Anda.
 3.  Pilih repository `Mikbotam-Next-Rinjani-Edition-MOD`.
@@ -35,12 +39,15 @@ Anda bisa menjalankan Mikbotam Next secara gratis selamanya menggunakan Vercel.
 ## 🚀 Opsi Instalasi Lainnya
 
 ### 1. VPS Linux (Ubuntu/Debian) - Rekomendasi
+
 Gunakan skrip otomatis kami untuk setup yang paling stabil:
+
 ```bash
 wget -qO- https://raw.githubusercontent.com/theworldinyourhand/Mikbotam-Next-Rinjani-Edition-MOD/main/deploy.sh | bash
 ```
 
 ### 2. Docker (Instan & Terisolasi)
+
 ```bash
 docker-compose up -d
 ```
@@ -48,6 +55,7 @@ docker-compose up -d
 ---
 
 ## ✨ Fitur Utama Rinjani Edition
+
 - ✅ **Native ROS 7 Support:** Cloud Cleaner logic untuk hapus voucher otomatis.
 - ✅ **Advanced Bandwidth:** Support Burst Limit, Threshold, & Priority.
 - ✅ **Security:** Password BCrypt & Stateless JWT.
@@ -57,7 +65,5 @@ docker-compose up -d
 ---
 
 ## 📄 Lisensi
-Proyek ini bersifat Open Source. Tetap sertakan kredit kepada pengembang awal dan pengembang versi Next Gen ini.
 
----
-**Mikbotam Next - Empowering Your Network Management.**
+Proyek ini bersifat Open Source. Tetap sertakan kredit kepada pengembang awal dan pengembang versi Next Gen ini.

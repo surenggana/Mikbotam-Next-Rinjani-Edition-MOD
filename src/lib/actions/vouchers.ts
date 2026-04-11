@@ -12,8 +12,6 @@ export async function getVoucherPackages() {
   if (!voucherData?.settings) return [];
 
   try {
-    // Di PHP ini disimpan sebagai serialized array, kita perlu handle parsingnya
-    // Untuk saat ini kita asumsikan kita menyimpan sebagai JSON String agar lebih mudah di Next.js
     return JSON.parse(voucherData.settings);
   } catch (e) {
     return [];
@@ -27,19 +25,35 @@ export async function updateVoucherPackages(packages: any[]) {
   const existing = await prisma.voucherConfig.findFirst();
   const settingsJson = JSON.stringify(packages);
 
+  const data = {
+    type: "hotspot",
+    settings: settingsJson,
+    generate: "auto",
+    lastDate: new Date().toISOString(),
+    settingsOther: "",
+    voucherHotspot: "",
+    hotspotUser: "",
+    hotspotPass: "",
+    username: "",
+    usermanUser: "",
+    usermanPass: "",
+    expiry: "",
+    routerName: "",
+    user: "",
+    ip: "",
+    setNow: "",
+    other: "",
+    updateDate: new Date().toISOString(),
+  };
+
   if (existing) {
     await prisma.voucherConfig.update({
       where: { no: existing.no },
-      data: { settings: settingsJson },
+      data: data,
     });
   } else {
     await prisma.voucherConfig.create({
-      data: {
-        type: "hotspot",
-        settings: settingsJson,
-        generate: "auto",
-        lastDate: new Date().toISOString(),
-      },
+      data: data,
     });
   }
 

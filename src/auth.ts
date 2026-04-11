@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "./lib/prisma";
 import bcrypt from "bcrypt";
 import { z } from "zod";
+import { authConfig } from "./auth.config";
 
 // Skema validasi input (Security Best Practice)
 const loginSchema = z.object({
@@ -11,6 +12,7 @@ const loginSchema = z.object({
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -62,23 +64,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  session: {
-    strategy: "jwt", // Menggunakan Stateless JWT (Lebih aman dari Session hijacking)
-    maxAge: 30 * 24 * 60 * 60, // Sesi berlaku 30 hari
-  },
-  pages: {
-    signIn: "/login",
-  },
-  callbacks: {
-    // Memastikan dashboard hanya bisa diakses user yang sudah login di level Middleware
-    authorized: ({ auth, request: { nextUrl } }) => {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard");
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redirect ke login
-      }
-      return true;
-    },
-  },
 });
