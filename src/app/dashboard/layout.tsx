@@ -1,8 +1,8 @@
 import { RouterSelector } from "@/components/layout/router-selector";
+import { UserMenu } from "@/components/layout/user-menu";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { UserCircle } from "lucide-react";
 import { DashboardContainer } from "@/components/layout/dashboard-container";
 
 export default async function DashboardLayout({
@@ -37,17 +37,8 @@ export default async function DashboardLayout({
 
       <div className="hidden md:block h-8 w-[1px] bg-slate-200" />
 
-      <div className="flex items-center gap-2 md:gap-3 md:pl-2">
-        <div className="hidden sm:flex flex-col items-end">
-          <span className="text-xs font-bold text-slate-900">{session.user?.name}</span>
-          <span className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            ONLINE
-          </span>
-        </div>
-        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center text-slate-400 shrink-0">
-          <UserCircle size={20} className="md:size-6" />
-        </div>
+      <div className="md:pl-2">
+        <UserMenu name={session.user?.name || "Admin"} />
       </div>
     </>
   );

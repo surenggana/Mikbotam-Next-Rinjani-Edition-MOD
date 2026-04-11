@@ -48,14 +48,18 @@ export default async function BotEditorPage() {
 
       <form action={handleSave}>
         <Card className="shadow-sm border-none">
-          <CardHeader className="bg-slate-900 text-white rounded-t-lg">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MessageSquare size={20} />
-              Kustomisasi Balasan Bot
-            </CardTitle>
-            <CardDescription className="text-slate-400">
-              Ubah teks yang dikirimkan bot Telegram ke pengguna secara dinamis.
-            </CardDescription>
+          <CardHeader className="border-b border-slate-100 bg-slate-50/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
+                <MessageSquare size={18} />
+              </div>
+              <div>
+                <CardTitle className="text-base font-black uppercase tracking-wider text-slate-800">Kustomisasi Balasan Bot</CardTitle>
+                <CardDescription className="text-[11px] font-medium uppercase tracking-tight text-slate-500">
+                  Ubah teks yang dikirimkan bot Telegram ke pengguna secara dinamis.
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             <div className="grid gap-2">
@@ -78,7 +82,7 @@ export default async function BotEditorPage() {
               <Textarea name="fail_balance" defaultValue={botTexts.fail_balance} className="min-h-[80px]" />
             </div>
 
-            <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 h-12 text-lg">
+            <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 text-lg">
               <Save className="mr-2" size={20} />
               Simpan Perubahan Teks Bot
             </Button>

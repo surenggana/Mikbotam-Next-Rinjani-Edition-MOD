@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { cn } from "@/lib/utils";
+import { RouterManagementCard } from "@/components/settings/router-management-card";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null);
@@ -89,6 +90,8 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-black text-slate-900 tracking-tight">App Configuration</h1>
         <p className="text-sm font-medium text-slate-500 text-balance">Kelola parameter infrastruktur MikroTik dan integrasi bot telegram Anda.</p>
       </div>
+
+      <RouterManagementCard />
 
       <form action={async (fd) => {
         fd.append("connectionMode", connectionMode);

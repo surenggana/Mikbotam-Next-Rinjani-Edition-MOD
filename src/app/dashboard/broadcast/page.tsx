@@ -40,14 +40,16 @@ export default function BroadcastPage() {
       </div>
 
       <Card className="shadow-md border-slate-100 overflow-hidden">
-        <CardHeader className="bg-slate-900 text-white">
-          <div className="flex items-center justify-between">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/30">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
+              <Send size={18} />
+            </div>
             <div>
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <Send size={20} className="text-emerald-400" />
+              <CardTitle className="text-base font-black uppercase tracking-wider text-slate-800">
                 Buat Pesan Baru
               </CardTitle>
-              <CardDescription className="text-slate-400 mt-1">
+              <CardDescription className="text-[11px] font-medium uppercase tracking-tight text-slate-500">
                 Mendukung format HTML Telegram (contoh: &lt;b&gt;tebal&lt;/b&gt;, &lt;i&gt;miring&lt;/i&gt;)
               </CardDescription>
             </div>
