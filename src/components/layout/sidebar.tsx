@@ -4,27 +4,26 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
-  import { 
-    LayoutDashboard, 
-    Users, 
-    History, 
-    Settings, 
-    LogOut, 
-    ChevronRight, 
-    Info, 
-    Ticket, 
-    Activity, 
-    Send, 
-    Terminal, 
-    UserCircle, 
-    MessageSquare, 
-    ShieldCheck, 
-    Wifi, 
-    X, 
-    PanelLeftClose, 
-    PanelLeft,
-    Zap
-  } from "lucide-react";
+  LayoutDashboard, 
+  Users, 
+  History, 
+  Settings, 
+  LogOut, 
+  ChevronRight, 
+  Info, 
+  Ticket, 
+  Activity, 
+  Send, 
+  Terminal, 
+  UserCircle, 
+  MessageSquare, 
+  ShieldCheck, 
+  Wifi, 
+  X, 
+  PanelLeftClose, 
+  PanelLeft,
+  Zap
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 
