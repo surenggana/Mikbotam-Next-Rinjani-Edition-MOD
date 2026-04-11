@@ -10,81 +10,62 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-export function IncomeChart({ data }: { data: any[] }) {
-  const rupiah = (value: number) => 
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(value);
+interface IncomeChartProps {
+  data: { date: string; amount: number }[];
+}
 
-  // Custom Tooltip Design
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-slate-900 border border-slate-800 p-3 shadow-2xl rounded-xl">
-          <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">{label}</p>
-          <p className="text-sm font-bold text-emerald-400">{rupiah(payload[0].value)}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+function formatRupiah(value: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    notation: "compact",
+  }).format(value);
+}
 
+export default function IncomeChart({ data }: IncomeChartProps) {
   return (
-    <div className="h-[320px] w-full mt-6 group/chart">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart 
-          data={data}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-        >
-          <defs>
-            <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#059669" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#059669" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid 
-            strokeDasharray="3 3" 
-            vertical={false} 
-            stroke="#f1f5f9" 
-          />
-          <XAxis 
-            dataKey="date" 
-            axisLine={false} 
-            tickLine={false} 
-            tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 500 }}
-            dy={15}
-          />
-          <YAxis 
-            axisLine={false} 
-            tickLine={false} 
-            tick={{ fontSize: 11, fill: '#94a3b8' }}
-            tickFormatter={(value) => `Rp${value / 1000}k`}
-          />
-          <Tooltip 
-            content={<CustomTooltip />}
-            cursor={{ stroke: '#059669', strokeWidth: 1, strokeDasharray: '4 4' }}
-          />
-          <Area
-            type="monotone" // Smooth curve
-            dataKey="amount"
-            stroke="#059669"
-            strokeWidth={4}
-            fillOpacity={1}
-            fill="url(#colorIncome)"
-            animationDuration={2000}
-            animationEasing="ease-in-out"
-            activeDot={{ 
-              r: 6, 
-              stroke: '#ffffff', 
-              strokeWidth: 3, 
-              fill: '#059669',
-              className: "shadow-lg shadow-emerald-500/50"
-            }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={220}>
+      <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+        <XAxis
+          dataKey="date"
+          tick={{ fontSize: 10, fontWeight: 700, fill: "#94a3b8" }}
+          axisLine={false}
+          tickLine={false}
+        />
+        <YAxis
+          tickFormatter={formatRupiah}
+          tick={{ fontSize: 10, fontWeight: 700, fill: "#94a3b8" }}
+          axisLine={false}
+          tickLine={false}
+          width={72}
+        />
+        <Tooltip
+          formatter={(value: number) => [formatRupiah(value), "Pendapatan"]}
+          contentStyle={{
+            borderRadius: "0.75rem",
+            border: "1px solid #e2e8f0",
+            fontSize: 11,
+            fontWeight: 700,
+          }}
+        />
+        <Area
+          type="monotone"
+          dataKey="amount"
+          stroke="#10b981"
+          strokeWidth={2}
+          fill="url(#incomeGradient)"
+          dot={{ r: 3, fill: "#10b981", strokeWidth: 0 }}
+          activeDot={{ r: 5, fill: "#10b981" }}
+        />
+      </AreaChart>
+    </ResponsiveContainer>
   );
 }

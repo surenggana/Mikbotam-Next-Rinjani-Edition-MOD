@@ -7,9 +7,9 @@ export default function AboutPage() {
       <div className="flex flex-col md:flex-row gap-6">
         {/* Profile Card */}
         <Card className="md:w-1/3 bg-slate-950 text-white overflow-hidden border-none shadow-2xl relative group">
-          <div className="absolute inset-0 bg-gradient-to-b from-teal-500/10 to-transparent opacity-50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent opacity-50" />
           <div className="p-8 flex flex-col items-center text-center relative z-10">
-            <div className="w-32 h-32 rounded-3xl bg-teal-500/10 p-3 mb-6 border border-teal-500/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+            <div className="w-32 h-32 rounded-3xl bg-emerald-500/10 p-3 mb-6 border border-emerald-500/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
               <div className="w-full h-full rounded-2xl bg-slate-900 flex items-center justify-center overflow-hidden shadow-inner">
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path 
@@ -21,15 +21,15 @@ export default function AboutPage() {
                   />
                   <defs>
                     <linearGradient id="about-logo-gradient" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
-                      <stop offset="0%" stopColor="#0ea5e9" />
-                      <stop offset="100%" stopColor="#14b8a6" />
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#059669" />
                     </linearGradient>
                   </defs>
                 </svg>
               </div>
             </div>
             <h3 className="text-2xl font-black text-white tracking-tight">MIKBOTAM</h3>
-            <p className="text-teal-500 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">Rinjani Edition</p>
+            <p className="text-emerald-500 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">Rinjani Edition</p>
             
             <div className="mt-8 pt-8 border-t border-slate-800 w-full">
               <p className="text-xs text-slate-500 font-medium">© 2026 Mikbotam Next</p>
@@ -42,7 +42,7 @@ export default function AboutPage() {
         <Card className="flex-1 shadow-md border-slate-100 overflow-hidden bg-white">
           <CardHeader className="border-b bg-slate-50/30 pb-4">
             <CardTitle className="text-xl font-bold flex items-center gap-2 text-slate-800">
-              <ShieldCheck className="text-teal-600" size={24} />
+              <ShieldCheck className="text-emerald-600" size={24} />
               System Information
             </CardTitle>
           </CardHeader>
@@ -52,7 +52,7 @@ export default function AboutPage() {
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5 w-20 shrink-0">Version</div>
                 <div className="flex flex-col">
                   <span className="text-slate-900 font-bold text-lg leading-none">MOD v2.1.0</span>
-                  <span className="text-xs text-teal-600 font-semibold mt-1 uppercase tracking-tighter">Rinjani Next-Gen Evolution</span>
+                  <span className="text-xs text-emerald-600 font-semibold mt-1 uppercase tracking-tighter">Rinjani Next-Gen Evolution</span>
                 </div>
               </div>
               
@@ -65,7 +65,7 @@ export default function AboutPage() {
                     <a 
                       href="https://mikrotik.com/training/certificates/b101043c12c303053eb3" 
                       target="_blank" 
-                      className="text-[10px] font-bold text-blue-600 flex items-center gap-1 hover:underline mt-2 bg-blue-50 px-2 py-1 rounded-md w-fit border border-blue-100"
+                      className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 hover:underline mt-2 bg-emerald-50 px-2 py-1 rounded-md w-fit border border-emerald-100"
                     >
                       <ExternalLink size={10} /> VERIFY MTCNA
                     </a>
@@ -77,7 +77,7 @@ export default function AboutPage() {
                     <a 
                       href="https://mikrotik.com/training/certificates/c504881caf75ac7a4a3d" 
                       target="_blank" 
-                      className="text-[10px] font-bold text-teal-600 flex items-center gap-1 hover:underline mt-2 bg-teal-50 px-2 py-1 rounded-md w-fit border border-teal-100"
+                      className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 hover:underline mt-2 bg-emerald-50 px-2 py-1 rounded-md w-fit border border-emerald-100"
                     >
                       <ExternalLink size={10} /> VERIFY MTCNA
                     </a>

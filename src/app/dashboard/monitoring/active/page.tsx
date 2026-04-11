@@ -80,7 +80,7 @@ export default function ActiveSessionsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
+            <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg">
               <ShieldCheck size={14} />
             </div>
             <div className="flex flex-col">
@@ -92,7 +92,7 @@ export default function ActiveSessionsPage() {
             variant="outline" 
             size="icon" 
             onClick={fetchData}
-            className="rounded-xl border-slate-200 hover:bg-slate-50 text-slate-400 hover:text-teal-600 transition-all"
+            className="rounded-xl border-slate-200 hover:bg-slate-50 text-slate-400 hover:text-emerald-600 transition-all"
           >
             <RefreshCcw size={18} />
           </Button>
@@ -139,7 +139,7 @@ export default function ActiveSessionsPage() {
               title="PPPoE Active Sessions"
               description={`${data.ppp.length} tunnel connections active`}
               icon={<ShieldCheck size={20} />}
-              iconBg="bg-blue-50 text-blue-600 border-blue-100"
+              iconBg="bg-emerald-50 text-emerald-600 border-emerald-100"
               isExpanded={expandedSection === 'ppp'}
               onExpand={() => toggleExpand('ppp')}
               badge={`${data.ppp.length} Active`}
@@ -166,7 +166,7 @@ function MonitoringCard({
   return (
     <Card className={cn(
       "shadow-md border-slate-200/60 overflow-hidden bg-white transition-all duration-500",
-      isExpanded ? "ring-2 ring-teal-500 ring-offset-4" : ""
+      isExpanded ? "ring-2 ring-emerald-500 ring-offset-4" : ""
     )}>
       <CardHeader className="border-b border-slate-50 bg-slate-50/30 py-4 px-6">
         <div className="flex items-center justify-between">
@@ -232,7 +232,7 @@ function InterfacesTable({ interfaces }: any) {
               <div className="flex items-center gap-4 text-[11px] font-mono font-black">
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-[8px] uppercase">Upload</span>
-                  <span className="text-blue-600 flex items-center gap-1"><ArrowDownUp size={10} className="rotate-180" /> {formatBytes(iface["tx-byte"])}</span>
+                  <span className="text-emerald-600 flex items-center gap-1"><ArrowDownUp size={10} className="rotate-180" /> {formatBytes(iface["tx-byte"])}</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-slate-400 text-[8px] uppercase">Download</span>
@@ -285,7 +285,7 @@ function HotspotTable({ users }: any) {
               </div>
             </TableCell>
             <TableCell className="px-6 text-right">
-              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-sky-50 text-[#0ea5e9] text-xs font-mono font-black border border-sky-100">
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 text-xs font-mono font-black border border-emerald-100">
                 <Clock size={12} /> {formatUptime(user.uptime)}
               </span>
             </TableCell>
@@ -312,14 +312,14 @@ function PppTable({ users }: any) {
           <TableRow key={user[".id"]} className="hover:bg-slate-50/50 border-slate-50">
             <TableCell className="font-bold text-slate-700 py-4 px-6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-black">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-black">
                   PP
                 </div>
                 {user.name}
               </div>
             </TableCell>
             <TableCell>
-              <Badge className="bg-blue-600 text-white font-black text-[9px] uppercase tracking-tighter px-2">
+              <Badge className="bg-emerald-600 text-white font-black text-[9px] uppercase tracking-tighter px-2">
                 {user.service}
               </Badge>
             </TableCell>

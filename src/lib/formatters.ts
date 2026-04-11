@@ -14,14 +14,41 @@ export function formatBytes(bytes: number | string | undefined, decimals = 2) {
 }
 
 /**
- * Format MikroTik uptime string (e.g. 1d05:20:10) to more readable version
+ * Format MikroTik uptime string to hari/jam/menit
+ * Input examples: "1d05:20:10", "05:20:10", "1w2d05:20:10", "3d12:00:00"
  */
 export function formatUptime(uptime: string | undefined) {
   if (!uptime) return "-";
-  
-  // MikroTik format: 1d05:20:10 or 05:20:10 or 1w2d...
-  // Just clean up slightly if needed, or return as is if already decent
-  return uptime.replace('w', 'w ').replace('d', 'd ').trim();
+
+  let str = uptime.trim();
+  let weeks = 0, days = 0, hours = 0, minutes = 0;
+
+  const weekMatch = str.match(/^(\d+)w/);
+  if (weekMatch) {
+    weeks = parseInt(weekMatch[1]);
+    str = str.slice(weekMatch[0].length);
+  }
+
+  const dayMatch = str.match(/^(\d+)d/);
+  if (dayMatch) {
+    days = parseInt(dayMatch[1]);
+    str = str.slice(dayMatch[0].length);
+  }
+
+  const timeParts = str.split(":");
+  if (timeParts.length >= 2) {
+    hours = parseInt(timeParts[0]) || 0;
+    minutes = parseInt(timeParts[1]) || 0;
+  }
+
+  days += weeks * 7;
+
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}h`);
+  if (hours > 0 || days > 0) parts.push(`${hours}j`);
+  parts.push(`${minutes}m`);
+
+  return parts.join(" ");
 }
 
 /**

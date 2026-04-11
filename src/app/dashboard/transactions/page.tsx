@@ -31,7 +31,7 @@ export default async function TransactionsPage({
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <History className="text-teal-600" size={24} />
+            <History className="text-emerald-600" size={24} />
             Transaction History
           </h1>
           <p className="text-sm text-slate-500">Riwayat lengkap aktivitas penjualan voucher dan topup saldo.</p>
@@ -50,7 +50,7 @@ export default async function TransactionsPage({
                 <Input 
                   name="search"
                   placeholder="Cari seller, voucher, atau keterangan..." 
-                  className="pl-10 bg-slate-50 border-none focus-visible:ring-teal-500" 
+                  className="pl-10 bg-slate-50 border-none focus-visible:ring-emerald-500" 
                   defaultValue={search}
                 />
              </div>
@@ -115,7 +115,7 @@ async function TransactionListContainer({ page, search }: { page: number; search
                 <div className="opacity-70">{tx.time}</div>
               </TableCell>
               <TableCell>
-                <div className="font-semibold text-slate-800 group-hover:text-teal-600 transition-colors">
+                <div className="font-semibold text-slate-800 group-hover:text-emerald-600 transition-colors">
                   {tx.sellerName}
                 </div>
                 <div className="text-[10px] text-slate-400 font-mono tracking-tighter">{tx.userId}</div>
@@ -124,12 +124,12 @@ async function TransactionListContainer({ page, search }: { page: number; search
                 <div className="text-sm font-medium flex items-center gap-2">
                   {tx.description === 'Success' ? (
                     <>
-                      <Ticket size={14} className="text-teal-500" />
+                      <Ticket size={14} className="text-emerald-500" />
                       <span>Voucher {tx.voucherExpiry}</span>
                     </>
                   ) : tx.topUp ? (
                     <>
-                      <ArrowUpCircle size={14} className="text-blue-500" />
+                      <ArrowUpCircle size={14} className="text-emerald-500" />
                       <span>Isi Saldo (Topup)</span>
                     </>
                   ) : (
@@ -142,7 +142,7 @@ async function TransactionListContainer({ page, search }: { page: number; search
                   </div>
                 )}
               </TableCell>
-              <TableCell className={cn("text-right font-bold", tx.topUp ? "text-blue-600" : "text-slate-900")}>
+              <TableCell className={cn("text-right font-bold", tx.topUp ? "text-emerald-600" : "text-slate-900")}>
                 {tx.topUp ? "+" : ""}{rupiah(tx.voucherBuy || tx.topUp)}
               </TableCell>
               <TableCell className="text-right text-slate-500 font-mono text-xs italic">

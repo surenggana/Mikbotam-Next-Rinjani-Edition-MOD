@@ -142,7 +142,7 @@ export default function SettingsPage() {
           <Card className="shadow-sm border-slate-200/60 overflow-hidden">
             <CardHeader className="border-b border-slate-50 bg-slate-50/30">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-sky-50 text-sky-600 border border-sky-100">
+                <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
                   <Bot size={18} />
                 </div>
                 <div>
@@ -183,7 +183,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-end">
                   {connectionMode === "webhook" ? (
-                    <Button type="button" onClick={handleSetWebhook} className="w-full rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black uppercase text-[10px] tracking-widest h-11 shadow-md shadow-sky-200">
+                    <Button type="button" onClick={handleSetWebhook} className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-11 shadow-md shadow-emerald-200">
                       <Globe size={14} className="mr-2" />
                       Aktifkan Webhook URL
                     </Button>

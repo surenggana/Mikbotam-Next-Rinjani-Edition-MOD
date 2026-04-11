@@ -1,4 +1,5 @@
 import { getDashboardStats, getRecentTransactions } from "@/lib/actions/stats";
+import { formatUptime } from "@/lib/formatters";
 import { getRouterStats } from "@/lib/mikrotik";
 import { prisma } from "@/lib/prisma";
 import { subDays, format as formatDate } from "date-fns";
@@ -30,7 +31,7 @@ import {
   ArrowRight,
   Wifi
 } from "lucide-react";
-import { IncomeChart } from "@/components/dashboard/income-chart";
+import IncomeChart from "@/components/dashboard/income-chart";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -172,10 +173,17 @@ export default async function DashboardPage() {
         <Card className="lg:col-span-1 shadow-sm border-slate-200/60 flex flex-col">
           <CardHeader className="border-b border-slate-50 bg-slate-50/20 pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base text-slate-900">
-                <Activity className="h-4 w-4 text-emerald-500" />
-                MikroTik Status
-              </CardTitle>
+              <div className="flex flex-col gap-0.5">
+                <CardTitle className="flex items-center gap-2 text-base text-slate-900">
+                  <Activity className="h-4 w-4 text-emerald-500" />
+                  MikroTik Status
+                </CardTitle>
+                {router && (
+                  <span className="text-[11px] font-bold text-slate-500 pl-6 tracking-tight">
+                    {router.routerName}
+                  </span>
+                )}
+              </div>
               {router && (
                 <div className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -215,7 +223,7 @@ export default async function DashboardPage() {
                     <Clock size={14} className="text-slate-400" />
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Uptime</span>
                   </div>
-                  <span className="text-xs font-bold text-slate-700">{router.uptime}</span>
+                  <span className="text-xs font-bold text-slate-700">{formatUptime(router.uptime)}</span>
                 </div>
                 <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
                   <div className="flex items-center gap-2.5">

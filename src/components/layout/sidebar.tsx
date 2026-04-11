@@ -67,7 +67,7 @@ interface SidebarProps {
 const Logo = ({ isCollapsed }: { isCollapsed: boolean }) => (
   <div className="flex items-center gap-3">
     <div className="relative group cursor-pointer">
-      <div className="absolute -inset-1 bg-gradient-to-tr from-emerald-500 to-primary rounded-xl blur-md opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-300"></div>
+      <div className="absolute -inset-1 bg-gradient-to-tr from-primary to-primary rounded-xl blur-md opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-300"></div>
       <div className="relative w-11 h-11 bg-white rounded-xl flex items-center justify-center border border-slate-200 shadow-sm group-hover:border-primary/50 transition-all duration-500 overflow-hidden">
         <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:8px_8px]"></div>
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 group-hover:scale-110 transition-transform duration-500">
@@ -90,7 +90,7 @@ const Logo = ({ isCollapsed }: { isCollapsed: boolean }) => (
     {!isCollapsed && (
       <div className="animate-in fade-in slide-in-from-left-2 duration-500">
         <h1 className="text-xl font-black tracking-tighter text-slate-900 leading-none">MIKBOTAM</h1>
-        <p className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.25em] mt-1">Rinjani Edition</p>
+        <p className="text-[9px] font-black text-primary uppercase tracking-[0.25em] mt-1">Rinjani Edition</p>
       </div>
     )}
   </div>
