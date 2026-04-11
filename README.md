@@ -1,12 +1,13 @@
 # 🚀 Mikbotam Next - Rinjani Edition
 
-### _Modern Evolution MOD v2.1.0_
+### _Modern Evolution MOD v2.2.0_
 
-![Mikbotam Banner](https://img.shields.io/badge/Mikrotik-Hotspot%20Bot-teal?style=for-the-badge&logo=mikrotik)
-![Next.js 15](https://img.shields.io/badge/Next.js%2015-black?style=for-the-badge&logo=next.js)
+![Mikbotam Banner](https://img.shields.io/badge/Mikrotik-Hotspot%20Bot-emerald?style=for-the-badge&logo=mikrotik)
+![Next.js 16](https://img.shields.io/badge/Next.js%2016-black?style=for-the-badge&logo=next.js)
 ![Prisma ORM](https://img.shields.io/badge/Prisma%20ORM-blue?style=for-the-badge&logo=prisma)
+![Version](https://img.shields.io/badge/version-2.2.0-emerald?style=for-the-badge)
 
-**Mikbotam Next** adalah evolusi revolusioner dari versi **Krakatau (Master)**. Dibangun ulang dari nol menggunakan **Next.js 15**, aplikasi ini menawarkan performa kilat, keamanan tingkat tinggi, dan fitur yang sepenuhnya mendukung **RouterOS 7**.
+**Mikbotam Next** adalah evolusi revolusioner dari versi **Krakatau (Master)**. Dibangun ulang dari nol menggunakan **Next.js 16**, aplikasi ini menawarkan performa kilat, keamanan tingkat tinggi, dan fitur yang sepenuhnya mendukung **RouterOS 7**.
 
 ---
 
@@ -14,6 +15,20 @@
 
 - **Original Founder:** [BangAchil](https://github.com/bangachil) (Mikbotam Master PHP)
 - **Lead Developer (Next Gen):** **Sanrian Surenggana, MTCNA**
+
+---
+
+## 🆕 Changelog v2.2.0
+
+- ✅ **Multi-Router Management** — Tambah/hapus banyak MikroTik langsung dari Settings, identity otomatis diambil dari router
+- ✅ **Emerald Primary Theme** — Konsistensi warna penuh, tidak ada lagi warna sky/blue yang bocor
+- ✅ **User Menu Dropdown** — Avatar pojok kanan atas: Edit Profile, Settings, dan Keluar Sesi
+- ✅ **Router Selector** — Menampilkan identity MikroTik asli, fallback ke IP jika belum dikonfigurasi
+- ✅ **Uptime Formatter** — Format waktu MikroTik rapi: `1h 5j 20m` (hari/jam/menit)
+- ✅ **Webhook UI** — Field domain HTTPS + preview URL lengkap + panduan setup
+- ✅ **Light Theme** — Semua card dark (broadcast, profile, bot-editor, logs) diubah ke tema terang konsisten
+- ✅ **Income Chart** — Komponen chart pendapatan 7 hari dengan Recharts (AreaChart)
+- ✅ **System Logs** — Tabel log rapi dengan sticky header opaque dan badge topic berwarna
 
 ---
 
@@ -60,7 +75,8 @@ docker-compose up -d
 - ✅ **Advanced Bandwidth:** Support Burst Limit, Threshold, & Priority.
 - ✅ **Security:** Password BCrypt & Stateless JWT.
 - ✅ **Real-time:** Dashboard interaktif dengan grafik pendapatan harian.
-- ✅ **Multi-Bot:** Kelola banyak router & bot dalam satu dashboard.
+- ✅ **Multi-Router:** Kelola banyak router MikroTik dalam satu dashboard.
+- ✅ **Telegram Bot:** Support Polling & Webhook dengan konfigurasi visual.
 
 ---
 

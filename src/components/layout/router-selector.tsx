@@ -39,7 +39,7 @@ export function RouterSelector({ routers }: { routers: any[] }) {
         <SelectContent>
           {routers.map((r) => (
             <SelectItem key={r.no} value={r.no.toString()}>
-              {r.routerName} ({r.routerIp})
+              {r.routerName && r.routerName !== r.no.toString() ? r.routerName : r.routerIp}
             </SelectItem>
           ))}
         </SelectContent>

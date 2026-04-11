@@ -75,6 +75,64 @@ export async function testBotConnection(token: string) {
   }
 }
 
+export async function getAllRouterConfigs() {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+  return await prisma.systemConfig.findMany({
+    select: { no: true, routerName: true, routerIp: true, routerUsername: true, port: true },
+    orderBy: { no: "asc" },
+  });
+}
+
+export async function addRouterConfig(formData: FormData) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+
+  const routerIp = formData.get("routerIp") as string;
+  const port = (formData.get("port") as string) || "8728";
+  const routerUsername = formData.get("routerUsername") as string;
+  const routerPassword = formData.get("routerPassword") as string;
+
+  let routerName = routerIp;
+  try {
+    const conn = new RouterOSAPI({
+      host: routerIp,
+      user: routerUsername,
+      password: routerPassword,
+      port: parseInt(port),
+      timeout: 5,
+    });
+    await conn.connect();
+    const identity = await conn.write("/system/identity/print");
+    conn.close();
+    routerName = (identity[0] as any)?.name || routerIp;
+  } catch {}
+
+  await prisma.systemConfig.create({
+    data: {
+      id: Date.now().toString(),
+      routerIp,
+      port,
+      routerUsername,
+      routerPassword,
+      routerName,
+    },
+  });
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard");
+  return { success: true, routerName };
+}
+
+export async function deleteRouterConfig(no: number) {
+  const session = await auth();
+  if (!session) throw new Error("Unauthorized");
+  await prisma.systemConfig.delete({ where: { no } });
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
 export async function updateSystemSettings(formData: FormData) {
   const session = await auth();
   if (!session) throw new Error("Unauthorized");
