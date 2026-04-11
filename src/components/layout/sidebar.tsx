@@ -4,51 +4,53 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
-  LayoutDashboard, 
-  Users, 
-  History, 
-  Settings, 
-  LogOut,
-  ChevronRight,
-  Info,
-  Ticket,
-  Activity,
-  Send,
-  Terminal,
-  UserCircle,
-  MessageSquare,
-  ShieldCheck,
-  Wifi,
-  X,
-  PanelLeftClose,
-  PanelLeft
-} from "lucide-react";
+  import { 
+    LayoutDashboard, 
+    Users, 
+    History, 
+    Settings, 
+    LogOut, 
+    ChevronRight, 
+    Info, 
+    Ticket, 
+    Activity, 
+    Send, 
+    Terminal, 
+    UserCircle, 
+    MessageSquare, 
+    ShieldCheck, 
+    Wifi, 
+    X, 
+    PanelLeftClose, 
+    PanelLeft,
+    Zap
+  } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 
 const menuItems = [
   { group: "Main", items: [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "User Management", href: "/dashboard/users", icon: Users },
-    { name: "Transactions", href: "/dashboard/transactions", icon: History },
+    { name: "Reseller Management", href: "/dashboard/users", icon: Users },
+    { name: "Transaction History", href: "/dashboard/transactions", icon: History },
   ]},
-  { group: "MikroTik Control", items: [
-    { name: "Hotspot Manager", href: "/dashboard/mikrotik/hotspot", icon: Wifi },
-    { name: "PPP Manager", href: "/dashboard/mikrotik/ppp", icon: ShieldCheck },
-    { name: "Voucher & Pricing", href: "/dashboard/settings/vouchers", icon: Ticket },
+  { group: "Hotspot Service", items: [
+    { name: "Hotspot Users", href: "/dashboard/mikrotik/hotspot/users", icon: Users },
+    { name: "User Profiles", href: "/dashboard/mikrotik/hotspot/profiles", icon: Ticket },
+    { name: "Voucher Generator", href: "/dashboard/settings/vouchers", icon: Zap },
   ]},
-  { group: "Monitoring", items: [
-    { name: "Monitoring Active", href: "/dashboard/monitoring/active", icon: Activity },
-    { name: "System Logs", href: "/dashboard/monitoring/logs", icon: Terminal },
+  { group: "PPP Service", items: [
+    { name: "PPP Secrets", href: "/dashboard/mikrotik/ppp/secrets", icon: ShieldCheck },
+    { name: "PPP Profiles", href: "/dashboard/mikrotik/ppp/profiles", icon: Settings },
   ]},
   { group: "Communication", items: [
-    { name: "Broadcast Telegram", href: "/dashboard/broadcast", icon: Send },
-    { name: "Bot Editor", href: "/dashboard/settings/bot-editor", icon: MessageSquare },
+    { name: "Broadcast Center", href: "/dashboard/broadcast", icon: Send },
+    { name: "Bot Configuration", href: "/dashboard/settings/bot-editor", icon: MessageSquare },
   ]},
-  { group: "Configuration", items: [
+  { group: "System", items: [
     { name: "My Profile", href: "/dashboard/profile", icon: UserCircle },
-    { name: "Settings", href: "/dashboard/settings", icon: Settings },
-    { name: "About", href: "/dashboard/about", icon: Info },
+    { name: "App Settings", href: "/dashboard/settings", icon: Settings },
+    { name: "About System", href: "/dashboard/about", icon: Info },
   ]},
 ];
 
@@ -62,19 +64,34 @@ interface SidebarProps {
 const Logo = ({ isCollapsed }: { isCollapsed: boolean }) => (
   <div className="flex items-center gap-3">
     <div className="relative group cursor-pointer">
-      <div className="absolute -inset-1 bg-gradient-to-r from-primary to-teal-500 rounded-xl blur-[2px] opacity-20 group-hover:opacity-40 transition duration-500"></div>
-      <div className="relative w-10 h-10 bg-sidebar/50 backdrop-blur-md rounded-xl flex items-center justify-center shadow-xl border border-white/10 group-hover:border-primary/50 transition-colors">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-sidebar-foreground group-hover:text-primary transition-all duration-300">
-          <path d="M12 4V20M12 4L8 8M12 4L16 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M4 12H20M4 12L8 16M4 12L8 8" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/>
-          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <div className="absolute -inset-1 bg-gradient-to-tr from-primary to-teal-400 rounded-xl blur-md opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-300"></div>
+      <div className="relative w-11 h-11 bg-slate-900 rounded-xl flex items-center justify-center border border-slate-800 group-hover:border-primary/50 transition-all duration-500 shadow-2xl">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="group-hover:scale-110 transition-transform duration-500">
+          {/* Main Stylized 'M' with sharp outline */}
+          <path 
+            d="M4 18V6L12 14L20 6V18" 
+            stroke="currentColor" 
+            strokeWidth="2.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="text-primary"
+          />
+          {/* Subtle accent line */}
+          <path 
+            d="M8 14L12 18L16 14" 
+            stroke="currentColor" 
+            strokeWidth="1.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="text-teal-600/30"
+          />
         </svg>
       </div>
     </div>
     {!isCollapsed && (
-      <div className="animate-in fade-in slide-in-from-left-2 duration-300">
+      <div className="animate-in fade-in slide-in-from-left-2 duration-500">
         <h1 className="text-xl font-black tracking-tighter text-sidebar-foreground leading-none">MIKBOTAM</h1>
-        <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] mt-1">Rinjani Edition</p>
+        <p className="text-[9px] font-black text-primary uppercase tracking-[0.25em] mt-1">Rinjani Edition</p>
       </div>
     )}
   </div>

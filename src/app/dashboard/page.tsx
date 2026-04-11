@@ -171,8 +171,8 @@ export default async function DashboardPage() {
         <Card className="lg:col-span-1 shadow-sm flex flex-col">
           <CardHeader className="border-b border-slate-50">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Activity className="h-4 w-4 text-primary" />
+              <CardTitle className="flex items-center gap-2 text-base text-slate-900">
+                <Activity className="h-4 w-4 text-emerald-500" />
                 MikroTik Status
               </CardTitle>
               {router && (
@@ -187,25 +187,40 @@ export default async function DashboardPage() {
             {router ? (
               <div className="divide-y divide-slate-50">
                 <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">CPU Load</span>
-                  <span className={cn("text-xs font-mono font-black", parseInt(router.cpuLoad) > 80 ? "text-red-500" : "text-slate-900")}>
+                  <div className="flex items-center gap-2.5">
+                    <Cpu size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">CPU Load</span>
+                  </div>
+                  <span className={cn("text-xs font-mono font-black", parseInt(router.cpuLoad) > 80 ? "text-red-500" : "text-emerald-600")}>
                     {router.cpuLoad}%
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Model</span>
+                  <div className="flex items-center gap-2.5">
+                    <Zap size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Model</span>
+                  </div>
                   <span className="text-xs font-bold text-slate-700">{router.board}</span>
                 </div>
                 <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">RouterOS</span>
+                  <div className="flex items-center gap-2.5">
+                    <Activity size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">RouterOS</span>
+                  </div>
                   <span className="text-xs font-bold text-slate-700">v{router.version}</span>
                 </div>
                 <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Uptime</span>
+                  <div className="flex items-center gap-2.5">
+                    <Clock size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Uptime</span>
+                  </div>
                   <span className="text-xs font-bold text-slate-700">{router.uptime}</span>
                 </div>
                 <div className="flex justify-between items-center p-4 hover:bg-slate-50/50 transition-colors">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Free Memory</span>
+                  <div className="flex items-center gap-2.5">
+                    <HardDrive size={14} className="text-slate-400" />
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Memory</span>
+                  </div>
                   <span className="text-xs font-bold text-slate-700">{Math.round(parseInt(router.freeMemory) / 1024 / 1024)} MB</span>
                 </div>
               </div>
