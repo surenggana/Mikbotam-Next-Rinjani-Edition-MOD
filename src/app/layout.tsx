@@ -19,7 +19,9 @@ export const metadata: Metadata = {
   title: "Mikbotam Next - Rinjani Edition",
   description: "Modern Evolution of MikroTik Bot Management",
   icons: {
-    icon: "/logo-next.svg",
+    icon: [
+      { url: "/logo-next.svg", type: "image/svg+xml" },
+    ],
     apple: "/logo-next.svg",
   }
 };

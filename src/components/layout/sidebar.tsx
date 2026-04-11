@@ -63,24 +63,19 @@ interface SidebarProps {
 const Logo = ({ isCollapsed }: { isCollapsed: boolean }) => (
   <div className="flex items-center gap-3">
     <div className="relative group cursor-pointer">
-      {/* High-vibrancy glow effect */}
-      <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#0ea5e9] to-[#14b8a6] rounded-xl blur-lg opacity-20 group-hover:opacity-50 transition duration-1000 group-hover:duration-300"></div>
-      
-      <div className="relative w-11 h-11 bg-slate-950 rounded-xl flex items-center justify-center border border-white/10 shadow-2xl group-hover:border-[#0ea5e9]/50 transition-all duration-500 overflow-hidden">
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:8px_8px]"></div>
-        
+      <div className="absolute -inset-1 bg-gradient-to-tr from-[#0ea5e9] to-[#14b8a6] rounded-xl blur-md opacity-10 group-hover:opacity-30 transition duration-1000 group-hover:duration-300"></div>
+      <div className="relative w-11 h-11 bg-white rounded-xl flex items-center justify-center border border-slate-200 shadow-sm group-hover:border-[#0ea5e9]/50 transition-all duration-500 overflow-hidden">
+        <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:8px_8px]"></div>
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 group-hover:scale-110 transition-transform duration-500">
-          {/* Main Stylized 'M' - High Clarity Outline */}
           <path 
             d="M4 18V6L12 14L20 6V18" 
-            stroke="url(#logo-gradient)" 
+            stroke="url(#logo-gradient-sidebar-v2)" 
             strokeWidth="2.5" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
           />
           <defs>
-            <linearGradient id="logo-gradient" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+            <linearGradient id="logo-gradient-sidebar-v2" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor="#0ea5e9" />
               <stop offset="100%" stopColor="#14b8a6" />
             </linearGradient>
@@ -90,7 +85,7 @@ const Logo = ({ isCollapsed }: { isCollapsed: boolean }) => (
     </div>
     {!isCollapsed && (
       <div className="animate-in fade-in slide-in-from-left-2 duration-500">
-        <h1 className="text-xl font-black tracking-tighter text-white leading-none">MIKBOTAM</h1>
+        <h1 className="text-xl font-black tracking-tighter text-slate-900 leading-none">MIKBOTAM</h1>
         <p className="text-[9px] font-black text-[#0ea5e9] uppercase tracking-[0.25em] mt-1">Rinjani Edition</p>
       </div>
     )}
@@ -113,11 +108,12 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
 
   return (
     <div className={cn(
-      "bg-sidebar text-sidebar-foreground h-screen flex flex-col border-r border-sidebar-border shadow-xl relative transition-all duration-500 ease-in-out z-[60]",
+      "bg-white text-slate-600 h-screen flex flex-col border-r border-slate-200 shadow-sm relative transition-all duration-500 ease-in-out z-[60]",
       isCollapsed ? "w-20" : "w-72",
       className
     )}>
-      {/* Header Section */}
+      <div className="absolute inset-0 bg-white -z-10" />
+
       <div className={cn(
         "p-6 flex items-center justify-between h-24",
         isCollapsed ? "px-5" : "px-8"
@@ -127,7 +123,7 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
         {onClose && (
           <button 
             onClick={onClose}
-            className="p-2 text-sidebar-foreground/50 hover:text-white md:hidden"
+            className="p-2 text-slate-400 hover:text-slate-900 md:hidden transition-colors"
           >
             <X size={20} />
           </button>
@@ -137,7 +133,7 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
           <button 
             onClick={handleToggle}
             className={cn(
-              "hidden md:flex p-1.5 rounded-lg bg-white/5 border border-white/10 text-sidebar-foreground/50 hover:text-primary hover:border-primary/50 transition-all duration-300",
+              "hidden md:flex p-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-400 hover:text-[#0ea5e9] hover:border-[#0ea5e9]/50 transition-all duration-300",
               isCollapsed && "mx-auto mt-2"
             )}
           >
@@ -146,12 +142,11 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
         )}
       </div>
       
-      {/* Navigation Section */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto overflow-x-hidden custom-scrollbar space-y-6">
         {menuItems.map((group) => (
           <div key={group.group} className="space-y-2">
             {!isCollapsed && (
-              <h3 className="px-5 text-[10px] font-black text-sidebar-foreground/30 uppercase tracking-[0.25em] animate-in fade-in duration-500">
+              <h3 className="px-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] animate-in fade-in duration-500">
                 {group.group}
               </h3>
             )}
@@ -166,27 +161,27 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
                     className={cn(
                       "flex items-center px-4 py-2.5 rounded-xl transition-all duration-300 group relative",
                       isActive 
-                        ? "bg-primary/10 text-primary font-bold shadow-[inset_0_0_12px_rgba(20,184,166,0.02)]" 
-                        : "text-sidebar-foreground/50 hover:bg-white/5 hover:text-sidebar-foreground",
+                        ? "bg-[#0ea5e9]/10 text-[#0ea5e9] font-bold" 
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
                       isCollapsed ? "justify-center" : "justify-between"
                     )}
                   >
                     {isActive && (
-                      <span className="absolute left-0 w-1 h-5 bg-primary rounded-r-full animate-in fade-in slide-in-from-left-2 duration-500 shadow-[0_0_8px_rgba(20,184,166,0.4)]" />
+                      <span className="absolute left-0 w-1 h-5 bg-[#0ea5e9] rounded-r-full animate-in fade-in slide-in-from-left-2 duration-500 shadow-[0_0_8px_rgba(14,165,233,0.4)]" />
                     )}
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={cn(
                         "p-1.5 rounded-lg transition-all duration-300",
-                        isActive ? "bg-primary/20" : "bg-transparent group-hover:bg-white/5"
+                        isActive ? "bg-white shadow-sm ring-1 ring-[#0ea5e9]/20" : "bg-transparent group-hover:bg-white"
                       )}>
                         <item.icon size={18} className={cn(
                           "transition-all duration-300",
-                          isActive ? "text-primary scale-110" : "text-sidebar-foreground/30 group-hover:text-sidebar-foreground/70 group-hover:scale-110"
+                          isActive ? "text-[#0ea5e9] scale-110" : "text-slate-400 group-hover:text-slate-600 group-hover:scale-110"
                         )} />
                       </div>
                       {!isCollapsed && (
-                        <span className="text-sm tracking-tight animate-in fade-in slide-in-from-left-1 duration-300">
+                        <span className="text-sm tracking-tight">
                           {item.name}
                         </span>
                       )}
@@ -194,14 +189,14 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
 
                     {!isCollapsed && (
                       isActive ? (
-                        <ChevronRight size={14} className="text-primary/50 animate-in slide-in-from-left-2 duration-300" />
+                        <ChevronRight size={14} className="text-[#0ea5e9]/50 animate-in slide-in-from-left-2 duration-300" />
                       ) : (
-                        <ChevronRight size={14} className="text-sidebar-foreground/20 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        <ChevronRight size={14} className="text-slate-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                       )
                     )}
 
                     {isCollapsed && (
-                      <div className="absolute left-full ml-4 px-3 py-2 bg-sidebar-accent text-white text-xs font-bold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl border border-white/10 z-[100] whitespace-nowrap">
+                      <div className="absolute left-full ml-4 px-3 py-2 bg-slate-900 text-white text-xs font-bold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-[100] whitespace-nowrap">
                         {item.name}
                       </div>
                     )}
@@ -213,17 +208,16 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
         ))}
       </nav>
 
-      {/* Footer Section */}
       <div className={cn(
-        "p-5 mt-auto border-t border-sidebar-border bg-black/5 backdrop-blur-md transition-all duration-300",
+        "p-5 mt-auto border-t border-slate-100 bg-slate-50/50 transition-all duration-300",
         isCollapsed ? "items-center" : ""
       )}>
         {!isCollapsed && (
-          <div className="px-4 py-3 mb-4 rounded-xl bg-white/5 border border-white/10 flex flex-col gap-1 hover:border-primary/30 transition-all duration-300 cursor-default group overflow-hidden relative">
-            <span className="text-[9px] font-black text-sidebar-foreground/30 uppercase tracking-widest leading-none">Version Status</span>
+          <div className="px-4 py-3 mb-4 rounded-xl bg-white border border-slate-200 flex flex-col gap-1 hover:border-[#0ea5e9]/30 transition-all duration-300 cursor-default group overflow-hidden relative shadow-sm">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Version Status</span>
             <div className="flex items-center justify-between relative z-10">
-              <span className="text-[11px] font-mono font-bold text-primary/80">v2.1.0-rinjani</span>
-              <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(20,184,166,0.6)] animate-pulse" />
+              <span className="text-[11px] font-mono font-bold text-slate-600">v2.1.0-rinjani</span>
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse" />
             </div>
           </div>
         )}
@@ -231,11 +225,11 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
         <button
           onClick={() => signOut()}
           className={cn(
-            "flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-sidebar-foreground/40 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 group overflow-hidden relative",
+            "flex items-center gap-3 px-4 py-2.5 w-full rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-300 group overflow-hidden relative",
             isCollapsed ? "justify-center" : ""
           )}
         >
-          <div className="p-1.5 rounded-lg bg-transparent group-hover:bg-red-500/20 transition-all duration-300">
+          <div className="p-1.5 rounded-lg bg-transparent group-hover:bg-red-100 transition-all duration-300">
             <LogOut size={18} className="group-hover:-translate-x-0.5 transition-transform" />
           </div>
           {!isCollapsed && <span className="text-sm font-bold tracking-tight">Keluar Sesi</span>}
