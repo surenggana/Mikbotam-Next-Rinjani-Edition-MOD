@@ -1,0 +1,12 @@
+services:
+  mikbotam-next:
+    build: .
+    container_name: mikbotam-next
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./prisma/mikbotam.db:/app/prisma/mikbotam.db
+    restart: always
+    environment:
+      - DATABASE_URL=file:./mikbotam.db
+      - AUTH_SECRET=GantiDenganSecretYangKuat
