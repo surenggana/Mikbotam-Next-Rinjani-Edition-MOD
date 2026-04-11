@@ -30,7 +30,7 @@ export default async function DashboardLayout({
   );
 
   const headerActions = (
-    <>
+    <div className="flex items-center gap-2 md:gap-6">
       <div className="hidden md:block">
         <RouterSelector routers={routers} />
       </div>
@@ -49,19 +49,15 @@ export default async function DashboardLayout({
           <UserCircle size={20} className="md:size-6" />
         </div>
       </div>
-    </>
+    </div>
   );
 
   return (
     <DashboardContainer 
       header={headerContent}
+      headerActions={headerActions}
     >
-      <div className="relative">
-        <div className="absolute top-0 right-0 -translate-y-[72px] flex items-center gap-4 z-40">
-           {headerActions}
-        </div>
-        {children}
-      </div>
+      {children}
     </DashboardContainer>
   );
 }

@@ -149,23 +149,23 @@ export function Sidebar({ onClose, className, isCollapsed: forcedCollapsed, onTo
                     className={cn(
                       "flex items-center px-4 py-2.5 rounded-xl transition-all duration-300 group relative",
                       isActive 
-                        ? "bg-primary/10 text-primary font-semibold" 
-                        : "hover:bg-white/5 hover:text-white",
+                        ? "bg-primary/10 text-primary font-bold shadow-[inset_0_0_12px_rgba(20,184,166,0.02)]" 
+                        : "text-sidebar-foreground/50 hover:bg-white/5 hover:text-sidebar-foreground",
                       isCollapsed ? "justify-center" : "justify-between"
                     )}
                   >
                     {isActive && (
-                      <span className="absolute left-0 w-1 h-5 bg-primary rounded-r-full animate-in fade-in slide-in-from-left-2 duration-500" />
+                      <span className="absolute left-0 w-1 h-5 bg-primary rounded-r-full animate-in fade-in slide-in-from-left-2 duration-500 shadow-[0_0_8px_rgba(20,184,166,0.4)]" />
                     )}
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={cn(
                         "p-1.5 rounded-lg transition-all duration-300",
-                        isActive ? "bg-primary/20 shadow-lg shadow-primary/10" : "bg-transparent group-hover:bg-white/5"
+                        isActive ? "bg-primary/20" : "bg-transparent group-hover:bg-white/5"
                       )}>
                         <item.icon size={18} className={cn(
                           "transition-all duration-300",
-                          isActive ? "text-primary scale-110" : "text-sidebar-foreground/40 group-hover:text-sidebar-foreground/80 group-hover:scale-110"
+                          isActive ? "text-primary scale-110" : "text-sidebar-foreground/30 group-hover:text-sidebar-foreground/70 group-hover:scale-110"
                         )} />
                       </div>
                       {!isCollapsed && (
