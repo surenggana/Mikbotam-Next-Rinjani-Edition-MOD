@@ -55,13 +55,14 @@ export default async function VouchersSettingsPage() {
                 <TableHead>Markup (Profit)</TableHead>
                 <TableHead>Harga Jual</TableHead>
                 <TableHead>Masa Aktif</TableHead>
+                <TableHead>Kuota</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10 text-slate-400 italic">
+                  <TableCell colSpan={8} className="text-center py-10 text-slate-400 italic">
                     Belum ada paket voucher yang dikonfigurasi.
                   </TableCell>
                 </TableRow>
@@ -76,6 +77,11 @@ export default async function VouchersSettingsPage() {
                       {rupiah(parseFloat(pkg.price) + parseFloat(pkg.markup))}
                     </TableCell>
                     <TableCell>{pkg.Limit || '-'}</TableCell>
+                    <TableCell>
+                      {pkg.quotaGB && parseFloat(pkg.quotaGB) > 0
+                        ? `${pkg.quotaGB} GB`
+                        : <span className="text-slate-400 text-xs">Unlimited</span>}
+                    </TableCell>
                     <TableCell className="text-right space-x-2">
                       <Button variant="outline" size="icon" className="h-8 w-8 text-emerald-600">
                         <Edit size={16} />

@@ -21,7 +21,9 @@ import {
   X, 
   PanelLeftClose, 
   PanelLeft,
-  Zap
+  Zap,
+  CreditCard,
+  BarChart3
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,8 @@ const menuItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Reseller Management", href: "/dashboard/users", icon: Users },
     { name: "Transaction History", href: "/dashboard/transactions", icon: History },
+    { name: "Permintaan Topup", href: "/dashboard/topup-requests", icon: CreditCard },
+    { name: "Laporan Penjualan", href: "/dashboard/report", icon: BarChart3 },
   ]},
   { group: "Hotspot Service", items: [
     { name: "Hotspot Users", href: "/dashboard/mikrotik/hotspot/users", icon: Users },
