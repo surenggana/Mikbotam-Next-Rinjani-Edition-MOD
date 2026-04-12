@@ -1,31 +1,82 @@
-import { getHotspotUsers } from "@/lib/mikrotik/hotspot";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Users, Plus, MoreHorizontal, Trash2, ShieldOff, ShieldCheck } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+"use client";
 
-export default async function HotspotUsersPage() {
-  const users = await getHotspotUsers().catch(() => []);
+import { useEffect, useState, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { HotspotUserModal } from "@/components/modals/hotspot-user-modal";
+import { HotspotProfileModal } from "@/components/modals/hotspot-profile-modal";
+import { getHotspotUsersAction, getHotspotProfilesAction, removeHotspotUserAction, toggleHotspotUserAction } from "@/lib/actions/mikrotik-hotspot";
+import { Users, Plus, MoreHorizontal, Trash2, ShieldOff, ShieldCheck, Loader2, RefreshCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { Toaster } from "sonner";
+
+export default function HotspotUsersPage() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [actionId, setActionId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [u, p] = await Promise.all([
+      getHotspotUsersAction(),
+      getHotspotProfilesAction(),
+    ]);
+    setUsers(u as any[]);
+    setProfiles(p as any[]);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleDelete = async (id: string, name: string) => {
+    setActionId(id);
+    try {
+      await removeHotspotUserAction(id);
+      toast.success(`User "${name}" dihapus.`);
+      load();
+    } catch {
+      toast.error("Gagal menghapus user.");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleToggle = async (id: string, disabled: string, name: string) => {
+    setActionId(id);
+    const action = disabled === "true" ? "enable" : "disable";
+    try {
+      await toggleHotspotUserAction(id, action);
+      toast.success(`User "${name}" ${action === "enable" ? "diaktifkan" : "dinonaktifkan"}.`);
+      load();
+    } catch {
+      toast.error("Gagal mengubah status user.");
+    } finally {
+      setActionId(null);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
+      <Toaster position="top-right" richColors />
       <div className="flex justify-between items-center px-1">
         <div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Hotspot Users</h1>
           <p className="text-sm font-medium text-slate-500">Kelola akun pengguna hotspot langsung dari router.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 rounded-xl font-bold uppercase text-[10px] tracking-widest h-11 px-6 shadow-lg shadow-primary/20">
-          <Plus size={16} className="mr-2" />
-          Tambah User
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={load} className="rounded-xl border-slate-200 h-11 px-4">
+            <RefreshCcw size={14} className={cn(loading && "animate-spin")} />
+          </Button>
+          <Button onClick={() => setShowUserModal(true)} className="bg-primary hover:bg-primary/90 rounded-xl font-bold uppercase text-[10px] tracking-widest h-11 px-6 shadow-lg shadow-primary/20">
+            <Plus size={16} className="mr-2" />
+            Tambah User
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-sm border-slate-200/60 overflow-hidden">
@@ -50,17 +101,23 @@ export default async function HotspotUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-12 text-center">
+                    <Loader2 className="animate-spin mx-auto text-primary" size={24} />
+                  </TableCell>
+                </TableRow>
+              ) : users.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="py-12 text-center text-slate-400 text-xs font-medium italic">
-                    Tidak ada data user hotspot ditemukan.
+                    Tidak ada data user hotspot.
                   </TableCell>
                 </TableRow>
               ) : (
                 users.map((user: any) => (
-                  <TableRow key={user[".id"]} className="hover:bg-slate-50/50 transition-colors group">
+                  <TableRow key={user[".id"]} className="hover:bg-slate-50/50 transition-colors">
                     <TableCell className="font-bold text-slate-700 py-4 px-6">{user.name}</TableCell>
-                    <TableCell className="text-slate-500 font-mono text-[11px]">{user.password || '-'}</TableCell>
+                    <TableCell className="text-slate-500 font-mono text-[11px]">{user.password || "-"}</TableCell>
                     <TableCell>
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border bg-slate-50 text-slate-600 border-slate-200">
                         {user.profile}
@@ -70,8 +127,8 @@ export default async function HotspotUsersPage() {
                     <TableCell>
                       <span className={cn(
                         "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                        user.disabled === "true" 
-                          ? "bg-red-50 text-red-600 border-red-100" 
+                        user.disabled === "true"
+                          ? "bg-red-50 text-red-600 border-red-100"
                           : "bg-emerald-50 text-emerald-600 border-emerald-100"
                       )}>
                         {user.disabled === "true" ? "Disabled" : "Enabled"}
@@ -80,16 +137,24 @@ export default async function HotspotUsersPage() {
                     <TableCell className="text-right px-6">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-slate-100">
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg hover:bg-slate-100" disabled={actionId === user[".id"]}>
+                            {actionId === user[".id"] ? <Loader2 size={14} className="animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl border-slate-200 shadow-xl">
-                          <DropdownMenuItem className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 cursor-pointer">
-                            {user.disabled === "true" ? <ShieldCheck className="h-4 w-4 text-emerald-600" /> : <ShieldOff className="h-4 w-4 text-amber-600" />}
+                          <DropdownMenuItem
+                            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 cursor-pointer"
+                            onClick={() => handleToggle(user[".id"], user.disabled, user.name)}
+                          >
+                            {user.disabled === "true"
+                              ? <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                              : <ShieldOff className="h-4 w-4 text-amber-600" />}
                             {user.disabled === "true" ? "Enable User" : "Disable User"}
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 text-red-600 cursor-pointer">
+                          <DropdownMenuItem
+                            className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 text-red-600 cursor-pointer"
+                            onClick={() => handleDelete(user[".id"], user.name)}
+                          >
                             <Trash2 className="h-4 w-4" />
                             Hapus User
                           </DropdownMenuItem>
@@ -103,6 +168,13 @@ export default async function HotspotUsersPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <HotspotUserModal
+        isOpen={showUserModal}
+        onClose={() => setShowUserModal(false)}
+        profiles={profiles}
+        onSuccess={load}
+      />
     </div>
   );
 }
