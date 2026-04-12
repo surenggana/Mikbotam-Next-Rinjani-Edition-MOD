@@ -134,7 +134,11 @@ export default function SettingsPage() {
                 <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">API Password</Label>
                 <Input name="routerPassword" type="password" defaultValue={settings?.routerPassword || ""} className="bg-slate-50/50 border-slate-200 focus:bg-white transition-all" />
               </div>
-              <div className="md:col-span-2 pt-4">
+              <div className="md:col-span-2 space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Router Name</Label>
+                <Input name="routerName" defaultValue={settings?.routerName || ""} placeholder="Nama router (opsional, diisi otomatis dari identity)" className="bg-slate-50/50 border-slate-200 focus:bg-white transition-all" />
+              </div>
+              <div className="md:col-span-2 pt-2">
                 <Button type="button" variant="outline" onClick={handleTestRouter} className="w-full md:w-auto rounded-xl border-emerald-200 text-emerald-700 hover:bg-emerald-50 font-bold uppercase text-[10px] tracking-widest h-11 px-6">
                   <Wifi size={14} className="mr-2"/>
                   Uji Koneksi MikroTik
