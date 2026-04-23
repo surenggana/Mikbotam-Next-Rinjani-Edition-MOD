@@ -1,6 +1,6 @@
 {
   "name": "mikbotam-next",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Modern Evolution of MikroTik Bot Management using Next.js 15. Support RouterOS 7, Multi-Router, and Advanced Bandwidth Management (Rinjani Edition MOD).",
   "author": "Sanrian Surenggana <https://github.com/surenggana>",
   "repository": {

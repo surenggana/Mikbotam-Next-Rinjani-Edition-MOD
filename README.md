@@ -1,11 +1,11 @@
 # 🚀 Mikbotam Next - Rinjani Edition
 
-### _Modern Evolution MOD v2.2.0_
+### _Modern Evolution MOD v2.3.0_
 
 ![Mikbotam Banner](https://img.shields.io/badge/Mikrotik-Hotspot%20Bot-emerald?style=for-the-badge&logo=mikrotik)
 ![Next.js 16](https://img.shields.io/badge/Next.js%2016-black?style=for-the-badge&logo=next.js)
 ![Prisma ORM](https://img.shields.io/badge/Prisma%20ORM-blue?style=for-the-badge&logo=prisma)
-![Version](https://img.shields.io/badge/version-2.2.0-emerald?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-2.3.0-emerald?style=for-the-badge)
 
 **Mikbotam Next** adalah evolusi revolusioner dari versi **Krakatau (Master)**. Dibangun ulang dari nol menggunakan **Next.js 16**, aplikasi ini menawarkan performa kilat, keamanan tingkat tinggi, dan fitur yang sepenuhnya mendukung **RouterOS 7**.
 
@@ -15,6 +15,20 @@
 
 - **Original Founder:** [BangAchil](https://github.com/bangachil) (Mikbotam Master PHP)
 - **Lead Developer (Next Gen):** [Sanrian Surenggana, MTCNA](https://github.com/surenggana)
+
+---
+
+## 🆕 Changelog v2.3.0
+
+- ✅ **Refined Login UI** — Desain modern *glassmorphism* dengan background dekoratif, tipografi presisi, dan animasi halus.
+- ✅ **Admin Management** — Fitur baru untuk mengelola akses Administrator dan Superadmin langsung dari dashboard.
+- ✅ **Stability & Socket Handling** — Penanganan error API MikroTik yang lebih kuat, mencegah server crash saat terjadi timeout atau gangguan jaringan.
+- ✅ **Session Provider Fix** — Integrasi *Next-Auth* yang lebih stabil untuk pengalaman pengguna yang mulus tanpa error runtime.
+- ✅ **Enhanced Deployment** — Skrip `deploy.sh` kini otomatis mendeteksi lingkungan dan membuat file `.env` beserta `AUTH_SECRET`.
+- ✅ **Topup Request System** — Alur manajemen permintaan saldo reseller yang lebih terorganisir di menu "Permintaan Topup".
+- ✅ **Data Scoping & Security** — Implementasi `admin_id` untuk isolasi data yang lebih aman bagi multi-administrator.
+- ✅ **Advanced Dashboard Charts** — Visualisasi pendapatan dan trafik yang lebih interaktif menggunakan sistem chart terbaru.
+- ✅ **Multi-Router Support** — Kelola banyak MikroTik dalam satu dashboard dengan identity asli yang diambil otomatis dari router.
 
 ---
 
