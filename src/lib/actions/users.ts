@@ -13,16 +13,21 @@ export async function getSellers({
   limit?: number;
   search?: string;
 }) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
+
   const skip = (page - 1) * limit;
 
-  const where = search 
-    ? {
-        OR: [
-          { sellerName: { contains: search } },
-          { userId: { contains: search } },
-        ],
-      }
-    : {};
+  const where: any = {
+    adminId: adminId,
+    ...(search ? {
+      OR: [
+        { sellerName: { contains: search } },
+        { userId: { contains: search } },
+      ],
+    } : {})
+  };
 
   const [users, total] = await Promise.all([
     prisma.seller.findMany({
@@ -43,7 +48,8 @@ export async function getSellers({
 
 export async function addSeller(formData: FormData) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
 
   const userId = formData.get("userId") as string;
   const sellerName = formData.get("sellerName") as string;
@@ -52,6 +58,7 @@ export async function addSeller(formData: FormData) {
 
   await prisma.seller.create({
     data: {
+      adminId,
       userId,
       sellerName,
       balance: balance || "0",
@@ -62,31 +69,40 @@ export async function addSeller(formData: FormData) {
     },
   });
 
-  revalidatePath("/dashboard/users");
+  revalidatePath("/users");
   return { success: true };
 }
 
 export async function updateSeller(no: number, data: any) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
+
+  // Pastikan seller ini milik admin yang login (Security check)
+  const existing = await prisma.seller.findUnique({ where: { no } });
+  if (!existing || existing.adminId !== adminId) throw new Error("Akses ditolak.");
 
   await prisma.seller.update({
     where: { no },
     data,
   });
 
-  revalidatePath("/dashboard/users");
+  revalidatePath("/users");
   return { success: true };
 }
 
 export async function deleteSeller(no: number) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
+
+  const existing = await prisma.seller.findUnique({ where: { no } });
+  if (!existing || existing.adminId !== adminId) throw new Error("Akses ditolak.");
 
   await prisma.seller.delete({
     where: { no },
   });
 
-  revalidatePath("/dashboard/users");
+  revalidatePath("/users");
   return { success: true };
 }

@@ -14,7 +14,7 @@
 ## 🎖️ Credits & Appreciation
 
 - **Original Founder:** [BangAchil](https://github.com/bangachil) (Mikbotam Master PHP)
-- **Lead Developer (Next Gen):** **Sanrian Surenggana, MTCNA**
+- **Lead Developer (Next Gen):** [Sanrian Surenggana, MTCNA](https://github.com/surenggana)
 
 ---
 
@@ -32,36 +32,44 @@
 
 ---
 
-## 🌩️ Deployment Gratis (Vercel)
+## 🚀 Panduan Instalasi
 
-Anda bisa menjalankan Mikbotam Next secara gratis selamanya menggunakan Vercel.
+### 1. VPS Linux (Ubuntu/Debian) - Rekomendasi Utama
 
-### Langkah-langkah:
-
-1.  **Fork** repository ini ke akun GitHub Anda.
-2.  Buka [Vercel.com](https://vercel.com) dan hubungkan dengan GitHub Anda.
-3.  Pilih repository `Mikbotam-Next-Rinjani-Edition-MOD`.
-4.  **Environment Variables:** Tambahkan variabel berikut di dashboard Vercel:
-    - `AUTH_SECRET`: (Buat string acak panjang untuk keamanan session).
-    - `DATABASE_URL`: (Gunakan koneksi PostgreSQL dari Supabase/Neon jika ingin data awet, atau biarkan default SQLite jika hanya untuk testing).
-5.  Klik **Deploy**.
-6.  Selesai! Aplikasi Anda langsung online dengan HTTPS gratis.
-
-> ⚠️ **Catatan Penting:** SQLite di Vercel akan reset setiap kali ada update kode. Untuk penggunaan produksi (saldo asli), sangat disarankan menggunakan Database Cloud gratis seperti **Neon.tech** atau **Supabase**.
-
----
-
-## 🚀 Opsi Instalasi Lainnya
-
-### 1. VPS Linux (Ubuntu/Debian) - Rekomendasi
-
-Gunakan skrip otomatis kami untuk setup yang paling stabil:
+Gunakan skrip otomatis untuk instalasi yang paling stabil dan cepat:
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/theworldinyourhand/Mikbotam-Next-Rinjani-Edition-MOD/main/deploy.sh | bash
+wget -qO- https://raw.githubusercontent.com/surenggana/Mikbotam-Next-Rinjani-Edition-MOD/main/deploy.sh | bash
 ```
 
-### 2. Docker (Instan & Terisolasi)
+> **Note:** Skrip ini akan otomatis menginstal Node.js, PM2, dependencies, dan melakukan build aplikasi.
+
+### 2. Instalasi Manual (Development)
+
+Jika Anda ingin menjalankan di lingkungan lokal:
+
+1.  **Clone Repository:**
+    ```bash
+    git clone https://github.com/surenggana/Mikbotam-Next-Rinjani-Edition-MOD.git
+    cd Mikbotam-Next-Rinjani-Edition-MOD
+    ```
+2.  **Instal Dependencies:**
+    ```bash
+    npm install
+    ```
+3.  **Setup Environment:**
+    Salin file `.env.example` ke `.env` dan sesuaikan `AUTH_SECRET`.
+4.  **Database Sync:**
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+5.  **Jalankan:**
+    ```bash
+    npm run dev
+    ```
+
+### 3. Docker (Instan & Terisolasi)
 
 ```bash
 docker-compose up -d

@@ -3,24 +3,27 @@
 import { prisma } from "../prisma";
 import { getBotInstance } from "../bot";
 import { auth } from "@/auth";
+import { getActiveConfig } from "../mikrotik";
 
 export async function sendBroadcast(message: string) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
 
   const sellers = await prisma.seller.findMany({
     where: { 
       userId: { not: null },
-      status: "Active"
+      status: "Active",
+      adminId: adminId
     },
     select: { userId: true, sellerName: true }
   });
 
-  if (sellers.length === 0) return { success: false, message: "Tidak ada reseller aktif." };
+  if (sellers.length === 0) return { success: false, message: "Tidak ada reseller aktif di bawah manajemen Anda." };
 
-  // Ambil bot pertama yang aktif (atau bisa di-loop jika ingin kirim dari semua bot)
-  const config = await prisma.systemConfig.findFirst({ where: { botToken: { not: null } } });
-  if (!config?.botToken) throw new Error("Bot Token tidak ditemukan.");
+  // Ambil config aktif untuk mendapatkan bot token yang relevan
+  const config = await getActiveConfig();
+  if (!config?.botToken) throw new Error("Bot Token tidak ditemukan pada router aktif.");
 
   const bot = await getBotInstance(config.botToken);
   

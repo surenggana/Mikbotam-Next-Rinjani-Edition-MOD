@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MessageSquare, Save } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import { getActiveConfig } from "@/lib/mikrotik";
 
 export default async function BotEditorPage() {
-  const settings = await prisma.systemConfig.findFirst();
-  
+  const settings = await getActiveConfig();
+
   // Parse teks bot dari JSON string
   let botTexts = {
     welcome: "Selamat datang di Bot MikroTik kami!",
@@ -30,10 +31,10 @@ export default async function BotEditorPage() {
       fail_balance: formData.get("fail_balance"),
     };
 
-    const existing = await prisma.systemConfig.findFirst();
-    if (existing) {
+    const config = await getActiveConfig();
+    if (config) {
       await prisma.systemConfig.update({
-        where: { no: existing.no },
+        where: { no: config.no },
         data: { settingsText: JSON.stringify(data) }
       });
     }

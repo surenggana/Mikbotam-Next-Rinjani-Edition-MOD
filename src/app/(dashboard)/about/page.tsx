@@ -74,13 +74,22 @@ export default function AboutPage() {
                   <div className="flex flex-col pt-4 border-t border-slate-50">
                     <span className="text-sm font-bold text-slate-800">Sanrian Surenggana</span>
                     <span className="text-xs text-slate-500 font-medium">Lead Developer - Next Gen Evolution</span>
-                    <a 
-                      href="https://mikrotik.com/training/certificates/c504881caf75ac7a4a3d" 
-                      target="_blank" 
-                      className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 hover:underline mt-2 bg-emerald-50 px-2 py-1 rounded-md w-fit border border-emerald-100"
-                    >
-                      <ExternalLink size={10} /> VERIFY MTCNA
-                    </a>
+                    <div className="flex gap-2 mt-2">
+                      <a 
+                        href="https://mikrotik.com/training/certificates/c504881caf75ac7a4a3d" 
+                        target="_blank" 
+                        className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 hover:underline bg-emerald-50 px-2 py-1 rounded-md w-fit border border-emerald-100"
+                      >
+                        <ExternalLink size={10} /> VERIFY MTCNA
+                      </a>
+                      <a 
+                        href="https://github.com/surenggana" 
+                        target="_blank" 
+                        className="text-[10px] font-bold text-slate-600 flex items-center gap-1 hover:underline bg-slate-50 px-2 py-1 rounded-md w-fit border border-slate-200"
+                      >
+                        <ExternalLink size={10} /> GITHUB
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>

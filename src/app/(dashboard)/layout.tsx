@@ -1,4 +1,3 @@
-import { RouterSelector } from "@/components/layout/router-selector";
 import { UserMenu } from "@/components/layout/user-menu";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
@@ -16,10 +15,6 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const routers = await prisma.systemConfig.findMany({
-    select: { no: true, routerName: true, routerIp: true }
-  });
-
   const headerContent = (
     <div className="flex flex-col">
       <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Administrator</span>
@@ -31,12 +26,6 @@ export default async function DashboardLayout({
 
   const headerActions = (
     <>
-      <div className="hidden md:block">
-        <RouterSelector routers={routers} />
-      </div>
-
-      <div className="hidden md:block h-8 w-[1px] bg-slate-200" />
-
       <div className="md:pl-2">
         <UserMenu name={session.user?.name || "Admin"} />
       </div>

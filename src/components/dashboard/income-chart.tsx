@@ -48,7 +48,7 @@ export default function IncomeChart({ data }: IncomeChartProps) {
           width={72}
         />
         <Tooltip
-          formatter={(value: number) => [formatRupiah(value), "Pendapatan"]}
+          formatter={(value: any) => [formatRupiah(Number(value) || 0), "Pendapatan"]}
           contentStyle={{
             borderRadius: "0.75rem",
             border: "1px solid #e2e8f0",

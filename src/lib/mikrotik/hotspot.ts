@@ -1,5 +1,4 @@
-import { getMikrotikConnection } from "../mikrotik";
-import { prisma } from "../prisma";
+import { getMikrotikConnection, getActiveConfig } from "../mikrotik";
 
 export async function getHotspotUsers() {
   const conn = await getMikrotikConnection();
@@ -28,21 +27,29 @@ export async function addHotspotProfile(params: {
   onLogin?: string;
   onLogout?: string;
   lockMac?: boolean;
+  validity?: string;
 }) {
   const conn = await getMikrotikConnection();
   try {
     await conn.connect();
     
     // Ambil URL server dari config untuk default script jika tidak disediakan
-    const config = await prisma.systemConfig.findFirst();
+    const config = await getActiveConfig();
     const serverUrl = config?.dnsName || "http://your-server.com";
     
-    let defaultOnLogin = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=login&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
+    // SCRIPT AUTO DELETE & LOCK MAC (Dari core.php Mikbotam)
+    // Jika validity ada (misal 1d, 1h), pasang scheduler untuk hapus user otomatis saat login
+    let onLoginScript = params.onLogin || "";
     
-    // Poin 2: Lock MAC Address (Opsional per Profile)
-    if (params.lockMac) {
-      defaultOnLogin += ` :if ([/ip hotspot user get $user mac-address] = "00:00:00:00:00:00" || [/ip hotspot user get $user mac-address] = "") do={/ip hotspot user set $user mac-address=$"mac-address"}`;
+    if (!onLoginScript && params.validity && params.validity !== "0") {
+      const lockMacCmd = params.lockMac ? `[/ip hotspot user set mac-address=$"mac-address" [find where name=$user]];` : "";
+      
+      onLoginScript = `{:local date [/system clock get date ];:local time [/system clock get time ];:local uptime (${params.validity});:local macadd $"mac-address";${lockMacCmd}[/system scheduler add disabled=no interval=$uptime name=$user on-event="[/ip hotspot active remove [find where user=$user]];[/ip hotspot user remove [find where name=$user]];[/ip hotspot cookie remove [find user=$user]];[/sys sch re [find where name=$user]]" start-date=$date start-time=$time];}`;
     }
+
+    // Tambahkan webhook kita di awal/akhir script jika belum ada
+    const webhookLogin = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=login&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
+    onLoginScript = webhookLogin + (onLoginScript ? " " + onLoginScript : "");
 
     const defaultOnLogout = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=logout&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
 
@@ -50,7 +57,7 @@ export async function addHotspotProfile(params: {
     if (params.sharedUsers) cmd.push("=shared-users=" + params.sharedUsers);
     if (params.rateLimit) cmd.push("=rate-limit=" + params.rateLimit);
     
-    cmd.push("=on-login=" + (params.onLogin || defaultOnLogin));
+    cmd.push("=on-login=" + onLoginScript);
     cmd.push("=on-logout=" + (params.onLogout || defaultOnLogout));
     
     return await conn.write(cmd);
@@ -97,6 +104,50 @@ export async function removeHotspotUser(id: string) {
   try {
     await conn.connect();
     return await conn.write(["/ip/hotspot/user/remove", "=.id=" + id]);
+  } finally {
+    conn.close();
+  }
+}
+
+export async function removeHotspotProfile(id: string) {
+  const conn = await getMikrotikConnection();
+  try {
+    await conn.connect();
+    return await conn.write(["/ip/hotspot/user/profile/remove", "=.id=" + id]);
+  } finally {
+    conn.close();
+  }
+}
+
+export async function updateHotspotProfile(id: string, params: {
+  name: string;
+  sharedUsers?: string;
+  rateLimit?: string;
+  validity?: string;
+  lockMac?: boolean;
+}) {
+  const conn = await getMikrotikConnection();
+  try {
+    await conn.connect();
+    
+    const config = await getActiveConfig();
+    const serverUrl = config?.dnsName || "http://your-server.com";
+    
+    let onLoginScript = "";
+    if (params.validity && params.validity !== "0") {
+      const lockMacCmd = params.lockMac ? `[/ip hotspot user set mac-address=$"mac-address" [find where name=$user]];` : "";
+      onLoginScript = `{:local date [/system clock get date ];:local time [/system clock get time ];:local uptime (${params.validity});:local macadd $"mac-address";${lockMacCmd}[/system scheduler add disabled=no interval=$uptime name=$user on-event="[/ip hotspot active remove [find where user=$user]];[/ip hotspot user remove [find where name=$user]];[/ip hotspot cookie remove [find user=$user]];[/sys sch re [find where name=$user]]" start-date=$date start-time=$time];}`;
+    }
+    
+    const webhookLogin = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=login&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
+    onLoginScript = webhookLogin + (onLoginScript ? " " + onLoginScript : "");
+
+    const cmd = ["/ip/hotspot/user/profile/set", "=.id=" + id, "=name=" + params.name];
+    if (params.sharedUsers) cmd.push("=shared-users=" + params.sharedUsers);
+    if (params.rateLimit) cmd.push("=rate-limit=" + params.rateLimit);
+    cmd.push("=on-login=" + onLoginScript);
+    
+    return await conn.write(cmd);
   } finally {
     conn.close();
   }

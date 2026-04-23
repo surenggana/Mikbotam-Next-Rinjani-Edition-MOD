@@ -3,7 +3,6 @@ import { authConfig } from "./auth.config";
 
 export default NextAuth(authConfig).auth;
 
-// Lindungi folder dashboard secara otomatis
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|logo-next.svg|logo-outline.svg).*)'],
 }

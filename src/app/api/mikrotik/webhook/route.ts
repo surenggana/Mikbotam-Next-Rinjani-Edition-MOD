@@ -13,9 +13,17 @@ export async function GET(req: NextRequest) {
   const mac = searchParams.get("mac");
   const ip = searchParams.get("ip");
   const token = searchParams.get("token"); // Optional security token
+  const routerId = searchParams.get("routerId");
 
-  // Ambil konfigurasi sistem untuk mendapatkan Bot Token dan Owner ID
-  const config = await prisma.systemConfig.findFirst();
+  // Ambil konfigurasi sistem berdasarkan routerId jika disediakan
+  let config;
+  if (routerId) {
+    config = await prisma.systemConfig.findUnique({
+      where: { no: parseInt(routerId) }
+    });
+  } else {
+    config = await prisma.systemConfig.findFirst();
+  }
 
   if (!config || !config.botToken || !config.ownerId) {
     return NextResponse.json({ error: "Sistem belum dikonfigurasi" }, { status: 500 });

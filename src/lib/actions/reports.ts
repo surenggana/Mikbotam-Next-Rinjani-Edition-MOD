@@ -5,12 +5,16 @@ import { auth } from "@/auth";
 
 export async function getDailyReport(date?: string) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
 
   const targetDate = date || new Date().toISOString().split("T")[0];
 
   const reports = await prisma.report.findMany({
-    where: { date: targetDate },
+    where: { 
+      date: targetDate,
+      adminId: adminId
+    },
     orderBy: { no: "desc" },
   });
 
@@ -39,12 +43,16 @@ export async function getDailyReport(date?: string) {
 
 export async function getMonthlyReport(month?: string) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
 
   const targetMonth = month || new Date().toISOString().slice(0, 7);
 
   const reports = await prisma.report.findMany({
-    where: { date: { startsWith: targetMonth } },
+    where: { 
+      date: { startsWith: targetMonth },
+      adminId: adminId
+    },
     orderBy: { no: "desc" },
   });
 
@@ -61,7 +69,9 @@ export async function getMonthlyReport(month?: string) {
   const bySeller: Record<string, { userName: string; count: number; revenue: number }> = {};
   for (const r of reports) {
     const key = r.userId || "unknown";
-    if (!bySeller[key]) bySeller[key] = { userName: r.userName || "Unknown", count: 0, revenue: 0 };
+    if (!bySeller[key]) {
+      bySeller[key] = { userName: r.userName || "Unknown", count: 0, revenue: 0 };
+    }
     bySeller[key].count++;
     bySeller[key].revenue += parseFloat(r.revenue || "0");
   }

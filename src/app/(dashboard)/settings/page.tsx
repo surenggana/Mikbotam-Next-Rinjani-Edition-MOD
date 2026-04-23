@@ -19,26 +19,15 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { cn } from "@/lib/utils";
-import { RouterManagementCard } from "@/components/settings/router-management-card";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [connectionMode, setConnectionMode] = useState("polling");
   const [webhookDomain, setWebhookDomain] = useState("");
 
   useEffect(() => {
     getSystemSettings().then((res: any) => {
       setSettings(res);
-      // Accessing settings property from the JSON column if it exists, or fallback
-      let mode = "polling";
-      if (res?.settings) {
-        try {
-          const parsed = JSON.parse(res.settings);
-          mode = parsed.connectionMode || "polling";
-        } catch (e) {}
-      }
-      setConnectionMode(mode);
       setLoading(false);
       setWebhookDomain(window.location.origin);
     });
@@ -93,10 +82,8 @@ export default function SettingsPage() {
         <p className="text-sm font-medium text-slate-500 text-balance">Kelola parameter infrastruktur MikroTik dan integrasi bot telegram Anda.</p>
       </div>
 
-      <RouterManagementCard />
-
       <form action={async (fd) => {
-        fd.append("connectionMode", connectionMode);
+        fd.append("connectionMode", "webhook");
         const res = await updateSystemSettings(fd);
         if (res.success) toast.success("Konfigurasi berhasil disimpan!");
       }} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -156,7 +143,7 @@ export default function SettingsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-base font-black uppercase tracking-wider text-slate-800">Telegram Bot Integration</CardTitle>
-                  <CardDescription className="text-[11px] font-medium uppercase tracking-tight">Metode Komunikasi Telegram</CardDescription>
+                  <CardDescription className="text-[11px] font-medium uppercase tracking-tight">Metode Komunikasi Telegram (Webhook Only)</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -166,81 +153,44 @@ export default function SettingsPage() {
                 <Input name="botToken" defaultValue={settings?.botToken || ""} className="font-mono text-xs bg-slate-50/50 border-slate-200" placeholder="123456789:ABCDEF..." />
               </div>
 
-              <div className="space-y-3 pt-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Connection Method</Label>
-                <Select value={connectionMode} onValueChange={(val) => setConnectionMode(val || "polling")}>
-                  <SelectTrigger className="bg-slate-50/50 border-slate-200 rounded-xl h-11">
-                    <SelectValue placeholder="Pilih metode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="polling" className="py-3">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-bold text-sm">Long Polling (Local)</span>
-                        <span className="text-[10px] text-slate-400">Cocok untuk PC Lokal / STB / Local Server</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="webhook" className="py-3">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-bold text-sm">Webhook (Public)</span>
-                        <span className="text-[10px] text-slate-400">Memerlukan Domain SSL / HTTPS Publik</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-4 pt-1">
+                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-[11px] text-emerald-700 leading-relaxed space-y-1">
+                  <p className="font-bold">Cara pakai Webhook:</p>
+                  <ol className="list-decimal list-inside space-y-0.5 font-medium">
+                    <li>Isi domain HTTPS publik Anda di bawah (contoh: <span className="font-mono">https://bot.domain.com</span>)</li>
+                    <li>Klik <span className="font-bold">Aktifkan Webhook</span> — URL akan otomatis didaftarkan ke Telegram</li>
+                  </ol>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Domain HTTPS Publik
+                  </Label>
+                  <Input
+                    value={webhookDomain}
+                    onChange={(e) => setWebhookDomain(e.target.value)}
+                    placeholder="https://bot.yourdomain.com"
+                    className="font-mono text-xs bg-slate-50/50 border-slate-200 focus:bg-white"
+                  />
+                  {webhookDomain && settings?.botToken && (
+                    <p className="text-[10px] font-mono text-slate-400 break-all">
+                      URL yang akan didaftarkan:{" "}
+                      <span className="text-slate-600 font-bold">
+                        {webhookDomain.replace(/\/$/, "")}/api/telegram/{settings.botToken}
+                      </span>
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={handleSetWebhook}
+                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-11 px-6 shadow-md shadow-emerald-200"
+                >
+                  <Globe size={14} className="mr-2" />
+                  Aktifkan Webhook
+                </Button>
               </div>
-
-              {connectionMode === "polling" && (
-                <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                    Mode Polling — jalankan perintah berikut di server agar bot aktif menerima pesan:
-                  </p>
-                  <code className="mt-2 inline-block text-[11px] font-mono font-bold text-primary bg-primary/5 border border-primary/10 px-3 py-1.5 rounded-lg">
-                    npm run bot
-                  </code>
-                </div>
-              )}
-
-              {connectionMode === "webhook" && (
-                <div className="space-y-4 pt-1">
-                  <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-[11px] text-emerald-700 leading-relaxed space-y-1">
-                    <p className="font-bold">Cara pakai Webhook:</p>
-                    <ol className="list-decimal list-inside space-y-0.5 font-medium">
-                      <li>Isi domain HTTPS publik Anda di bawah (contoh: <span className="font-mono">https://bot.domain.com</span>)</li>
-                      <li>Klik <span className="font-bold">Aktifkan Webhook</span> — URL akan otomatis didaftarkan ke Telegram</li>
-                      <li>Bot akan menerima pesan tanpa perlu <code className="font-mono bg-emerald-100 px-1 rounded">npm run bot</code></li>
-                    </ol>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      Domain HTTPS Publik
-                    </Label>
-                    <Input
-                      value={webhookDomain}
-                      onChange={(e) => setWebhookDomain(e.target.value)}
-                      placeholder="https://bot.yourdomain.com"
-                      className="font-mono text-xs bg-slate-50/50 border-slate-200 focus:bg-white"
-                    />
-                    {webhookDomain && settings?.botToken && (
-                      <p className="text-[10px] font-mono text-slate-400 break-all">
-                        URL yang akan didaftarkan:{" "}
-                        <span className="text-slate-600 font-bold">
-                          {webhookDomain.replace(/\/$/, "")}/api/telegram/{settings.botToken}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-
-                  <Button
-                    type="button"
-                    onClick={handleSetWebhook}
-                    className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-11 px-6 shadow-md shadow-emerald-200"
-                  >
-                    <Globe size={14} className="mr-2" />
-                    Aktifkan Webhook
-                  </Button>
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>

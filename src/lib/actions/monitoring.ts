@@ -29,3 +29,25 @@ export async function getLiveMonitoringData() {
     };
   }
 }
+
+import { getMikrotikConnection } from "@/lib/mikrotik";
+
+export async function getInterfaceTraffic(interfaceName: string) {
+  try {
+    const conn = await getMikrotikConnection();
+    await conn.connect();
+    const data = await conn.write([
+      "/interface/monitor-traffic",
+      "=interface=" + interfaceName,
+      "=once="
+    ]);
+    return {
+      rx: parseInt(data[0]["rx-bits-per-second"] || "0"),
+      tx: parseInt(data[0]["tx-bits-per-second"] || "0"),
+      success: true
+    };
+  } catch (error) {
+    // Return quiet failure instead of throwing
+    return { rx: 0, tx: 0, success: false };
+  }
+}

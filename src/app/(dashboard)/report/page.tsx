@@ -156,7 +156,7 @@ export default function ReportPage() {
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <TableSkeleton rows={5} cols={3} />
+            <TableSkeleton rows={5} columns={3} />
           ) : (
             <Table>
               <TableHeader>
@@ -212,7 +212,7 @@ export default function ReportPage() {
           </CardHeader>
           <CardContent className="p-0">
             {loading ? (
-              <TableSkeleton rows={5} cols={3} />
+              <TableSkeleton rows={5} columns={3} />
             ) : (
               <Table>
                 <TableHeader>

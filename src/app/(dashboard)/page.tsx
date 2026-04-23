@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { auth } from "@/auth";
 import { getDashboardStats, getRecentTransactions } from "@/lib/actions/stats";
 import { formatUptime } from "@/lib/formatters";
 import { getRouterStats } from "@/lib/mikrotik";
@@ -29,15 +31,93 @@ import {
   Zap,
   Clock,
   ArrowRight,
-  Wifi
+  ShieldAlert,
+  Users,
 } from "lucide-react";
-import IncomeChart from "@/components/dashboard/income-chart";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SystemIntegrityBanner } from "@/components/layout/system-info";
+import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
 
 export default async function DashboardPage() {
+  const session = await auth();
+  const isSuperAdmin = (session?.user as any)?.role === "SUPERADMIN";
+
+  if (isSuperAdmin) {
+    const totalAdmins = await prisma.admin.count();
+    const totalSellers = await prisma.seller.count();
+    const totalTransactions = await prisma.transaction.count();
+
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500">
+        <SystemIntegrityBanner />
+        
+        <div className="flex flex-col gap-1 px-1">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Superadmin Dashboard</h1>
+          <p className="text-sm font-medium text-slate-500">Ringkasan global ekosistem Mikbotam Tenant.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <Card className="shadow-sm border-slate-200/60 transition-all hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Admin (Tenants)</CardTitle>
+              <div className="p-2 rounded-lg bg-purple-50 text-purple-600">
+                <ShieldAlert size={16} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-black text-slate-900 tracking-tight">{totalAdmins}</div>
+              <p className="text-[10px] font-bold text-slate-400 mt-2">AKTIF DI SISTEM</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-slate-200/60 transition-all hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Seluruh Reseller</CardTitle>
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                <Users size={16} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-black text-slate-900 tracking-tight">{totalSellers}</div>
+              <p className="text-[10px] font-bold text-slate-400 mt-2">DI SELURUH ROUTER</p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-slate-200/60 transition-all hover:shadow-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Transaksi Global</CardTitle>
+              <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
+                <TrendingUp size={16} />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-black text-slate-900 tracking-tight">{totalTransactions}</div>
+              <p className="text-[10px] font-bold text-slate-400 mt-2">VOUCHER & TOPUP</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="bg-slate-100/50 rounded-2xl p-8 border border-dashed border-slate-200 text-center space-y-4">
+          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+             <ShieldAlert className="text-slate-400" size={32} />
+          </div>
+          <div className="max-w-md mx-auto">
+            <h3 className="text-lg font-bold text-slate-800">Mode Superadmin Aktif</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Gunakan menu <b>Admin Management</b> di sidebar untuk menambah tenant baru atau mengelola router yang ada.
+            </p>
+          </div>
+          <Button asChild className="bg-emerald-600 hover:bg-emerald-700 rounded-xl px-8 h-12 shadow-lg shadow-emerald-900/20">
+            <Link href="/admin-management">Kelola Admin Sekarang</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // DATA FETCHING UNTUK ADMIN BIASA
   const [stats, txData, router] = await Promise.all([
     getDashboardStats(),
     getRecentTransactions({ limit: 10 }),
@@ -79,7 +159,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <SystemIntegrityBanner />
 
       <div className="flex flex-col gap-1 px-1">
@@ -88,7 +168,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="shadow-sm border-slate-200/60">
+        <Card className="shadow-sm border-slate-200/60 transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Voucher Terjual</CardTitle>
             <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
@@ -106,7 +186,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-slate-200/60">
+        <Card className="shadow-sm border-slate-200/60 transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Top Up</CardTitle>
             <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
@@ -121,7 +201,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-slate-200/60">
+        <Card className="shadow-sm border-slate-200/60 transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pendapatan</CardTitle>
             <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
@@ -136,7 +216,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-slate-200/60">
+        <Card className="shadow-sm border-slate-200/60 transition-all hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <CardTitle className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reseller Baru</CardTitle>
             <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
@@ -153,24 +233,11 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 shadow-sm border-slate-200/60">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-slate-50 pb-6">
-            <div>
-              <CardTitle>Tren Pendapatan</CardTitle>
-              <CardDescription>Performa penjualan dalam 7 hari terakhir.</CardDescription>
-            </div>
-            <Button variant="outline" size="sm" asChild className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50">
-              <Link href="/dashboard/transactions" className="gap-2">
-                Detail Transaksi <ArrowRight size={14} />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent className="pt-8">
-            <IncomeChart data={chartData} />
-          </CardContent>
-        </Card>
+        <div className="lg:col-span-2">
+          <DashboardCharts chartData={chartData} />
+        </div>
 
-        <Card className="lg:col-span-1 shadow-sm border-slate-200/60 flex flex-col">
+        <Card className="lg:col-span-1 shadow-sm border-slate-200/60 flex flex-col h-fit">
           <CardHeader className="border-b border-slate-50 bg-slate-50/20 pb-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-0.5">
@@ -247,7 +314,7 @@ export default async function DashboardPage() {
           )}
         </Card>
 
-        <Card className="lg:col-span-3 shadow-sm border-slate-200/60 overflow-hidden">
+        <Card className="lg:col-span-3 shadow-sm border-slate-200/60 overflow-hidden transition-all hover:shadow-md">
           <CardHeader className="border-b border-slate-50 bg-slate-50/30">
             <CardTitle>10 Transaksi Terakhir</CardTitle>
           </CardHeader>
@@ -283,7 +350,7 @@ export default async function DashboardPage() {
                           "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
                           tx.description === 'Success' || tx.description === 'topup' 
                             ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
-                            : "bg-amber-50 text-amber-600 border-amber-100"
+                            : "bg-amber-50 text-amber-700 border-amber-100"
                         )}>
                           {tx.description === 'Success' || tx.description === 'topup' ? 'Success' : 'Process'}
                         </span>

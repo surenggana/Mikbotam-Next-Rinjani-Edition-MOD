@@ -13,8 +13,11 @@ export default async function VouchersSettingsPage() {
   // Ambil profil dari router untuk dropdown nanti
   const profiles = await getHotspotProfiles().catch(() => []);
   
-  // Ambil data voucher yang tersimpan
-  const voucherConfig = await prisma.voucherConfig.findFirst();
+  // Ambil data voucher yang tersimpan (Scoping per adminId)
+  const adminId = parseInt(session?.user?.id || "0");
+  const voucherConfig = await prisma.voucherConfig.findFirst({
+    where: { adminId }
+  });
   let packages: any[] = [];
   try {
     packages = voucherConfig?.settings ? JSON.parse(voucherConfig.settings) : [];

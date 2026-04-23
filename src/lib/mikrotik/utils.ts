@@ -17,7 +17,18 @@ export function formatRateLimit(params: {
     if (params.burstThreshold) {
       parts.push(params.burstThreshold);
       if (params.burstTime) {
-        parts.push(params.burstTime);
+        // Fix: MikroTik burst-time requires unit (e.g., 30s). 
+        // If user input is just "30", we append "s/s" or "30s/30s"
+        let bTime = params.burstTime;
+        if (/^\d+$/.test(bTime)) {
+          bTime = `${bTime}s/${bTime}s`;
+        } else if (/^\d+\/\d+$/.test(bTime)) {
+          // If input is "30/30", convert to "30s/30s"
+          const [rx, tx] = bTime.split("/");
+          bTime = `${rx}s/${tx}s`;
+        }
+        
+        parts.push(bTime);
         if (params.priority) {
           parts.push(params.priority.toString());
           if (params.limitAt) {

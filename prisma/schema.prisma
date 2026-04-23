@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -9,15 +8,24 @@ datasource db {
 
 model Admin {
   u_id      Int     @id @default(autoincrement())
-  u_user    String
+  u_user    String  @unique
   u_pass    String
-  token     String
-  enct      String
-  version   String  @default("")
-  lastlogin String
-  ip        String
-  user      String
-  status    String
+  role      String  @default("ADMIN") // SUPERADMIN, ADMIN
+  token     String?
+  enct      String?
+  version   String? @default("")
+  lastlogin String?
+  ip        String?
+  user      String?
+  status    String? @default("Active")
+  
+  // Relations
+  routers      SystemConfig[]
+  sellers      Seller[]
+  transactions Transaction[]
+  reports      Report[]
+  topupRequests TopupRequest[]
+  vouchers     VoucherConfig[]
 
   @@map("mikhbotam_id")
 }
@@ -44,6 +52,7 @@ model Customer {
 
 model Transaction {
   no               Int     @id @default(autoincrement()) @map("No")
+  adminId          Int?    @map("admin_id") // Scoping for multi-tenant
   userId           String? @map("id_user")
   sellerName       String? @map("nama_seller")
   balanceStart     String? @map("saldo_awal")
@@ -67,11 +76,14 @@ model Transaction {
   time             String? @map("Waktu")
   date             String? @map("Tanggal")
 
+  admin            Admin?  @relation(fields: [adminId], references: [u_id])
+
   @@map("re_operating")
 }
 
 model Seller {
   no                Int     @id @default(autoincrement()) @map("No")
+  adminId          Int?    @map("admin_id") // Scoping for multi-tenant
   userId            String? @map("id_user")
   sellerName        String? @map("nama_seller")
   phoneNumber       String? @map("nomer_tlp")
@@ -91,6 +103,8 @@ model Seller {
   typeLast          String? @map("typelast")
   time              String  @map("Waktu")
   date              String  @map("Tanggal")
+
+  admin            Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("re_settings")
 }
@@ -116,6 +130,7 @@ model Graphic {
 
 model SystemConfig {
   no               Int     @id @default(autoincrement()) @map("No")
+  adminId          Int?    @map("admin_id") // Scoping for multi-tenant
   id               String  @map("_id")
   botToken         String? @map("Token_bot")
   botUsername      String? @map("Username_bot")
@@ -146,8 +161,10 @@ model SystemConfig {
   autoRefresh      String? @map("autoreflash")
   other            String? @map("other")
   otherTwo         String? @map("othertho")
-  otherThree       String? @map("othertree")
+  otherThree        String? @map("othertree")
   dateModified     String? @map("Tanggal_diubah")
+
+  admin            Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("st_mikbotam")
 }
@@ -183,6 +200,7 @@ model PppConfig {
 
 model Report {
   no         Int     @id @default(autoincrement()) @map("No")
+  adminId    Int?    @map("admin_id") // Scoping for multi-tenant
   userId     String? @map("id_user")
   userName   String? @map("nama_user")
   transaction String? @map("transaksi")
@@ -191,6 +209,8 @@ model Report {
   revenue    String? @default("0") @map("pendapatan")
   time       String? @map("Waktu")
   date       String? @map("Tanggal")
+
+  admin      Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("st_reportdata")
 }
@@ -207,6 +227,7 @@ model SmsGateway {
 
 model VoucherConfig {
   no            Int    @id @default(autoincrement()) @map("No")
+  adminId       Int?   @map("admin_id") // Scoping for multi-tenant
   type          String @map("_type")
   generate      String @map("_generate")
   lastDate      String @map("_lastdate")
@@ -226,5 +247,34 @@ model VoucherConfig {
   other         String @map("_other")
   updateDate    String @map("_updatedate")
 
+  admin         Admin? @relation(fields: [adminId], references: [u_id])
+
   @@map("st_voucher")
+}
+
+model TopupRequest {
+  id          Int      @id @default(autoincrement())
+  adminId     Int?     @map("admin_id") // Scoping for multi-tenant
+  userId      String   @map("id_user")
+  sellerName  String   @map("nama_seller")
+  amount      Float
+  method      String
+  status      String   @default("Pending") // Pending, Success, Rejected
+  time        String
+  date        String
+  createdAt   DateTime @default(now())
+
+  admin       Admin?   @relation(fields: [adminId], references: [u_id])
+
+  @@map("st_topup_request")
+}
+
+model DepositMethod {
+  id      Int     @id @default(autoincrement())
+  name    String  // Bank BCA, Dana, dll
+  number  String  // No Rekening
+  owner   String  // Atas Nama
+  active  Boolean @default(true)
+
+  @@map("st_deposit_method")
 }

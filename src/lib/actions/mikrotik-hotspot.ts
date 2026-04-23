@@ -6,14 +6,26 @@ import {
   addHotspotUser,
   addHotspotProfile,
   removeHotspotUser,
+  removeHotspotProfile,
+  updateHotspotProfile,
   setHotspotUserStatus,
 } from "@/lib/mikrotik/hotspot";
+import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
+
+async function validateSession() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  return parseInt(session.user.id);
+}
 
 export async function getHotspotUsersAction() {
+  await validateSession();
   return await getHotspotUsers().catch(() => []);
 }
 
 export async function getHotspotProfilesAction() {
+  await validateSession();
   return await getHotspotProfiles().catch(() => []);
 }
 
@@ -23,21 +35,55 @@ export async function addHotspotUserAction(params: {
   profile: string;
   limitUptime?: string;
 }) {
-  return await addHotspotUser({ server: "all", ...params });
+  await validateSession();
+  const res = await addHotspotUser({ server: "all", ...params });
+  revalidatePath("/hotspot-users");
+  return res;
 }
 
 export async function addHotspotProfileAction(params: {
   name: string;
   sharedUsers?: string;
   rateLimit?: string;
+  lockMac?: boolean;
+  validity?: string;
 }) {
-  return await addHotspotProfile(params);
+  await validateSession();
+  const res = await addHotspotProfile(params);
+  revalidatePath("/hotspot-profiles");
+  return res;
+}
+
+export async function updateHotspotProfileAction(id: string, params: {
+  name: string;
+  sharedUsers?: string;
+  rateLimit?: string;
+  validity?: string;
+  lockMac?: boolean;
+}) {
+  await validateSession();
+  const res = await updateHotspotProfile(id, params);
+  revalidatePath("/hotspot-profiles");
+  return res;
 }
 
 export async function removeHotspotUserAction(id: string) {
-  return await removeHotspotUser(id);
+  await validateSession();
+  const res = await removeHotspotUser(id);
+  revalidatePath("/hotspot-users");
+  return res;
+}
+
+export async function removeHotspotProfileAction(id: string) {
+  await validateSession();
+  const res = await removeHotspotProfile(id);
+  revalidatePath("/hotspot-profiles");
+  return res;
 }
 
 export async function toggleHotspotUserAction(id: string, action: "enable" | "disable") {
-  return await setHotspotUserStatus(id, action);
+  await validateSession();
+  const res = await setHotspotUserStatus(id, action);
+  revalidatePath("/hotspot-users");
+  return res;
 }

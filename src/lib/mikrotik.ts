@@ -1,11 +1,27 @@
 import { RouterOSAPI } from 'node-routeros';
 import { prisma } from './prisma';
+import { auth } from '@/auth';
+
+export async function getActiveConfig() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  const adminId = parseInt(session.user.id);
+
+  // Ambil config router milik admin yang sedang login
+  const config = await prisma.systemConfig.findFirst({
+    where: { adminId: adminId }
+  });
+
+  return config;
+}
 
 export async function getRouterConfig() {
-  const config = await prisma.systemConfig.findFirst();
-  if (!config) {
-    throw new Error('Konfigurasi router tidak ditemukan di database.');
-  }
+  const config = await getActiveConfig();
+  if (!config) return null;
+
   return {
     host: config.routerIp || '',
     user: config.routerUsername || '',
@@ -16,6 +32,10 @@ export async function getRouterConfig() {
 
 export async function getMikrotikConnection() {
   const config = await getRouterConfig();
+  if (!config) {
+    throw new Error('Router belum dikonfigurasi.');
+  }
+
   const conn = new RouterOSAPI({
     host: config.host,
     user: config.user,
@@ -23,6 +43,12 @@ export async function getMikrotikConnection() {
     port: config.port,
     timeout: 5,
   });
+
+  // Tambahkan listener error agar tidak crash jika terjadi timeout/gangguan socket
+  conn.on('error', (err) => {
+    console.error('RouterOS API Socket Error:', err.message);
+  });
+
   return conn;
 }
 
@@ -58,21 +84,20 @@ export async function getRouterStats() {
     console.error('Gagal mengambil statistik router:', error);
     throw error;
   } finally {
-  conn.close();
+    conn.close();
   }
-  }
+}
 
-  export async function getInterfaces() {
+export async function getInterfaces() {
   const conn = await getMikrotikConnection();
   try {
-  await conn.connect();
-  const data = await conn.write('/interface/print');
-  return data;
+    await conn.connect();
+    const data = await conn.write('/interface/print');
+    return data;
   } catch (error) {
-  console.error('Gagal mengambil data interface:', error);
-  throw error;
+    console.error('Gagal mengambil data interface:', error);
+    throw error;
   } finally {
-  conn.close();
+    conn.close();
   }
-  }
-
+}

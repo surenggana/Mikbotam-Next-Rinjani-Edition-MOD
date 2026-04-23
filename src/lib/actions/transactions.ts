@@ -6,19 +6,20 @@ import { auth } from "@/auth";
 
 export async function topupReseller(targetUserId: string, amount: number) {
   const session = await auth();
-  if (!session) throw new Error("Unauthorized");
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
 
   const now = new Date();
   const timeStr = format(now, "HH:mm:ss");
   const dateStr = format(now, "yyyy-MM-dd");
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Get current balance
+    // 1. Get current balance (filtered by adminId for security)
     const seller = await tx.seller.findFirst({
-      where: { userId: targetUserId },
+      where: { userId: targetUserId, adminId },
     });
 
-    if (!seller) throw new Error("Seller tidak ditemukan");
+    if (!seller) throw new Error("Seller tidak ditemukan di bawah manajemen Anda.");
 
     const currentBalance = parseFloat(seller.balance || "0");
     const newBalance = currentBalance + amount;
@@ -36,13 +37,14 @@ export async function topupReseller(targetUserId: string, amount: number) {
     // 3. Log to re_operating
     await tx.transaction.create({
       data: {
+        adminId, // Record tenant ID
         userId: targetUserId,
         sellerName: seller.sellerName,
         balanceStart: currentBalance.toString(),
         balanceEnd: newBalance.toString(),
         topUp: amount.toString(),
         description: "topup",
-        topUpFromId: session.user?.name || "Admin", // Or owner ID
+        topUpFromId: session.user?.name || "Admin",
         time: timeStr,
         date: dateStr,
       },
@@ -61,28 +63,30 @@ export async function beliVoucher(params: {
   password: string;
   expiry: string;
   status: string;
-  routerName: string; // Tambahkan routerName
+  routerName: string;
 }) {
   const now = new Date();
   const timeStr = format(now, "HH:mm:ss");
   const dateStr = format(now, "yyyy-MM-dd");
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Get current balance
+    // 1. Get seller to identify adminId
     const seller = await tx.seller.findFirst({
       where: { userId: params.userId },
     });
 
     if (!seller) throw new Error("Seller tidak ditemukan");
+    const adminId = seller.adminId; // Inherit adminId from seller
 
     const currentBalance = parseFloat(seller.balance || "0");
     const newBalance = currentBalance - params.price;
 
     if (newBalance < 0) throw new Error("Saldo tidak mencukupi");
 
-    // 2. Log to re_operating dengan Router Name yang spesifik
+    // 2. Log to re_operating
     await tx.transaction.create({
       data: {
+        adminId, // Crucial for multi-tenant visibility
         userId: params.userId,
         sellerName: params.sellerName,
         balanceStart: currentBalance.toString(),
@@ -93,7 +97,7 @@ export async function beliVoucher(params: {
         voucherPassword: params.password,
         voucherExpiry: params.expiry,
         description: params.status,
-        routerName: params.routerName, // Simpan nama router
+        routerName: params.routerName,
         time: timeStr,
         date: dateStr,
       },
@@ -110,15 +114,16 @@ export async function beliVoucher(params: {
       },
     });
 
-    // 4. Record to st_reportdata if success
+    // 4. Record to st_reportdata
     if (params.status === "Success") {
       await tx.report.create({
         data: {
+          adminId, // Record tenant ID
           userId: params.userId,
           userName: params.sellerName,
           price: params.price.toString(),
           status: params.status,
-          transaction: "halo", // Same as PHP
+          transaction: "Voucher Hotspot",
           revenue: params.price.toString(),
           time: timeStr,
           date: dateStr,

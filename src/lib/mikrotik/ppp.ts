@@ -1,4 +1,4 @@
-import { getMikrotikConnection } from "../mikrotik";
+import { getMikrotikConnection, getActiveConfig } from "../mikrotik";
 
 export async function getPppProfiles() {
   const conn = await getMikrotikConnection();
@@ -15,14 +15,28 @@ export async function addPppProfile(params: {
   localAddress?: string;
   remoteAddress?: string;
   rateLimit?: string;
+  onUp?: string;
+  onDown?: string;
 }) {
   const conn = await getMikrotikConnection();
   try {
     await conn.connect();
+
+    // Ambil URL server dari config untuk default script jika tidak disediakan
+    const config = await getActiveConfig();
+    const serverUrl = config?.dnsName || "http://your-server.com";
+
+    const defaultOnUp = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=login&user=$user&mac=$"remote-address"&ip=$"remote-address"" mode=http keep-result=no;`;
+    const defaultOnDown = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=logout&user=$user&mac=$"remote-address"&ip=$"remote-address"" mode=http keep-result=no;`;
+
     const cmd = ["/ppp/profile/add", "=name=" + params.name];
     if (params.localAddress) cmd.push("=local-address=" + params.localAddress);
     if (params.remoteAddress) cmd.push("=remote-address=" + params.remoteAddress);
     if (params.rateLimit) cmd.push("=rate-limit=" + params.rateLimit);
+
+    cmd.push("=on-up=" + (params.onUp || defaultOnUp));
+    cmd.push("=on-down=" + (params.onDown || defaultOnDown));
+
     return await conn.write(cmd);
   } finally {
     conn.close();
