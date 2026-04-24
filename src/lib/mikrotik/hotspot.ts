@@ -167,7 +167,20 @@ export async function getActiveHotspotUsers() {
   const conn = await getMikrotikConnection();
   try {
     await conn.connect();
-    return await conn.write("/ip/hotspot/active/print");
+    // Ambil data active sessions dan data user list secara bersamaan untuk mendapatkan limit-uptime
+    const [active, users] = await Promise.all([
+      conn.write("/ip/hotspot/active/print"),
+      conn.write("/ip/hotspot/user/print")
+    ]);
+
+    // Map limit-uptime ke data active berdasarkan username
+    return active.map((a: any) => {
+      const u = users.find((usr: any) => usr.name === a.user);
+      return {
+        ...a,
+        "limit-uptime": u ? u["limit-uptime"] : "0"
+      };
+    });
   } finally {
     conn.close();
   }
