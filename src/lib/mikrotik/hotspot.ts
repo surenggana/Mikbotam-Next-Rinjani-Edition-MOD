@@ -131,8 +131,9 @@ export async function updateHotspotProfile(id: string, params: {
     await conn.connect();
     
     const config = await getActiveConfig();
-    const serverUrl = config?.dnsName || "http://your-server.com";
+    const serverUrl = config?.dnsName || "https://mikbotam.angelicadigital.id";
     
+    // RE-GENERATE SCRIPTS (Sesuai Mikbotam Master PHP)
     let onLoginScript = "";
     if (params.validity && params.validity !== "0") {
       const lockMacCmd = params.lockMac ? `[/ip hotspot user set mac-address=$"mac-address" [find where name=$user]];` : "";
@@ -142,10 +143,14 @@ export async function updateHotspotProfile(id: string, params: {
     const webhookLogin = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=login&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
     onLoginScript = webhookLogin + (onLoginScript ? " " + onLoginScript : "");
 
+    const onLogoutScript = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=logout&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
+
     const cmd = ["/ip/hotspot/user/profile/set", "=.id=" + id, "=name=" + params.name];
     if (params.sharedUsers) cmd.push("=shared-users=" + params.sharedUsers);
     if (params.rateLimit) cmd.push("=rate-limit=" + params.rateLimit);
+    
     cmd.push("=on-login=" + onLoginScript);
+    cmd.push("=on-logout=" + onLogoutScript);
     
     return await conn.write(cmd);
   } finally {
