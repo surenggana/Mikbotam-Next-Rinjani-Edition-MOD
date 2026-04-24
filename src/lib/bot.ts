@@ -7,7 +7,7 @@ import { getRouterStats } from "./mikrotik";
 import { formatIDR } from "./formatters";
 
 const botRegistry: Map<string, Telegraf> = new Map();
-const transferStates: Map<string, { targetId: string; targetName: string; amount?: number }> = new Map();
+const transferStates: Map<string, { targetId?: string; targetName?: string; amount?: number }> = new Map();
 const topupStates: Map<string, { amount?: number }> = new Map();
 
 export async function attachBotLogic(bot: Telegraf, config: any) {
@@ -32,255 +32,170 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     ["📡 Status Router", "⚙️ Bantuan"]
   ]).resize();
 
-  // --- MIDDLEWARE: Check User Registration ---
+  // --- MIDDLEWARE ---
   bot.use(async (ctx, next) => {
     if (!ctx.from) return;
     const telegramId = ctx.from.id.toString();
-    
-    // Commands that don't require registration
-    if (ctx.message && 'text' in ctx.message && (ctx.message.text === "/start" || ctx.message.text === "/daftar" || ctx.message.text === "/help")) {
-      return next();
-    }
-
+    if (ctx.message && 'text' in ctx.message && ["/start", "/daftar", "/help"].includes(ctx.message.text)) return next();
     const seller = await prisma.seller.findFirst({ where: { userId: telegramId } });
-    if (!seller) {
-      return ctx.replyWithHTML("<b>Akses Ditolak!</b>\nID Telegram Anda belum terdaftar.\n\nKetik /daftar untuk mendaftar.");
-    }
-    if (seller.status === "Pending") {
-      return ctx.replyWithHTML("<b>Akses Ditolak!</b>\nAkun Anda masih dalam status <b>Pending</b>. Mohon tunggu persetujuan Admin.");
-    }
-    
-    // Store seller in state for convenience
+    if (!seller) return ctx.replyWithHTML("<b>Akses Ditolak!</b>\nKetik /daftar untuk mendaftar.");
+    if (seller.status === "Pending") return ctx.replyWithHTML("<b>Akses Ditolak!</b>\nAkun Anda masih dalam status Pending.");
     (ctx as any).seller = seller;
     return next();
   });
 
-  // --- START & HELP ---
-  bot.start(async (ctx) => {
-    const seller = (ctx as any).seller;
-    if (!seller) return ctx.replyWithHTML(`<b>${botTexts.welcome}</b>\n\nKetik /daftar untuk mulai menggunakan bot ini.`, mainMenu);
-    return ctx.replyWithHTML(`<b>${botTexts.welcome}</b>\n\nID Anda: <code>${ctx.from.id}</code>`, mainMenu);
-  });
-
-  const helpAction = (ctx: any) => {
-    ctx.replyWithHTML(
-      `<b>${botTexts.help}</b>\n\n` +
-      `🎫 /beli - Beli Voucher\n` +
-      `💰 /saldo - Cek Saldo Anda\n` +
-      `📂 /mutasi - 5 Transaksi Terakhir\n` +
-      `📊 /report - Laporan Penjualan Hari Ini\n` +
-      `💸 /transfer - Kirim Saldo ke Reseller Lain\n` +
-      `💳 /topup - Request Topup Saldo\n` +
-      `📡 /status - Cek Kondisi Router\n\n` +
-      `🆔 ID Anda: <code>${ctx.from.id}</code>`,
-      mainMenu
-    );
-  };
-  bot.help(helpAction);
+  // --- ACTIONS ---
+  const helpAction = (ctx: any) => ctx.replyWithHTML(`<b>${botTexts.help}</b>\n\n/beli - Voucher\n/saldo - Cek Saldo\n/transfer - Kirim Saldo\n/mutasi - Riwayat\n/report - Laporan\n\n🆔 ID Anda: <code>${ctx.from.id}</code>`, mainMenu);
+  bot.start(helpAction);
   bot.command("help", helpAction);
   bot.hears("⚙️ Bantuan", helpAction);
 
-  // --- SALDO ---
-  const saldoAction = async (ctx: any) => {
-    const seller = (ctx as any).seller;
-    const saldo = parseFloat(seller.balance || "0");
-    return ctx.replyWithHTML(`💳 Saldo Anda: <b>${formatIDR(saldo)}</b>`);
-  };
+  const saldoAction = async (ctx: any) => ctx.replyWithHTML(`💳 Saldo Anda: <b>${formatIDR((ctx as any).seller.balance || 0)}</b>`);
   bot.command("saldo", saldoAction);
   bot.hears("💰 Cek Saldo", saldoAction);
 
-  // --- MENU VOUCHER ---
-  const showVoucherMenu = async (ctx: any) => {
+  // --- TRANSFER LOGIC (INTERACTIVE) ---
+  const handleTransferInit = async (ctx: any) => {
+    const telegramId = ctx.from.id.toString();
+    const args = ctx.message.text.split(" ");
+
+    // Direct command: /transfer [ID] [AMOUNT]
+    if (args.length >= 3) {
+      const targetId = args[1];
+      const amount = parseFloat(args[2].replace(/\D/g, ""));
+      try {
+        const res = await transferBalance(telegramId, targetId, amount);
+        return ctx.replyWithHTML(`✅ <b>Transfer Berhasil!</b>\nKe: <b>${res.receiverName}</b>\nJumlah: <b>${formatIDR(amount)}</b>`);
+      } catch (err: any) { return ctx.reply(`❌ Gagal: ${err.message}`); }
+    }
+
+    // Interactive start: Choose receiver
+    const otherSellers = await prisma.seller.findMany({ 
+      where: { adminId: config.adminId, userId: { not: telegramId }, status: "Active" },
+      take: 10 
+    });
+
+    if (otherSellers.length === 0) return ctx.reply("Tidak ada reseller lain yang aktif.");
+
+    const buttons = otherSellers.map(s => [Markup.button.callback(`👤 ${s.sellerName}`, `tr_to|${s.userId}|${s.sellerName}`)]);
+    return ctx.replyWithHTML("<b>Pilih Penerima:</b>", Markup.inlineKeyboard(buttons));
+  };
+  bot.command("transfer", handleTransferInit);
+  bot.hears("💸 Transfer Saldo", handleTransferInit);
+
+  // --- TOPUP LOGIC (INTERACTIVE) ---
+  const handleTopupInit = async (ctx: any) => {
+    const args = ctx.message.text.split(" ");
+    if (args.length >= 2) {
+      const amount = parseFloat(args[1].replace(/\D/g, ""));
+      if (config.ownerId) {
+        const btns = Markup.inlineKeyboard([[Markup.button.callback("✅ TERIMA", `tp_appr|${ctx.from.id}|${amount}`), Markup.button.callback("❌ TOLAK", `tp_rejt|${ctx.from.id}`)]]);
+        bot.telegram.sendMessage(config.ownerId, `💰 <b>REQUEST TOPUP</b>\nReseller: ${(ctx as any).seller.sellerName}\nJumlah: ${formatIDR(amount)}`, { parse_mode: "HTML", ...btns }).catch(() => {});
+        return ctx.replyWithHTML(`✅ Request topup ${formatIDR(amount)} terkirim.`);
+      }
+    }
+    topupStates.set(ctx.from.id.toString(), {});
+    return ctx.reply("Masukkan jumlah saldo yang ingin diisi:");
+  };
+  bot.command("topup", handleTopupInit);
+  bot.hears("💳 Request Topup", handleTopupInit);
+
+  // --- CALLBACK HANDLER ---
+  bot.on("callback_query", async (ctx) => {
+    const data = (ctx.callbackQuery as any).data;
+    const telegramId = ctx.from.id.toString();
+
+    if (data.startsWith("tr_to|")) {
+      const [, tId, tName] = data.split("|");
+      transferStates.set(telegramId, { targetId: tId, targetName: tName });
+      await ctx.editMessageText(`Kirim ke <b>${tName}</b>.\nKetik jumlah saldo:`, { parse_mode: "HTML" });
+      return ctx.answerCbQuery();
+    }
+
+    if (data.startsWith("buy_vcr|")) {
+      const pkgIdx = parseInt(data.split("|")[1]);
+      const vConfig = await prisma.voucherConfig.findFirst({ where: { adminId: config.adminId } });
+      const pkg = JSON.parse(vConfig?.settings || "[]")[pkgIdx];
+      const adminPrice = parseFloat(pkg.price) - parseFloat(pkg.markup || "0");
+      if (parseFloat((ctx as any).seller.balance || 0) < adminPrice) return ctx.answerCbQuery("Saldo tidak cukup!", { show_alert: true });
+
+      try {
+        const vCode = generateVoucher({ length: parseInt(pkg.length || "6"), type: (pkg.typechar || "mix") as any });
+        await beliVoucher({ userId: telegramId, sellerName: (ctx as any).seller.sellerName, price: parseFloat(pkg.price), markup: parseFloat(pkg.markup || "0"), username: vCode, password: vCode, expiry: pkg.validity || "30d", status: "Success", routerName: config.routerName || "MikroTik", origin: "BOT" });
+        await addHotspotUser({ server: pkg.server || "all", name: vCode, password: vCode, profile: pkg.profile, limitUptime: pkg.validity || "0", comment: `vc-bot|${(ctx as any).seller.sellerName}` }, { routerIp: config.routerIp, routerUsername: config.routerUsername, routerPassword: config.routerPassword, port: config.port });
+        await ctx.deleteMessage();
+        return ctx.replyWithHTML(`✅ <b>Voucher Berhasil!</b>\n\nKode: <code>${vCode}</code>\nHarga: ${formatIDR(pkg.price)}`);
+      } catch (e: any) { return ctx.reply(`Gagal: ${e.message}`); }
+    }
+
+    // Admin handlers
+    if (data.startsWith("adm_appr|") || data.startsWith("tp_appr|") || data.startsWith("adm_rejt|") || data.startsWith("tp_rejt|")) {
+      if (telegramId !== config.ownerId) return ctx.answerCbQuery("Akses ditolak.");
+      // registration approval
+      if (data.startsWith("adm_appr|")) {
+        const tId = data.split("|")[1];
+        await prisma.seller.updateMany({ where: { userId: tId, adminId: config.adminId }, data: { status: "Active" } });
+        await ctx.editMessageText("✅ Reseller disetujui!");
+        bot.telegram.sendMessage(tId, "🎊 Akun Anda sudah aktif!").catch(() => {});
+      }
+      // topup approval
+      if (data.startsWith("tp_appr|")) {
+        const [, tId, amt] = data.split("|");
+        const res = await topupReseller(tId, parseFloat(amt), "Admin Bot", parseInt(config.adminId));
+        await ctx.editMessageText(`✅ Topup ${formatIDR(amt)} berhasil!`);
+        bot.telegram.sendMessage(tId, `💰 Saldo bertambah ${formatIDR(amt)}!`).catch(() => {});
+      }
+      return ctx.answerCbQuery();
+    }
+  });
+
+  // --- TEXT HANDLER FOR STATES ---
+  bot.on("text", async (ctx, next) => {
+    const telegramId = ctx.from.id.toString();
+    
+    // Process Transfer Amount
+    const trState = transferStates.get(telegramId);
+    if (trState && trState.targetId && !trState.amount) {
+      const amount = parseFloat(ctx.message.text.replace(/\D/g, ""));
+      if (isNaN(amount) || amount <= 0) return ctx.reply("Masukkan angka yang valid.");
+      try {
+        const res = await transferBalance(telegramId, trState.targetId, amount);
+        transferStates.delete(telegramId);
+        return ctx.replyWithHTML(`✅ <b>Transfer Berhasil!</b>\nKe: <b>${trState.targetName}</b>\nJumlah: <b>${formatIDR(amount)}</b>`);
+      } catch (e: any) { return ctx.reply(`❌ Gagal: ${e.message}`); }
+    }
+
+    // Process Topup Amount
+    const tpState = topupStates.get(telegramId);
+    if (tpState && !tpState.amount) {
+      const amount = parseFloat(ctx.message.text.replace(/\D/g, ""));
+      if (isNaN(amount) || amount < 1000) return ctx.reply("Minimal Rp 1.000");
+      topupStates.delete(telegramId);
+      if (config.ownerId) {
+        const btns = Markup.inlineKeyboard([[Markup.button.callback("✅ TERIMA", `tp_appr|${telegramId}|${amount}`), Markup.button.callback("❌ TOLAK", `tp_rejt|${telegramId}`)]]);
+        bot.telegram.sendMessage(config.ownerId, `💰 <b>REQUEST TOPUP</b>\nReseller: ${(ctx as any).seller.sellerName}\nJumlah: ${formatIDR(amount)}`, { parse_mode: "HTML", ...btns }).catch(() => {});
+        return ctx.replyWithHTML(`✅ Request topup ${formatIDR(amount)} terkirim.`);
+      }
+    }
+    return next();
+  });
+
+  // Menu Voucher
+  const menuAction = async (ctx: any) => {
     const vConfig = await prisma.voucherConfig.findFirst({ where: { adminId: config.adminId } });
     const pkgs = JSON.parse(vConfig?.settings || "[]");
-    if (pkgs.length === 0) return ctx.reply("Belum ada paket voucher yang dikonfigurasi.");
-    
+    if (pkgs.length === 0) return ctx.reply("Belum ada paket.");
     const buttons = [];
     for (let i = 0; i < pkgs.length; i += 2) {
       const row = [Markup.button.callback(pkgs[i].Voucher || pkgs[i].name, `buy_vcr|${i}`)];
       if (pkgs[i+1]) row.push(Markup.button.callback(pkgs[i+1].Voucher || pkgs[i+1].name, `buy_vcr|${i+1}`));
       buttons.push(row);
     }
-    buttons.push([Markup.button.callback("💰 Cek Saldo", "inline_ceksaldo")]);
-    return ctx.replyWithHTML("<b>Pilih paket voucher:</b>", Markup.inlineKeyboard(buttons));
+    return ctx.replyWithHTML("<b>Pilih paket:</b>", Markup.inlineKeyboard(buttons));
   };
-  bot.command("beli", showVoucherMenu);
-  bot.command("menu", showVoucherMenu);
-  bot.hears("🎫 Menu Voucher", showVoucherMenu);
-
-  // --- MUTASI ---
-  const mutasiAction = async (ctx: any) => {
-    const telegramId = ctx.from.id.toString();
-    const txs = await prisma.transaction.findMany({
-      where: { userId: telegramId },
-      orderBy: { no: "desc" },
-      take: 5,
-    });
-    if (!txs.length) return ctx.reply("Belum ada riwayat transaksi.");
-    let msg = "<b>5 Transaksi Terakhir:</b>\n\n";
-    txs.forEach((t) => {
-      const amt = t.transferAmount || t.voucherBuy || t.topUp || "0";
-      msg += `📅 ${t.date} ${t.time}\n📝 ${t.description || "Transaksi"}\n💰 ${formatIDR(amt)}\n------------------\n`;
-    });
-    return ctx.replyWithHTML(msg);
-  };
-  bot.command("mutasi", mutasiAction);
-  bot.hears("📂 Mutasi", mutasiAction);
-
-  // --- REPORT ---
-  const reportAction = async (ctx: any) => {
-    const today = new Date().toISOString().split("T")[0];
-    const telegramId = ctx.from.id.toString();
-    const reports = await prisma.report.findMany({ 
-      where: { 
-        userId: telegramId,
-        date: today 
-      } 
-    });
-    const total = reports.reduce((s, r) => s + parseFloat(r.revenue || "0"), 0);
-    return ctx.replyWithHTML(
-      `📊 <b>Laporan Anda Hari Ini</b>\n📅 ${today}\n\n` +
-      `✅ Terjual: <b>${reports.length} Voucher</b>\n` +
-      `💰 Omset: <b>${formatIDR(total)}</b>`
-    );
-  };
-  bot.command("report", reportAction);
-  bot.hears("📊 Report", reportAction);
-
-  // --- STATUS ROUTER ---
-  const statusAction = async (ctx: any) => {
-    try {
-      const stats = await getRouterStats({ 
-        routerIp: config.routerIp, 
-        routerUsername: config.routerUsername, 
-        routerPassword: config.routerPassword, 
-        port: config.port 
-      });
-      return ctx.replyWithHTML(
-        `📊 <b>Status Router: ${stats.routerName}</b>\n\n` +
-        `🌡 CPU: ${stats.cpuLoad}%\n` +
-        `🧠 RAM: ${Math.round(parseInt(stats.freeMemory)/1024/1024)}MB free\n` +
-        `🕒 Uptime: ${stats.uptime}\n` +
-        `🛠 Version: ${stats.version}`
-      );
-    } catch { return ctx.reply("Gagal mengambil status router."); }
-  };
-  bot.command("status", statusAction);
-  bot.hears("📡 Status Router", statusAction);
-
-  // --- DAFTAR & APPROVAL LOGIC (Sesuai kode sebelumnya) ---
-  bot.command("daftar", async (ctx) => {
-    const telegramId = ctx.from.id.toString();
-    const username = ctx.from.username || ctx.from.first_name;
-    const existing = await prisma.seller.findFirst({ where: { userId: telegramId } });
-    if (existing) return ctx.reply("Anda sudah terdaftar.");
-
-    try {
-      await prisma.seller.create({
-        data: {
-          adminId: config.adminId,
-          userId: telegramId,
-          sellerName: username,
-          balance: "0",
-          status: "Pending",
-          time: new Date().toLocaleTimeString(),
-          date: new Date().toISOString().split("T")[0]
-        }
-      });
-      await ctx.replyWithHTML(`✅ <b>Pendaftaran Terkirim!</b>\nID: <code>${telegramId}</code>\n\nStatus: <b>Pending</b>\nMohon tunggu persetujuan Admin.`);
-      if (config.ownerId) {
-        const adminButtons = Markup.inlineKeyboard([
-          [Markup.button.callback("✅ SETUJUI", `adm_appr|${telegramId}`), Markup.button.callback("❌ TOLAK", `adm_rejt|${telegramId}`)]
-        ]);
-        bot.telegram.sendMessage(config.ownerId, `🔔 <b>RESELLER BARU</b>\nNama: ${username}\nID: ${telegramId}`, { parse_mode: "HTML", ...adminButtons }).catch(() => {});
-      }
-    } catch (err: any) { return ctx.reply(`Gagal mendaftar: ${err.message}`); }
-  });
-
-  // --- TRANSFER & TOPUP LOGIC (Sesuai kode sebelumnya) ---
-  const handleTransfer = async (ctx: any) => {
-    const args = ctx.message.text.split(" ");
-    if (args.length >= 3) {
-      const targetId = args[1];
-      const amount = parseFloat(args[2].replace(/\D/g, ""));
-      try {
-        const res = await transferBalance(ctx.from.id.toString(), targetId, amount);
-        return ctx.replyWithHTML(`✅ <b>Transfer Berhasil!</b>\nKe: ${res.receiverName}\nJumlah: ${formatIDR(amount)}`);
-      } catch (err: any) { return ctx.reply(`❌ Gagal: ${err.message}`); }
-    }
-    return ctx.reply("Format: /transfer [ID_PENERIMA] [JUMLAH]");
-  };
-  bot.command("transfer", handleTransfer);
-  bot.hears("💸 Transfer Saldo", (ctx) => ctx.reply("Gunakan perintah:\n/transfer [ID_PENERIMA] [JUMLAH]"));
-
-  const handleTopupRequest = async (ctx: any) => {
-    const args = ctx.message.text.split(" ");
-    if (args.length >= 2) {
-      const amount = parseFloat(args[1].replace(/\D/g, ""));
-      if (config.ownerId) {
-        const adminButtons = Markup.inlineKeyboard([[Markup.button.callback("✅ TERIMA", `tp_appr|${ctx.from.id}|${amount}`), Markup.button.callback("❌ TOLAK", `tp_rejt|${ctx.from.id}`)]]);
-        bot.telegram.sendMessage(config.ownerId, `💰 <b>REQUEST TOPUP</b>\nID: ${ctx.from.id}\nJumlah: ${formatIDR(amount)}`, { parse_mode: "HTML", ...adminButtons }).catch(() => {});
-        return ctx.replyWithHTML(`✅ Permintaan topup ${formatIDR(amount)} terkirim.`);
-      }
-    }
-    return ctx.reply("Format: /topup [JUMLAH]");
-  };
-  bot.command("topup", handleTopupRequest);
-  bot.hears("💳 Request Topup", (ctx) => ctx.reply("Gunakan perintah:\n/topup [JUMLAH]"));
-
-  // --- CALLBACK QUERY HANDLER ---
-  bot.on("callback_query", async (ctx) => {
-    const data = (ctx.callbackQuery as any).data;
-    const telegramId = ctx.from.id.toString();
-
-    // Buy Voucher Logic
-    if (data.startsWith("buy_vcr|")) {
-      const pkgIndex = parseInt(data.split("|")[1]);
-      const vConfig = await prisma.voucherConfig.findFirst({ where: { adminId: config.adminId } });
-      const pkgs = JSON.parse(vConfig?.settings || "[]");
-      const pkg = pkgs[pkgIndex];
-      const s = await prisma.seller.findFirst({ where: { userId: telegramId } });
-      const adminPrice = parseFloat(pkg.price) - parseFloat(pkg.markup || "0");
-      
-      if (parseFloat(s?.balance || "0") < adminPrice) return ctx.answerCbQuery("Saldo tidak cukup!", { show_alert: true });
-
-      try {
-        const vCode = generateVoucher({ length: parseInt(pkg.length || "6"), type: (pkg.typechar || "mix") as any });
-        await beliVoucher({ userId: telegramId, sellerName: s?.sellerName || "User", price: parseFloat(pkg.price), markup: parseFloat(pkg.markup || "0"), username: vCode, password: vCode, expiry: pkg.validity || "30d", status: "Success", routerName: config.routerName || "MikroTik", origin: "BOT" });
-        await addHotspotUser({ server: "all", name: vCode, password: vCode, profile: pkg.profile, limitUptime: pkg.validity || "0", comment: `vc-bot|${s?.sellerName}` }, { routerIp: config.routerIp, routerUsername: config.routerUsername, routerPassword: config.routerPassword, port: config.port });
-        await ctx.deleteMessage();
-        return ctx.replyWithHTML(`✅ <b>Voucher Berhasil!</b>\n\nKode: <code>${vCode}</code>\nProfil: ${pkg.profile}\nHarga: ${formatIDR(pkg.price)}`);
-      } catch (e: any) { return ctx.reply(`Gagal: ${e.message}`); }
-    }
-
-    // Admin Approval Registration
-    if (data.startsWith("adm_appr|")) {
-      if (telegramId !== config.ownerId) return ctx.answerCbQuery("Akses ditolak.");
-      const tId = data.split("|")[1];
-      await prisma.seller.updateMany({ where: { userId: tId, adminId: config.adminId }, data: { status: "Active" } });
-      await ctx.editMessageText("✅ Reseller disetujui!");
-      bot.telegram.sendMessage(tId, "🎊 Akun Anda sudah aktif!").catch(() => {});
-      return ctx.answerCbQuery();
-    }
-
-    // Inline Cek Saldo
-    if (data === "inline_ceksaldo") {
-      const s = await prisma.seller.findFirst({ where: { userId: telegramId } });
-      return ctx.answerCbQuery(`Saldo: ${formatIDR(parseFloat(s?.balance || "0"))}`, { show_alert: true });
-    }
-  });
-
-  // Daftarkan command list ke Telegram secara resmi
-  bot.telegram.setMyCommands([
-    { command: "beli", description: "Beli Voucher" },
-    { command: "saldo", description: "Cek Saldo" },
-    { command: "mutasi", description: "Riwayat Transaksi" },
-    { command: "report", description: "Laporan Hari Ini" },
-    { command: "transfer", description: "Kirim Saldo" },
-    { command: "topup", description: "Request Saldo" },
-    { command: "status", description: "Cek Router" },
-    { command: "help", description: "Bantuan" },
-  ]).catch(() => {});
+  bot.command("beli", menuAction);
+  bot.command("menu", menuAction);
+  bot.hears("🎫 Menu Voucher", menuAction);
 }
 
 export async function getBotInstance(token: string) {
@@ -303,5 +218,5 @@ export async function sendBotMessage(adminId: number, userId: string, message: s
     if (!config?.botToken) return;
     const bot = new Telegraf(config.botToken);
     await bot.telegram.sendMessage(userId, message, { parse_mode: "HTML" });
-  } catch (err: any) { console.error(`Failed to send bot notification: ${err.message}`); }
+  } catch (err: any) { console.error(`Failed: ${err.message}`); }
 }
