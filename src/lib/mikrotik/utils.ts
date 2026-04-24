@@ -1,30 +1,32 @@
 /**
  * Memformat string rate-limit standar MikroTik
  * Format: rate [burst-limit [burst-threshold [burst-time [priority [limit-at]]]]]
+ * Contoh: 3M/3M 5M/5M 4M/4M 30s/30s 8 1M/1M
  */
 export function formatRateLimit(params: {
-  rate: string;           // Contoh: 1M/1M
-  burstLimit?: string;    // Contoh: 2M/2M
-  burstThreshold?: string; // Contoh: 1500k/1500k
-  burstTime?: string;     // Contoh: 30s/30s
-  priority?: number;      // 1 - 8
-  limitAt?: string;       // Contoh: 512k/512k
+  rate: string;           
+  burstLimit?: string;    
+  burstThreshold?: string;
+  burstTime?: string;     
+  priority?: number;      
+  limitAt?: string;       
 }) {
   if (!params.rate) return "";
   
-  // MikroTik requires strict order. If we want to set Priority (index 4), 
-  // we MUST provide values for 0, 1, 2, and 3.
-  
-  const parts: string[] = [params.rate];
-  
-  const bLimit = params.burstLimit || "none";
-  const bThreshold = params.burstThreshold || "none";
-  let bTime = params.burstTime || "0s";
-  const priority = params.priority || 8;
-  const limitAt = params.limitAt || "none";
+  // Jika hanya isi Rate Limit saja (tanpa burst/priority)
+  if (!params.burstLimit && !params.burstThreshold && !params.burstTime && (!params.priority || params.priority === 8)) {
+    return params.rate;
+  }
 
-  // Normalize burst time format (ensure 's' is present)
-  if (bTime !== "none" && bTime !== "0s") {
+  // Jika ada salah satu advance setting, MikroTik wajib dikirim lengkap urutannya
+  const rate = params.rate;
+  const bLimit = params.burstLimit || "0/0";
+  const bThreshold = params.burstThreshold || "0/0";
+  let bTime = params.burstTime || "0/0";
+  const priority = params.priority || 8;
+
+  // Pastikan format Burst Time ada detiknya 's' jika angka polos
+  if (bTime !== "0/0") {
     if (/^\d+$/.test(bTime)) {
       bTime = `${bTime}s/${bTime}s`;
     } else if (/^\d+\/\d+$/.test(bTime)) {
@@ -33,17 +35,11 @@ export function formatRateLimit(params: {
     }
   }
 
-  // If any advanced setting is used, we must build the string up to that point
-  if (params.burstLimit || params.burstThreshold || params.burstTime || params.priority !== 8 || params.limitAt) {
-    parts.push(bLimit);
-    parts.push(bThreshold);
-    parts.push(bTime);
-    parts.push(priority.toString());
-    
-    if (params.limitAt) {
-      parts.push(limitAt);
-    }
+  let result = `${rate} ${bLimit} ${bThreshold} ${bTime} ${priority}`;
+  
+  if (params.limitAt) {
+    result += ` ${params.limitAt}`;
   }
   
-  return parts.join(" ");
+  return result;
 }
