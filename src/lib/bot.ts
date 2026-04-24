@@ -422,3 +422,21 @@ export async function getBotInstance(token: string) {
 export async function getAllBots() {
   return await prisma.systemConfig.findMany({ where: { botToken: { not: null } } });
 }
+
+/**
+ * Helper to send Telegram message from anywhere (Dashboard / Actions)
+ */
+export async function sendBotMessage(adminId: number, userId: string, message: string) {
+  try {
+    const config = await prisma.systemConfig.findFirst({ 
+      where: { adminId: adminId, botToken: { not: null } } 
+    });
+    
+    if (!config?.botToken) return;
+
+    const bot = new Telegraf(config.botToken);
+    await bot.telegram.sendMessage(userId, message, { parse_mode: "HTML" });
+  } catch (err: any) {
+    console.error(`Failed to send bot notification: ${err.message}`);
+  }
+}

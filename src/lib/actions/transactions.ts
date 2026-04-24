@@ -3,6 +3,8 @@
 import { prisma } from "../prisma";
 import { format } from "date-fns";
 import { auth } from "@/auth";
+import { sendBotMessage } from "@/lib/bot";
+import { formatIDR } from "@/lib/formatters";
 
 export async function beliVoucher(params: {
   userId: string;
@@ -104,7 +106,7 @@ export async function topupReseller(targetUserId: string, amount: number, origin
   const timeStr = format(now, "HH:mm:ss");
   const dateStr = format(now, "yyyy-MM-dd");
 
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // 1. Get current balance (filtered by adminId for security)
     const seller = await tx.seller.findFirst({
       where: { userId: targetUserId, adminId },
@@ -144,6 +146,22 @@ export async function topupReseller(targetUserId: string, amount: number, origin
 
     return { success: true, newBalance };
   });
+
+  // NOTIFICATION: Inform the reseller about the topup
+  if (result.success) {
+    const msg = 
+      `💰 <b>SALDO DITAMBAHKAN!</b>\n\n` +
+      `Halo, Admin telah menambahkan saldo ke akun Anda.\n\n` +
+      `💵 Jumlah: <b>${formatIDR(amount)}</b>\n` +
+      `💳 Saldo Sekarang: <b>${formatIDR(result.newBalance)}</b>\n` +
+      `🕒 Waktu: ${timeStr} ${dateStr}\n\n` +
+      `Terima kasih telah bergabung!`;
+    
+    // Non-blocking notification
+    sendBotMessage(adminId, targetUserId, msg).catch(() => {});
+  }
+
+  return result;
 }
 
 // Alias for Web Dashboard Action
@@ -156,7 +174,7 @@ export async function transferBalance(senderUserId: string, targetUserId: string
   const timeStr = format(now, "HH:mm:ss");
   const dateStr = format(now, "yyyy-MM-dd");
 
-  return await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     // 1. Get sender
     const sender = await tx.seller.findFirst({
       where: { userId: senderUserId },
@@ -232,6 +250,36 @@ export async function transferBalance(senderUserId: string, targetUserId: string
       },
     });
 
-    return { success: true, newSenderBalance, receiverName: receiver.sellerName };
+    return { 
+      success: true, 
+      newSenderBalance, 
+      newReceiverBalance,
+      senderName: sender.sellerName,
+      receiverName: receiver.sellerName,
+      adminId: sender.adminId
+    };
   });
+
+  // NOTIFICATION: Inform both parties about the transfer
+  if (result.success && result.adminId) {
+    // Notify Sender
+    const senderMsg = 
+      `💸 <b>TRANSFER BERHASIL!</b>\n\n` +
+      `Ke: <b>${result.receiverName}</b> (<code>${targetUserId}</code>)\n` +
+      `Jumlah: <b>${formatIDR(amount)}</b>\n` +
+      `Sisa Saldo: <b>${formatIDR(result.newSenderBalance)}</b>`;
+    
+    sendBotMessage(result.adminId, senderUserId, senderMsg).catch(() => {});
+
+    // Notify Receiver
+    const receiverMsg = 
+      `📩 <b>SALDO DITERIMA!</b>\n\n` +
+      `Dari: <b>${result.senderName}</b> (<code>${senderUserId}</code>)\n` +
+      `Jumlah: <b>${formatIDR(amount)}</b>\n` +
+      `Saldo Sekarang: <b>${formatIDR(result.newReceiverBalance)}</b>`;
+
+    sendBotMessage(result.adminId, targetUserId, receiverMsg).catch(() => {});
+  }
+
+  return result;
 }
