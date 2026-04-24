@@ -181,13 +181,14 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     const data = (ctx.callbackQuery as any).data;
     const telegramId = ctx.from.id.toString();
 
-    // Admin: Approve Topup
+    // Admin Action: Approve Topup
     if (data.startsWith("tp_appr|")) {
+      if (telegramId !== config.ownerId) return ctx.answerCbQuery("❌ Akses ditolak.");
       const [, targetId, amountStr] = data.split("|");
       const amount = parseFloat(amountStr);
 
       try {
-        const result = await topupReseller(targetId, amount, "Admin Bot");
+        const result = await topupReseller(targetId, amount, "Admin Bot", parseInt(config.adminId));
         await ctx.editMessageText(`✅ <b>Topup Berhasil!</b>\n\nKe: <code>${targetId}</code>\nJumlah: <b>${formatIDR(amount)}</b>\nSaldo Baru: <b>${formatIDR(result.newBalance)}</b>`, { parse_mode: "HTML" });
         
         // Notify Reseller
@@ -200,6 +201,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
 
     // Admin: Reject Topup
     if (data.startsWith("tp_rejt|")) {
+      if (telegramId !== config.ownerId) return ctx.answerCbQuery("❌ Akses ditolak.");
       const targetId = data.split("|")[1];
       await ctx.editMessageText(`❌ Permintaan topup dari <code>${targetId}</code> telah DITOLAK.`, { parse_mode: "HTML" });
       bot.telegram.sendMessage(targetId, "⚠️ <b>Maaf!</b> Permintaan topup Anda ditolak oleh Admin.", { parse_mode: "HTML" }).catch(() => {});
