@@ -20,22 +20,13 @@
 
 ## 🆕 Changelog v2.3.0
 
-- ✅ **Balance Transfer Flow** — Fitur transfer saldo antar reseller via Bot Telegram dengan verifikasi ID penerima.
-- ✅ **Pending Registration** — Alur pendaftaran reseller baru kini berstatus `Pending` secara default, membutuhkan persetujuan Admin melalui dashboard.
-- ✅ **Voucher Management Refactor** — Logika pengelolaan paket voucher dipindahkan ke komponen client baru untuk performa yang lebih responsif.
-- ✅ **Enhanced Security** — Penambahan field `origin` pada transaksi untuk melacak sumber transaksi (Web/Bot) dan proteksi akses reseller pending.
-- ✅ **Automatic Binary Rebuild** — Skrip deployment kini otomatis membangun ulang modul `better-sqlite3` untuk menjamin kompatibilitas dengan versi Node.js target.
-- ✅ **Improved Expiry Logic** — Penanganan penghapusan user MikroTik yang expired kini mendukung format komentar bot yang lebih fleksibel (`vc-bot|...`).
-
----
-
-## 🆕 Changelog v2.2.0
-
-- ✅ **Multi-Router Management** — Tambah/hapus banyak MikroTik langsung dari Settings, identity otomatis diambil dari router.
-- ✅ **Emerald Primary Theme** — Konsistensi warna penuh, tidak ada lagi warna sky/blue yang bocor.
-- ✅ **User Menu Dropdown** — Avatar pojok kanan atas: Edit Profile, Settings, dan Keluar Sesi.
-- ✅ **Income Chart** — Komponen chart pendapatan 7 hari dengan Recharts (AreaChart).
-- ✅ **System Logs** — Tabel log rapi dengan sticky header opaque dan badge topic berwarna.
+- ✅ **Interactive Admin Notifications** — Notifikasi instan ke Telegram Admin untuk pendaftaran reseller baru dan request topup, lengkap dengan tombol interaktif **[SETUJUI]** dan **[TOLAK]**.
+- ✅ **Dynamic Voucher Generation** — Pengaturan panjang karakter, tipe karakter (Angka/Huruf/Campur), dan mode (User=Pass atau Beda) kini bisa diatur per paket voucher melalui dashboard.
+- ✅ **Commission-Based Deduction** — Penyesuaian alur keuangan: Saldo reseller dipotong berdasarkan **(Harga Jual - Komisi)**, sesuai dengan logika asli Mikbotam Master.
+- ✅ **Advanced Active Monitoring** — Halaman monitoring kini menampilkan detail real-time yang lengkap: Nama User, IP Address, **MAC Address**, Uptime, dan **Sisa Waktu (Remaining Time)** voucher.
+- ✅ **Enhanced SEO & Branding** — Metadata media sosial (WhatsApp/FB/Twitter) kini menampilkan logo asli Mikbotam dan deskripsi profesional. Favicon juga sudah diseragamkan.
+- ✅ **Strict Access Control** — Pembatasan akses command bot yang lebih ketat antara Admin dan Reseller untuk menjamin keamanan multi-tenant.
+- ✅ **Automatic Binary Rebuild** — Skrip deployment otomatis membangun ulang modul `better-sqlite3` untuk menjamin stabilitas database di berbagai versi Node.js.
 
 ---
 
@@ -49,52 +40,27 @@ Gunakan skrip otomatis untuk instalasi yang paling stabil dan cepat:
 wget -qO- https://raw.githubusercontent.com/surenggana/Mikbotam-Next-Rinjani-Edition-MOD/main/deploy.sh | bash
 ```
 
-> **Note:** Skrip ini akan otomatis menginstal Node.js, PM2, dependencies, dan melakukan build aplikasi.
+> **Note:** Skrip ini akan otomatis menginstal Node.js 20, PM2, dependencies, dan melakukan build aplikasi serta setting port otomatis.
 
 ### 2. Instalasi Manual (Development)
 
-Jika Anda ingin menjalankan di lingkungan lokal:
-
-1.  **Clone Repository:**
-    ```bash
-    git clone https://github.com/surenggana/Mikbotam-Next-Rinjani-Edition-MOD.git
-    cd Mikbotam-Next-Rinjani-Edition-MOD
-    ```
-2.  **Instal Dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Setup Environment:**
-    Salin file `.env.example` ke `.env` dan sesuaikan `AUTH_SECRET`.
-4.  **Database Sync:**
-    ```bash
-    npx prisma generate
-    npx prisma db push
-    ```
-5.  **Jalankan:**
-    ```bash
-    npm run dev
-    ```
-
-### 3. Docker (Instan & Terisolasi)
-
-```bash
-docker-compose up -d
-```
+1.  **Clone Repository:** `git clone https://github.com/surenggana/Mikbotam-Next-Rinjani-Edition-MOD.git`
+2.  **Instal Dependencies:** `npm install`
+3.  **Database Sync:** `npx prisma generate && npx prisma db push`
+4.  **Jalankan:** `npm run dev`
 
 ---
 
 ## ✨ Fitur Utama Rinjani Edition
 
-- ✅ **Native ROS 7 Support:** Cloud Cleaner logic untuk hapus voucher otomatis.
-- ✅ **Advanced Bandwidth:** Support Burst Limit, Threshold, & Priority.
-- ✅ **Security:** Password BCrypt & Stateless JWT.
-- ✅ **Real-time:** Dashboard interaktif dengan grafik pendapatan harian.
-- ✅ **Multi-Router:** Kelola banyak router MikroTik dalam satu dashboard.
-- ✅ **Telegram Bot:** Support Polling & Webhook dengan konfigurasi visual.
+- ✅ **Native ROS 7 Support:** Cloud Cleaner logic untuk hapus voucher otomatis di MikroTik.
+- ✅ **Interactive Telegram Bot:** Full menu keyboard & perintah interaktif untuk kemudahan reseller.
+- ✅ **Multi-Router:** Kelola banyak router MikroTik dalam satu dashboard admin.
+- ✅ **Security First:** Password BCrypt, Stateless JWT, dan integrasi Webhook Telegram yang aman.
+- ✅ **Real-time Analytics:** Dashboard interaktif dengan grafik pendapatan harian menggunakan Recharts.
 
 ---
 
 ## 📄 Lisensi
 
-Proyek ini bersifat Open Source. Tetap sertakan kredit kepada pengembang awal dan pengembang versi Next Gen ini.
+Proyek ini bersifat Open Source. Tetap sertakan kredit kepada pengembang awal dan pengembang versi Next Gen ini sebagai bentuk apresiasi terhadap karya komunitas.
