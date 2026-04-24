@@ -86,9 +86,9 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     if (existing) return ctx.reply("Anda sudah terdaftar.");
 
     try {
-      await prisma.seller.create({
+      const newSeller = await prisma.seller.create({
         data: {
-          adminId: config.adminId, // Crucial: Link to the bot owner's tenant
+          adminId: config.adminId,
           userId: telegramId,
           sellerName: username,
           balance: "0",
@@ -97,7 +97,33 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           date: new Date().toISOString().split("T")[0]
         }
       });
-      return ctx.replyWithHTML(`✅ <b>Pendaftaran Berhasil!</b>\nID: <code>${telegramId}</code>\n\nStatus: <b>Pending</b>\nMohon hubungi Admin untuk mengaktifkan akun Anda agar bisa muncul di Dashboard.`, mainMenu);
+
+      // Notify Reseller
+      await ctx.replyWithHTML(`✅ <b>Pendaftaran Terkirim!</b>\nID: <code>${telegramId}</code>\n\nStatus: <b>Pending</b>\nMohon tunggu, Admin telah menerima notifikasi pendaftaran Anda.`);
+
+      // Notify Admin (Interactive)
+      if (config.ownerId) {
+        const adminMsg = 
+          `🔔 <b>RESELLER BARU MENDAFTAR</b>\n\n` +
+          `👤 Nama: <b>${username}</b>\n` +
+          `🆔 Telegram ID: <code>${telegramId}</code>\n` +
+          `📅 Tanggal: ${new Date().toLocaleDateString()}\n\n` +
+          `Silahkan pilih tindakan di bawah ini:`;
+
+        const adminButtons = Markup.inlineKeyboard([
+          [
+            Markup.button.callback("✅ SETUJUI", `adm_appr|${telegramId}`),
+            Markup.button.callback("❌ TOLAK", `adm_rejt|${telegramId}`)
+          ]
+        ]);
+
+        bot.telegram.sendMessage(config.ownerId, adminMsg, { 
+          parse_mode: "HTML",
+          ...adminButtons
+        }).catch(err => console.error("Gagal kirim notif ke Admin:", err.message));
+      }
+
+      return;
     } catch (err: any) { return ctx.reply(`Gagal mendaftar: ${err.message}`); }
   });
 
@@ -373,6 +399,55 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
       const seller = await prisma.seller.findFirst({ where: { userId: telegramId } });
       const saldo = parseFloat(seller?.balance || "0");
       return ctx.answerCbQuery(`Saldo Anda: ${formatIDR(saldo)}`, { show_alert: true });
+    }
+
+    // 4. Admin Action: Approve Reseller
+    if (data.startsWith("adm_appr|")) {
+      const targetId = data.split("|")[1];
+      try {
+        const targetSeller = await prisma.seller.findFirst({ 
+          where: { userId: targetId, adminId: config.adminId } 
+        });
+
+        if (!targetSeller) return ctx.answerCbQuery("Reseller tidak ditemukan.");
+        
+        await prisma.seller.update({
+          where: { no: targetSeller.no },
+          data: { status: "Active" }
+        });
+
+        await ctx.editMessageText(`✅ Reseller <b>${targetSeller.sellerName}</b> (<code>${targetId}</code>) telah DISERUJUI.`, { parse_mode: "HTML" });
+        
+        // Notify Reseller
+        bot.telegram.sendMessage(targetId, "🎊 <b>Selamat!</b> Akun reseller Anda telah diaktifkan oleh Admin. Sekarang Anda bisa melakukan transaksi.", { parse_mode: "HTML" }).catch(() => {});
+        
+      } catch (err: any) {
+        ctx.answerCbQuery(`Gagal: ${err.message}`);
+      }
+      return ctx.answerCbQuery();
+    }
+
+    // 5. Admin Action: Reject/Delete Reseller
+    if (data.startsWith("adm_rejt|")) {
+      const targetId = data.split("|")[1];
+      try {
+        const targetSeller = await prisma.seller.findFirst({ 
+          where: { userId: targetId, adminId: config.adminId } 
+        });
+
+        if (!targetSeller) return ctx.answerCbQuery("Reseller tidak ditemukan.");
+
+        await prisma.seller.delete({ where: { no: targetSeller.no } });
+
+        await ctx.editMessageText(`❌ Pendaftaran reseller <b>${targetSeller.sellerName}</b> (<code>${targetId}</code>) telah DITOLAK & DIHAPUS.`, { parse_mode: "HTML" });
+        
+        // Notify Reseller
+        bot.telegram.sendMessage(targetId, "⚠️ <b>Maaf!</b> Pendaftaran reseller Anda ditolak oleh Admin.", { parse_mode: "HTML" }).catch(() => {});
+
+      } catch (err: any) {
+        ctx.answerCbQuery(`Gagal: ${err.message}`);
+      }
+      return ctx.answerCbQuery();
     }
   });
 
