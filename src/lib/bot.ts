@@ -457,17 +457,44 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     } catch (err) { return ctx.reply("Gagal mengambil status router."); }
   });
 
-  bot.hears("⚙️ Bantuan", (ctx) => {
+  const helpText = (ctx: any) => {
     const helpMsg = `<b>${botTexts.help}</b>\n\n` +
-      `• 💰 <b>Cek Saldo</b> - Lihat saldo saat ini\n` +
-      `• 🎫 <b>Menu Voucher</b> - Pilih & beli paket internet\n` +
-      `• 💸 <b>Transfer Saldo</b> - Berbagi saldo antar reseller\n` +
-      `• 📂 <b>Mutasi</b> - Riwayat 5 transaksi terakhir\n` +
-      `• 📊 <b>Report</b> - Penjualan Anda hari ini\n\n` +
-      `<b>Format Transfer Cepat:</b>\n<code>/transfer [ID_PENERIMA] [JUMLAH]</code>\n\n` +
+      `• /beli - Beli Voucher\n` +
+      `• /menu - Menu Utama\n` +
+      `• /saldo - Cek Saldo\n` +
+      `• /topup - Top Up Saldo (Admin)\n` +
+      `• /transfer - Transfer Saldo Antar Reseller\n` +
+      `• /daftar - Daftar sebagai agen reseller\n` +
+      `• /mutasi - Riwayat Transaksi\n` +
+      `• /report - Laporan Penjualan Hari Ini\n\n` +
       `ID Telegram Anda: <code>${ctx.from.id}</code>`;
     return ctx.replyWithHTML(helpMsg);
+  };
+
+  bot.command("help", helpText);
+  bot.hears("⚙️ Bantuan", helpText);
+
+  bot.command("saldo", async (ctx) => {
+    const telegramId = ctx.from.id.toString();
+    const seller = await prisma.seller.findFirst({ where: { userId: telegramId } });
+    if (!seller) return ctx.reply("Anda tidak terdaftar.");
+    const saldo = parseFloat(seller.balance || "0");
+    return ctx.replyWithHTML(`💳 Saldo Anda: <b>${formatIDR(saldo)}</b>`);
   });
+
+  bot.command("beli", showVoucherMenu);
+
+  // Daftarkan command list ke Telegram
+  bot.telegram.setMyCommands([
+    { command: "beli", description: "Beli Voucher" },
+    { command: "menu", description: "Menu Utama" },
+    { command: "saldo", description: "Cek Saldo" },
+    { command: "transfer", description: "Transfer Saldo Antar Reseller" },
+    { command: "daftar", description: "Daftar sebagai agen reseller" },
+    { command: "mutasi", description: "Riwayat Transaksi" },
+    { command: "report", description: "Laporan Penjualan Hari Ini" },
+    { command: "help", description: "Bantuan" },
+  ]).catch(() => {});
 }
 
 export async function getBotInstance(token: string) {
