@@ -219,18 +219,18 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
 
       const seller = await prisma.seller.findFirst({ where: { userId: telegramId } });
       const balance = parseFloat(seller?.balance || "0");
+      
       const price = parseFloat(pkg.price);
       const markup = parseFloat(pkg.markup || "0");
-      const totalPrice = price + markup;
+      const adminPrice = price - markup; // Reseller only pays this
 
-      if (balance < totalPrice) {
+      if (balance < adminPrice) {
         return ctx.replyWithHTML(botTexts.fail_balance);
       }
 
       await ctx.editMessageText("<code>Sedang memproses voucher...</code>", { parse_mode: "HTML" });
 
       try {
-        // --- CUSTOM VOUCHER CONFIG ---
         const vLength = parseInt(config.voucher1 || "6");
         const vType = (config.voucherGenerate || "mix") as any;
         const code = generateVoucher({ length: vLength, type: vType });
@@ -239,7 +239,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           userId: telegramId,
           sellerName: seller?.sellerName || "Unknown",
           price: price,
-          markup: markup, // Pass the correct markup!
+          markup: markup,
           username: code,
           password: code,
           expiry: pkg.validity || "30d",
@@ -268,10 +268,10 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           profile: pkg.profile,
           limitBytesIn: quotaBytes,
           limitBytesOut: quotaBytes,
-          comment: `vc-bot|${seller?.sellerName}|${totalPrice}|${new Date().toLocaleDateString()}`
+          comment: `vc-bot|${seller?.sellerName}|${price}|${new Date().toLocaleDateString()}`
         }, routerConfig);
 
-        const caption = `<b>VOUCHER BERHASIL</b>\n\n👤 User: <code>${code}</code>\n🔑 Pass: <code>${code}</code>\n📦 Profil: ${pkg.profile}\n💰 Harga: ${formatIDR(totalPrice)}\n⏰ Masa Aktif: ${pkg.validity || "-"}\n--------------------------\nGUNAKAN INTERNET DENGAN BIJAK`;
+        const caption = `<b>VOUCHER BERHASIL</b>\n\n👤 User: <code>${code}</code>\n🔑 Pass: <code>${code}</code>\n📦 Profil: ${pkg.profile}\n💰 Harga: ${formatIDR(price)}\n⏰ Masa Aktif: ${pkg.validity || "-"}\n--------------------------\nGUNAKAN INTERNET DENGAN BIJAK`;
         await ctx.deleteMessage();
         return ctx.replyWithHTML(caption);
       } catch (err: any) { 
@@ -437,7 +437,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     } catch (err: any) { return ctx.reply(`Gagal: ${err.message}`); }
   });
 
-  // --- OTHER COMMANDS ---
+  // --- OTHER HANDLERS ---
   const showVoucherMenu = async (ctx: any) => {
     const telegramId = ctx.from.id.toString();
     const seller = await prisma.seller.findFirst({ where: { userId: telegramId } });

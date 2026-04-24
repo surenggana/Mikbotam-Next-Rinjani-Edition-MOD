@@ -138,9 +138,9 @@ export function VouchersClient({
               <TableRow>
                 <TableHead>Nama Paket</TableHead>
                 <TableHead>Profil MikroTik</TableHead>
-                <TableHead>Harga Beli</TableHead>
-                <TableHead>Markup (Profit)</TableHead>
-                <TableHead>Harga Jual</TableHead>
+                <TableHead>Harga Jual (ke User)</TableHead>
+                <TableHead>Komisi Reseller</TableHead>
+                <TableHead>Potong Saldo (Setoran)</TableHead>
                 <TableHead>Masa Aktif</TableHead>
                 <TableHead>Kuota</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
@@ -159,9 +159,9 @@ export function VouchersClient({
                     <TableCell className="font-semibold text-emerald-700">{pkg.Voucher || pkg.name}</TableCell>
                     <TableCell>{pkg.profile}</TableCell>
                     <TableCell>{rupiah(parseFloat(pkg.price))}</TableCell>
-                    <TableCell className="text-emerald-600">+{rupiah(parseFloat(pkg.markup))}</TableCell>
+                    <TableCell className="text-emerald-600">-{rupiah(parseFloat(pkg.markup))}</TableCell>
                     <TableCell className="font-bold">
-                      {rupiah(parseFloat(pkg.price) + parseFloat(pkg.markup))}
+                      {rupiah(parseFloat(pkg.price) - parseFloat(pkg.markup))}
                     </TableCell>
                     <TableCell>{pkg.validity || pkg.Limit || '-'}</TableCell>
                     <TableCell>

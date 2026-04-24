@@ -9,8 +9,8 @@ import { formatIDR } from "@/lib/formatters";
 export async function beliVoucher(params: {
   userId: string;
   sellerName: string;
-  price: number;
-  markup: number;
+  price: number; // Public Selling Price (e.g. 2000)
+  markup: number; // Reseller Commission (e.g. 500)
   username: string;
   password: string;
   expiry: string;
@@ -31,13 +31,15 @@ export async function beliVoucher(params: {
 
     if (!seller) throw new Error("Reseller tidak ditemukan.");
 
-    const totalPrice = params.price + params.markup;
+    // DEDUCTION: Reseller pays Admin (Price - Commission)
+    const adminPrice = params.price - params.markup;
     const currentBalance = parseFloat(seller.balance || "0");
-    if (currentBalance < totalPrice) {
+    
+    if (currentBalance < adminPrice) {
       throw new Error("Saldo tidak mencukupi.");
     }
 
-    const newBalance = currentBalance - totalPrice;
+    const newBalance = currentBalance - adminPrice;
 
     // 2. Update balance
     await tx.seller.update({
@@ -58,8 +60,8 @@ export async function beliVoucher(params: {
         sellerName: params.sellerName,
         balanceStart: currentBalance.toString(),
         balanceEnd: newBalance.toString(),
-        voucherBuy: params.price.toString(),
-        voucherMarkup: params.markup.toString(), // Record the profit!
+        voucherBuy: adminPrice.toString(), // The actual amount deducted
+        voucherMarkup: params.markup.toString(), // Reseller profit
         voucherUsername: params.username,
         voucherPassword: params.password,
         voucherExpiry: params.expiry,
@@ -77,10 +79,10 @@ export async function beliVoucher(params: {
         adminId: seller.adminId,
         userId: params.userId,
         userName: params.sellerName,
-        price: totalPrice.toString(),
+        price: params.price.toString(), // Public price
         status: "Success",
         transaction: params.service === "ppp" ? "ppp" : "vc",
-        revenue: totalPrice.toString(),
+        revenue: adminPrice.toString(), // What Admin receives
         time: timeStr,
         date: dateStr,
       },
