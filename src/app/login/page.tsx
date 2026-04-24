@@ -145,7 +145,7 @@ export default function LoginPage() {
                     <span className="w-full border-t border-slate-100"></span>
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-2 text-slate-400">Mikbotam v3.0</span>
+                    <span className="bg-white px-2 text-slate-400">Mikbotam v2.3.0</span>
                   </div>
                 </div>
               </div>

@@ -197,7 +197,7 @@ export const Sidebar = memo(({ onClose, className, isCollapsed: forcedCollapsed,
       <div className="p-5 mt-auto border-t border-slate-100 bg-slate-50/50">
         {!isCollapsed && (
           <div className="px-4 py-3 rounded-xl bg-white border border-slate-200 flex flex-col gap-1 shadow-sm">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">v2.1.0-rinjani</span>
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">v2.3.0-rinjani</span>
           </div>
         )}
       </div>

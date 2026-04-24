@@ -13,7 +13,7 @@ export function SystemIntegrityBanner() {
 
   useEffect(() => {
     // Indonesian mixed-case message
-    const msg = "Saat ini Anda menggunakan Mikbotam Next MOD v2.1.0 Rinjani Edition - Managed by Sanrian Surenggana.";
+    const msg = "Saat ini Anda menggunakan Mikbotam Next MOD v2.3.0 Rinjani Edition - Managed by Sanrian Surenggana.";
     setM(msg);
   }, []);
 

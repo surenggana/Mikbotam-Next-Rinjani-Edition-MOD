@@ -33,7 +33,7 @@ export default function AboutPage() {
             
             <div className="mt-8 pt-8 border-t border-slate-800 w-full">
               <p className="text-xs text-slate-500 font-medium">© 2026 Mikbotam Next</p>
-              <p className="text-[10px] text-slate-600 font-mono mt-1 uppercase">Build v2.1.0-stable</p>
+              <p className="text-[10px] text-slate-600 font-mono mt-1 uppercase">Build v2.3.0-stable</p>
             </div>
           </div>
         </Card>
@@ -51,7 +51,7 @@ export default function AboutPage() {
               <div className="flex items-start gap-6 p-6 hover:bg-slate-50/50 transition-colors">
                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5 w-20 shrink-0">Version</div>
                 <div className="flex flex-col">
-                  <span className="text-slate-900 font-bold text-lg leading-none">MOD v2.1.0</span>
+                  <span className="text-slate-900 font-bold text-lg leading-none">MOD v2.3.0</span>
                   <span className="text-xs text-emerald-600 font-semibold mt-1 uppercase tracking-tighter">Rinjani Next-Gen Evolution</span>
                 </div>
               </div>
