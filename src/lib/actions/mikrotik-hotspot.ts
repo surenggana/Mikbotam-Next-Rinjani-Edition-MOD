@@ -62,9 +62,14 @@ export async function updateHotspotProfileAction(id: string, params: {
   lockMac?: boolean;
 }) {
   await validateSession();
-  const res = await updateHotspotProfile(id, params);
-  revalidatePath("/hotspot-profiles");
-  return res;
+  try {
+    const res = await updateHotspotProfile(id, params);
+    revalidatePath("/hotspot-profiles");
+    return res;
+  } catch (error: any) {
+    // Melempar pesan error asli agar bisa ditangkap oleh toast.error
+    throw new Error(error.message || "Gagal memperbarui profil.");
+  }
 }
 
 export async function removeHotspotUserAction(id: string) {

@@ -59,8 +59,8 @@ export function HotspotProfileModal({
       }
       onClose();
       onSuccess?.();
-    } catch {
-      toast.error(isEdit ? "Gagal memperbarui profil." : "Gagal menambah profil.");
+    } catch (error: any) {
+      toast.error(error.message || (isEdit ? "Gagal memperbarui profil." : "Gagal menambah profil."));
     } finally {
       setLoading(false);
     }
