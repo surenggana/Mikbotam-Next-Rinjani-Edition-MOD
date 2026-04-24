@@ -32,27 +32,33 @@ export function VouchersClient({
   const [isSaving, setIsApproving] = useState(false);
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
 
-  // Form states
+  // Form states aligned with Core.php requirements
   const [formData, setFormData] = useState({
     Voucher: "",
-    name: "", // bot sometimes uses 'name' as display
     profile: "",
     price: "",
     markup: "0",
     validity: "30d",
-    quotaGB: "0"
+    quotaGB: "0",
+    length: "6",
+    type: "vc", // vc = user=pass, up = user!=pass
+    typechar: "mix", // up, low, num, mix
+    server: "all"
   });
 
   const handleOpenAdd = () => {
     setEditingIdx(null);
     setFormData({
       Voucher: "",
-      name: "",
       profile: profiles[0]?.name || "",
       price: "",
       markup: "0",
       validity: "30d",
-      quotaGB: "0"
+      quotaGB: "0",
+      length: "6",
+      type: "vc",
+      typechar: "mix",
+      server: "all"
     });
     setIsModalOpen(true);
   };
@@ -62,12 +68,15 @@ export function VouchersClient({
     setEditingIdx(idx);
     setFormData({
       Voucher: pkg.Voucher || pkg.name || "",
-      name: pkg.name || pkg.Voucher || "",
       profile: pkg.profile || "",
       price: pkg.price?.toString() || "",
       markup: pkg.markup?.toString() || "0",
       validity: pkg.validity || pkg.Limit || "30d",
-      quotaGB: pkg.quotaGB?.toString() || "0"
+      quotaGB: pkg.quotaGB?.toString() || "0",
+      length: pkg.length?.toString() || "6",
+      type: pkg.type || "vc",
+      typechar: pkg.typechar || "mix",
+      server: pkg.server || "all"
     });
     setIsModalOpen(true);
   };
@@ -88,12 +97,12 @@ export function VouchersClient({
     e.preventDefault();
     setIsApproving(true);
     
-    // Bot expects 'Voucher' for name, 'profile', 'price', 'markup', 'validity' (or Limit)
+    // Core.php expected format
     const pkgData = {
       ...formData,
-      Voucher: formData.Voucher,
+      id: editingIdx !== null ? packages[editingIdx].id : Date.now().toString(),
       name: formData.Voucher,
-      Limit: formData.validity, // Compatibility
+      Limit: formData.validity,
     };
 
     let newPackages = [...packages];
@@ -132,17 +141,17 @@ export function VouchersClient({
             Daftar Paket Voucher (Bot Telegram)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nama Paket</TableHead>
-                <TableHead>Profil MikroTik</TableHead>
-                <TableHead>Harga Jual (ke User)</TableHead>
-                <TableHead>Komisi Reseller</TableHead>
-                <TableHead>Potong Saldo (Setoran)</TableHead>
-                <TableHead>Masa Aktif</TableHead>
-                <TableHead>Kuota</TableHead>
+                <TableHead>Profil</TableHead>
+                <TableHead>Harga Jual</TableHead>
+                <TableHead>Komisi</TableHead>
+                <TableHead>Dipotong</TableHead>
+                <TableHead>Mode</TableHead>
+                <TableHead>Karakter</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -150,31 +159,25 @@ export function VouchersClient({
               {packages.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-10 text-slate-400 italic">
-                    Belum ada paket voucher yang dikonfigurasi.
+                    Belum ada paket voucher.
                   </TableCell>
                 </TableRow>
               ) : (
                 packages.map((pkg, idx) => (
                   <TableRow key={idx}>
                     <TableCell className="font-semibold text-emerald-700">{pkg.Voucher || pkg.name}</TableCell>
-                    <TableCell>{pkg.profile}</TableCell>
+                    <TableCell className="text-xs">{pkg.profile}</TableCell>
                     <TableCell>{rupiah(parseFloat(pkg.price))}</TableCell>
                     <TableCell className="text-emerald-600">-{rupiah(parseFloat(pkg.markup))}</TableCell>
-                    <TableCell className="font-bold">
-                      {rupiah(parseFloat(pkg.price) - parseFloat(pkg.markup))}
-                    </TableCell>
-                    <TableCell>{pkg.validity || pkg.Limit || '-'}</TableCell>
-                    <TableCell>
-                      {pkg.quotaGB && parseFloat(pkg.quotaGB) > 0
-                        ? `${pkg.quotaGB} GB`
-                        : <span className="text-slate-400 text-xs">Unlimited</span>}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button onClick={() => handleOpenEdit(idx)} variant="outline" size="icon" className="h-8 w-8 text-emerald-600">
-                        <Edit size={16} />
+                    <TableCell className="font-bold">{rupiah(parseFloat(pkg.price) - parseFloat(pkg.markup))}</TableCell>
+                    <TableCell className="text-[10px] uppercase font-bold">{pkg.type === 'up' ? 'U != P' : 'U = P'}</TableCell>
+                    <TableCell className="text-[10px] uppercase">{pkg.length} {pkg.typechar}</TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <Button onClick={() => handleOpenEdit(idx)} variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:bg-emerald-50">
+                        <Edit size={14} />
                       </Button>
-                      <Button onClick={() => handleDelete(idx)} variant="outline" size="icon" className="h-8 w-8 text-red-600">
-                        <Trash2 size={16} />
+                      <Button onClick={() => handleDelete(idx)} variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50">
+                        <Trash2 size={14} />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -186,88 +189,87 @@ export function VouchersClient({
       </Card>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>{editingIdx !== null ? "Edit Paket" : "Tambah Paket Voucher"}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="Voucher">Nama Paket (Tampil di Bot)</Label>
-              <Input 
-                id="Voucher" 
-                value={formData.Voucher}
-                onChange={(e) => setFormData({...formData, Voucher: e.target.value})}
-                placeholder="Contoh: 1 Jam" 
-                required 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Profil MikroTik</Label>
-              <Select 
-                value={formData.profile} 
-                onValueChange={(val) => setFormData({...formData, profile: val || ""})}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih profil" />
-                </SelectTrigger>
-                <SelectContent>
-                  {profiles.map((p) => (
-                    <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-1">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="price">Harga Beli (Modal)</Label>
-                <Input 
-                  id="price" 
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
-                  placeholder="2000" 
-                  required 
-                />
+                <Label htmlFor="Voucher">Nama Paket (di Bot)</Label>
+                <Input id="Voucher" value={formData.Voucher} onChange={(e) => setFormData({...formData, Voucher: e.target.value})} placeholder="1 Jam" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="markup">Markup (Profit)</Label>
-                <Input 
-                  id="markup" 
-                  type="number"
-                  value={formData.markup}
-                  onChange={(e) => setFormData({...formData, markup: e.target.value})}
-                  placeholder="500" 
-                  required 
-                />
+                <Label>Profil MikroTik</Label>
+                <Select value={formData.profile} onValueChange={(val) => setFormData({...formData, profile: val || ""})}>
+                  <SelectTrigger><SelectValue placeholder="Pilih profil" /></SelectTrigger>
+                  <SelectContent>{profiles.map((p) => (<SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>))}</SelectContent>
+                </Select>
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="validity">Masa Aktif</Label>
-                <Input 
-                  id="validity" 
-                  value={formData.validity}
-                  onChange={(e) => setFormData({...formData, validity: e.target.value})}
-                  placeholder="1d atau 30d" 
-                  required 
-                />
+                <Label htmlFor="price">Harga Jual (ke User)</Label>
+                <Input id="price" type="number" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} placeholder="2000" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="quotaGB">Kuota (GB) - 0 = Unlimited</Label>
-                <Input 
-                  id="quotaGB" 
-                  type="number"
-                  value={formData.quotaGB}
-                  onChange={(e) => setFormData({...formData, quotaGB: e.target.value})}
-                  placeholder="0" 
-                  required 
-                />
+                <Label htmlFor="markup">Komisi Reseller</Label>
+                <Input id="markup" type="number" value={formData.markup} onChange={(e) => setFormData({...formData, markup: e.target.value})} placeholder="500" required />
               </div>
             </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isSaving} className="w-full bg-emerald-600 hover:bg-emerald-700">
+
+            <div className="grid grid-cols-2 gap-4 border-t pt-4">
+              <div className="space-y-2">
+                <Label>Tipe Voucher</Label>
+                <Select value={formData.type} onValueChange={(val) => setFormData({...formData, type: val || "vc"})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="vc">User = Password</SelectItem>
+                    <SelectItem value="up">User & Password Beda</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Karakter</Label>
+                <Select value={formData.typechar} onValueChange={(val) => setFormData({...formData, typechar: val || "mix"})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mix">Campuran (ABC234)</SelectItem>
+                    <SelectItem value="num">Angka Saja (123456)</SelectItem>
+                    <SelectItem value="up">Huruf Besar (ABCDEF)</SelectItem>
+                    <SelectItem value="low">Huruf Kecil (abcdef)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="length">Panjang Karakter</Label>
+                <Input id="length" type="number" value={formData.length} onChange={(e) => setFormData({...formData, length: e.target.value})} placeholder="6" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="server">Server MikroTik</Label>
+                <Input id="server" value={formData.server} onChange={(e) => setFormData({...formData, server: e.target.value})} placeholder="all" required />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 border-t pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="validity">Masa Aktif (Router)</Label>
+                <Input id="validity" value={formData.validity} onChange={(e) => setFormData({...formData, validity: e.target.value})} placeholder="1h atau 1d" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quotaGB">Kuota (GB) - 0=Unlimited</Label>
+                <Input id="quotaGB" type="number" value={formData.quotaGB} onChange={(e) => setFormData({...formData, quotaGB: e.target.value})} placeholder="0" required />
+              </div>
+            </div>
+
+            <DialogFooter className="border-t pt-4">
+              <Button type="submit" disabled={isSaving} className="w-full bg-emerald-600 hover:bg-emerald-700 font-bold">
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Simpan Paket
+                SIMPAN PENGATURAN PAKET
               </Button>
             </DialogFooter>
           </form>
