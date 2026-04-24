@@ -20,29 +20,22 @@
 
 ## 🆕 Changelog v2.3.0
 
-- ✅ **Refined Login UI** — Desain modern *glassmorphism* dengan background dekoratif, tipografi presisi, dan animasi halus.
-- ✅ **Admin Management** — Fitur baru untuk mengelola akses Administrator dan Superadmin langsung dari dashboard.
-- ✅ **Stability & Socket Handling** — Penanganan error API MikroTik yang lebih kuat, mencegah server crash saat terjadi timeout atau gangguan jaringan.
-- ✅ **Session Provider Fix** — Integrasi *Next-Auth* yang lebih stabil untuk pengalaman pengguna yang mulus tanpa error runtime.
-- ✅ **Enhanced Deployment** — Skrip `deploy.sh` kini otomatis mendeteksi lingkungan dan membuat file `.env` beserta `AUTH_SECRET`.
-- ✅ **Topup Request System** — Alur manajemen permintaan saldo reseller yang lebih terorganisir di menu "Permintaan Topup".
-- ✅ **Data Scoping & Security** — Implementasi `admin_id` untuk isolasi data yang lebih aman bagi multi-administrator.
-- ✅ **Advanced Dashboard Charts** — Visualisasi pendapatan dan trafik yang lebih interaktif menggunakan sistem chart terbaru.
-- ✅ **Multi-Router Support** — Kelola banyak MikroTik dalam satu dashboard dengan identity asli yang diambil otomatis dari router.
+- ✅ **Balance Transfer Flow** — Fitur transfer saldo antar reseller via Bot Telegram dengan verifikasi ID penerima.
+- ✅ **Pending Registration** — Alur pendaftaran reseller baru kini berstatus `Pending` secara default, membutuhkan persetujuan Admin melalui dashboard.
+- ✅ **Voucher Management Refactor** — Logika pengelolaan paket voucher dipindahkan ke komponen client baru untuk performa yang lebih responsif.
+- ✅ **Enhanced Security** — Penambahan field `origin` pada transaksi untuk melacak sumber transaksi (Web/Bot) dan proteksi akses reseller pending.
+- ✅ **Automatic Binary Rebuild** — Skrip deployment kini otomatis membangun ulang modul `better-sqlite3` untuk menjamin kompatibilitas dengan versi Node.js target.
+- ✅ **Improved Expiry Logic** — Penanganan penghapusan user MikroTik yang expired kini mendukung format komentar bot yang lebih fleksibel (`vc-bot|...`).
 
 ---
 
 ## 🆕 Changelog v2.2.0
 
-- ✅ **Multi-Router Management** — Tambah/hapus banyak MikroTik langsung dari Settings, identity otomatis diambil dari router
-- ✅ **Emerald Primary Theme** — Konsistensi warna penuh, tidak ada lagi warna sky/blue yang bocor
-- ✅ **User Menu Dropdown** — Avatar pojok kanan atas: Edit Profile, Settings, dan Keluar Sesi
-- ✅ **Router Selector** — Menampilkan identity MikroTik asli, fallback ke IP jika belum dikonfigurasi
-- ✅ **Uptime Formatter** — Format waktu MikroTik rapi: `1h 5j 20m` (hari/jam/menit)
-- ✅ **Webhook UI** — Field domain HTTPS + preview URL lengkap + panduan setup
-- ✅ **Light Theme** — Semua card dark (broadcast, profile, bot-editor, logs) diubah ke tema terang konsisten
-- ✅ **Income Chart** — Komponen chart pendapatan 7 hari dengan Recharts (AreaChart)
-- ✅ **System Logs** — Tabel log rapi dengan sticky header opaque dan badge topic berwarna
+- ✅ **Multi-Router Management** — Tambah/hapus banyak MikroTik langsung dari Settings, identity otomatis diambil dari router.
+- ✅ **Emerald Primary Theme** — Konsistensi warna penuh, tidak ada lagi warna sky/blue yang bocor.
+- ✅ **User Menu Dropdown** — Avatar pojok kanan atas: Edit Profile, Settings, dan Keluar Sesi.
+- ✅ **Income Chart** — Komponen chart pendapatan 7 hari dengan Recharts (AreaChart).
+- ✅ **System Logs** — Tabel log rapi dengan sticky header opaque dan badge topic berwarna.
 
 ---
 
