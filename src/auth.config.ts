@@ -1,6 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
+  trustHost: true,
   providers: [], // Providers are defined in auth.ts (Node.js)
   session: {
     strategy: "jwt",
