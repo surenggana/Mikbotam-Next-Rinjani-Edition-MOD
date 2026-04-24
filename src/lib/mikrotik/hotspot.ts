@@ -74,12 +74,13 @@ export async function addHotspotUser(params: {
   limitUptime?: string;
   limitBytesIn?: number;
   limitBytesOut?: number;
+  limitBytesTotal?: number;
   comment?: string;
 }, customConfig?: any) {
   const conn = await getMikrotikConnection(customConfig);
   try {
     await conn.connect();
-    
+
     const cmd = [
       "/ip/hotspot/user/add",
       "=server=" + (params.server || "all"),
@@ -91,6 +92,7 @@ export async function addHotspotUser(params: {
     if (params.limitUptime) cmd.push("=limit-uptime=" + params.limitUptime);
     if (params.limitBytesIn) cmd.push("=limit-bytes-in=" + params.limitBytesIn);
     if (params.limitBytesOut) cmd.push("=limit-bytes-out=" + params.limitBytesOut);
+    if (params.limitBytesTotal) cmd.push("=limit-bytes-total=" + params.limitBytesTotal);
     if (params.comment) cmd.push("=comment=" + params.comment);
     
     return await conn.write(cmd);

@@ -249,7 +249,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
   // /mutasi
   const mutasiAction = async (ctx: any) => {
     const txs = await prisma.transaction.findMany({
-      where: { userId: ctx.from.id.toString() },
+      where: { userId: ctx.from.id.toString(), adminId: config.adminId },
       orderBy: { no: "desc" },
       take: 5,
     });
@@ -268,7 +268,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
   const reportAction = async (ctx: any) => {
     const today = new Date().toISOString().split("T")[0];
     const reports = await prisma.report.findMany({
-      where: { userId: ctx.from.id.toString(), date: today },
+      where: { userId: ctx.from.id.toString(), adminId: config.adminId, date: today },
     });
     const total = reports.reduce((s, r) => s + parseFloat(r.revenue || "0"), 0);
     return ctx.replyWithHTML(
@@ -330,34 +330,51 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           type: (pkg.typechar || "mix") as any,
         });
 
+        // type='up' → username ≠ password (seperti PHP), selainnya voucher code (user=pass)
+        const vUser = vCode;
+        const vPass = pkg.type === "up"
+          ? generateVoucher({ length: parseInt(pkg.length || "6"), type: (pkg.typechar || "mix") as any })
+          : vCode;
+
+        let quotaBytes: number | undefined;
+        if (pkg.quotaGB && parseFloat(pkg.quotaGB) > 0) {
+          quotaBytes = Math.round(parseFloat(pkg.quotaGB) * 1024 * 1024 * 1024);
+        }
+
         await beliVoucher({
           userId: telegramId,
+          adminId: config.adminId,
           sellerName: seller.sellerName || "Unknown",
           price,
           markup,
-          username: vCode,
-          password: vCode,
+          username: vUser,
+          password: vPass,
           expiry: pkg.validity || "30d",
           status: "Success",
           routerName: config.routerName || "MikroTik",
           origin: "BOT",
         });
 
-        // Kirim ke MikroTik dengan limit-uptime sesuai validity paket
+        const today = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" });
         await addHotspotUser({
           server: pkg.server || "all",
-          name: vCode,
-          password: vCode,
+          name: vUser,
+          password: vPass,
           profile: pkg.profile,
           limitUptime: pkg.validity || undefined,
-          comment: `vc-bot|${seller.sellerName}`,
+          limitBytesIn: quotaBytes,
+          limitBytesOut: quotaBytes,
+          limitBytesTotal: quotaBytes,
+          comment: `vc-bot|${seller.sellerName}|${price}|${today}`,
         });
 
         await ctx.deleteMessage().catch(() => {});
+        const passLine = pkg.type === "up"
+          ? `👤 User: <code>${vUser}</code>\n🔑 Pass: <code>${vPass}</code>`
+          : `🎟 Voucher: <code>${vUser}</code>`;
         return ctx.replyWithHTML(
           `✅ <b>Voucher Berhasil!</b>\n\n` +
-          `👤 User: <code>${vCode}</code>\n` +
-          `🔑 Pass: <code>${vCode}</code>\n` +
+          `${passLine}\n` +
           `📦 Profil: ${pkg.profile}\n` +
           `⏰ Masa Aktif: ${pkg.validity || "-"}\n` +
           `💰 Harga: ${formatIDR(price)}\n` +
@@ -451,7 +468,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
       const amount = parseFloat(ctx.message.text.replace(/\D/g, ""));
       if (isNaN(amount) || amount <= 0) return ctx.reply("❌ Masukkan angka nominal yang valid.");
       try {
-        await transferBalance(telegramId, trState.targetId, amount);
+        await transferBalance(telegramId, trState.targetId, amount, config.adminId);
         transferStates.delete(telegramId);
         return ctx.replyWithHTML(
           `✅ <b>Transfer Berhasil!</b>\n\nKe: <b>${trState.targetName}</b>\nJumlah: <b>${formatIDR(amount)}</b>`

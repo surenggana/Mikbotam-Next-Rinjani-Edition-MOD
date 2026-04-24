@@ -8,6 +8,7 @@ import { formatIDR } from "@/lib/formatters";
 
 export async function beliVoucher(params: {
   userId: string;
+  adminId: number;
   sellerName: string;
   price: number; // Public Selling Price (e.g. 2000)
   markup: number; // Reseller Commission (e.g. 500)
@@ -26,7 +27,7 @@ export async function beliVoucher(params: {
   return await prisma.$transaction(async (tx) => {
     // 1. Get seller
     const seller = await tx.seller.findFirst({
-      where: { userId: params.userId },
+      where: { userId: params.userId, adminId: params.adminId },
     });
 
     if (!seller) throw new Error("Reseller tidak ditemukan.");
@@ -173,7 +174,7 @@ export async function topupResellerAction(targetUserId: string, amount: number) 
   return await topupReseller(targetUserId, amount, "WEB");
 }
 
-export async function transferBalance(senderUserId: string, targetUserId: string, amount: number) {
+export async function transferBalance(senderUserId: string, targetUserId: string, amount: number, adminId?: number) {
   const now = new Date();
   const timeStr = format(now, "HH:mm:ss");
   const dateStr = format(now, "yyyy-MM-dd");
@@ -181,7 +182,7 @@ export async function transferBalance(senderUserId: string, targetUserId: string
   const result = await prisma.$transaction(async (tx) => {
     // 1. Get sender
     const sender = await tx.seller.findFirst({
-      where: { userId: senderUserId },
+      where: adminId ? { userId: senderUserId, adminId } : { userId: senderUserId },
     });
     if (!sender) throw new Error("Akun pengirim tidak ditemukan.");
 
