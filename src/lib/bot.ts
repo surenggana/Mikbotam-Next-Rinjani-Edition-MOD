@@ -228,7 +228,11 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
       await ctx.editMessageText("<code>Sedang memproses voucher...</code>", { parse_mode: "HTML" });
 
       try {
-        const code = generateVoucher({ length: 6, type: "mix" });
+        // --- CUSTOM VOUCHER CONFIG ---
+        const vLength = parseInt(config.voucher1 || "6");
+        const vType = (config.voucherGenerate || "mix") as any;
+        const code = generateVoucher({ length: vLength, type: vType });
+
         await beliVoucher({
           userId: telegramId,
           sellerName: seller?.sellerName || "Unknown",
@@ -248,7 +252,6 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           quotaBytes = Math.round(parseFloat(pkg.quotaGB) * 1024 * 1024 * 1024);
         }
 
-        // --- FIXED: Pass router config directly ---
         const routerConfig = {
           routerIp: config.routerIp,
           routerUsername: config.routerUsername,
@@ -378,6 +381,58 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     }
 
     return next();
+  });
+
+  // --- POWER USER COMMANDS (/vc) ---
+  bot.command("vc", async (ctx) => {
+    const args = ctx.message.text.split(" ");
+    if (args.length < 3) return ctx.reply("Format: /vc [profil] [harga]\nContoh: /vc 1Jam 2000");
+
+    const profile = args[1];
+    const price = parseFloat(args[2]);
+    const telegramId = ctx.from.id.toString();
+
+    const seller = await prisma.seller.findFirst({ where: { userId: telegramId } });
+    if (!seller || seller.status !== "Active") return ctx.reply("Akses ditolak.");
+
+    try {
+      const vLength = parseInt(config.voucher1 || "6");
+      const vType = (config.voucherGenerate || "mix") as any;
+      const code = generateVoucher({ length: vLength, type: vType });
+
+      await beliVoucher({
+        userId: telegramId,
+        sellerName: seller.sellerName || "Unknown",
+        price: price,
+        markup: 0,
+        username: code,
+        password: code,
+        expiry: "30d",
+        status: "Success",
+        routerName: config.routerName || "MikroTik",
+        service: "hotspot",
+        origin: "BOT"
+      });
+
+      const routerConfig = {
+        routerIp: config.routerIp,
+        routerUsername: config.routerUsername,
+        routerPassword: config.routerPassword,
+        port: config.port
+      };
+
+      await addHotspotUser({
+        server: "all",
+        name: code,
+        password: code,
+        profile: profile,
+        comment: `vc-bot-direct|${seller.sellerName}|${price}`
+      }, routerConfig);
+
+      return ctx.replyWithHTML(
+        `✅ <b>Voucher Berhasil!</b>\n\n👤 User: <code>${code}</code>\n🔑 Pass: <code>${code}</code>\n📦 Profil: ${profile}\n💰 Harga: ${formatIDR(price)}`
+      );
+    } catch (err: any) { return ctx.reply(`Gagal: ${err.message}`); }
   });
 
   // --- OTHER COMMANDS ---
