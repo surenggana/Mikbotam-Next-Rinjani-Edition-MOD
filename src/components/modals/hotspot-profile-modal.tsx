@@ -82,7 +82,8 @@ export function HotspotProfileModal({
   // Helper to extract validity and lockMac from on-login script
   const parseOnLogin = (script: string) => {
     if (!script) return { validity: "0", lockMac: false };
-    const valMatch = script.match(/uptime \((\w+)\)/);
+    // Regex lebih fleksibel untuk menangkap :local uptime (1d) atau :local uptime "1d"
+    const valMatch = script.match(/uptime\s+["']?\(?([\w]+)\)?["']?/i) || script.match(/uptime\s+([\w]+)/i);
     const lockMatch = script.includes("mac-address=$");
     return {
       validity: valMatch ? valMatch[1] : "0",
