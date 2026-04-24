@@ -57,6 +57,7 @@ async function beliVoucher({ userId, sellerName, price, username, password, expi
         voucherExpiry: expiry,
         description: "Success",
         routerName,
+        origin: "BOT",
         time: timeStr,
         date: dateStr,
       },
@@ -115,6 +116,7 @@ async function topupReseller(targetUserId, amount, fromName = "Admin") {
         topUp: amount.toString(),
         topUpFromId: fromName,
         description: "topup",
+        origin: "BOT",
         time: timeStr,
         date: dateStr,
       },
@@ -176,7 +178,6 @@ function attachBotLogic(bot, config) {
       `<b>Daftar Perintah:</b>\n\n` +
       `/cek_saldo - Cek saldo Anda\n` +
       `/vc [profil] [harga] - Buat voucher Hotspot\n` +
-      `/up [profil] [harga] - Buat akun PPP\n` +
       `/mutasi - Riwayat 5 transaksi terakhir\n` +
       `/ping - Cek status router\n` +
       `/report - Laporan penjualan hari ini\n` +
@@ -246,7 +247,7 @@ function attachBotLogic(bot, config) {
   );
 
   bot.hears("⚙️ Bantuan", (ctx) =>
-    ctx.replyWithHTML(`<b>${botTexts.help}</b>\n\nPerintah:\n/vc [profil] [harga]\n/up [profil] [harga]`)
+    ctx.replyWithHTML(`<b>${botTexts.help}</b>\n\nPerintah:\n/vc [profil] [harga]`)
   );
 
   // ── /cek_saldo ────────────────────────────────────────────────────────────
@@ -361,53 +362,6 @@ function attachBotLogic(bot, config) {
     } catch (err) {
       if (err.message === "Saldo tidak mencukupi") return ctx.replyWithHTML(botTexts.fail_balance);
       return ctx.reply(`Gagal membuat voucher: ${err.message}`);
-    }
-  });
-
-  // ── /up [profil] [harga] ──────────────────────────────────────────────────
-  bot.command("up", async (ctx) => {
-    const args = ctx.message.text.split(" ");
-    if (args.length < 3) return ctx.reply("Format: /up [profil] [harga]\nContoh: /up PPPOE-1M 50000");
-
-    const profile = args[1];
-    const price   = parseFloat(args[2]);
-    const id      = ctx.from.id.toString();
-
-    const seller = await prisma.seller.findFirst({ where: { userId: id } });
-    if (!seller) return ctx.reply("Anda tidak terdaftar.");
-
-    try {
-      const code = generateVoucher(6, "low");
-
-      const result = await beliVoucher({
-        userId: id, sellerName: seller.sellerName || "Unknown",
-        price, username: code, password: code, expiry: "30d", routerName,
-      });
-
-      const conn = await getMikrotikConn(config);
-      await conn.write([
-        "/ppp/secret/add",
-        "=name=" + code, "=password=" + code,
-        "=service=any", "=profile=" + profile,
-        "=comment=up-bot-" + new Date().toISOString().split("T")[0],
-      ]);
-      conn.close();
-
-      let reply =
-        `${botTexts.success_buy} (PPP)\n\n` +
-        `👤 User: <code>${code}</code>\n` +
-        `🔑 Pass: <code>${code}</code>\n` +
-        `📦 Profil: <b>${profile}</b>\n` +
-        `💰 Harga: ${rp(price)}\n` +
-        `💳 Sisa Saldo: ${rp(result.newBalance)}`;
-
-      if (result.newBalance < 10000)
-        reply += `\n\n⚠️ <b>PERINGATAN:</b> Saldo menipis! Segera Topup.`;
-
-      return ctx.replyWithHTML(reply);
-    } catch (err) {
-      if (err.message === "Saldo tidak mencukupi") return ctx.replyWithHTML(botTexts.fail_balance);
-      return ctx.reply(`Gagal membuat akun PPP: ${err.message}`);
     }
   });
 

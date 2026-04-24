@@ -30,9 +30,21 @@ export async function getRouterConfig() {
   };
 }
 
-export async function getMikrotikConnection() {
-  const config = await getRouterConfig();
-  if (!config) {
+export async function getMikrotikConnection(customConfig?: any) {
+  let config;
+
+  if (customConfig) {
+    config = {
+      host: customConfig.routerIp || '',
+      user: customConfig.routerUsername || '',
+      password: customConfig.routerPassword || '',
+      port: parseInt(customConfig.port || '8728'),
+    };
+  } else {
+    config = await getRouterConfig();
+  }
+
+  if (!config || !config.host) {
     throw new Error('Router belum dikonfigurasi.');
   }
 

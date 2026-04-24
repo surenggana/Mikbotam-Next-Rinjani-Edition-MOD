@@ -49,8 +49,10 @@ const UserRow = memo(({ user }: { user: any }) => (
     <TableCell>
       <span className={cn(
         "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
-        user.status === 'Active' || !user.status
+        user.status === 'Active'
           ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+          : user.status === 'Pending'
+          ? "bg-amber-50 text-amber-600 border-amber-100"
           : "bg-red-50 text-red-600 border-red-100"
       )}>
         {user.status || 'Active'}

@@ -91,6 +91,23 @@ export async function updateSeller(no: number, data: any) {
   return { success: true };
 }
 
+export async function approveSeller(no: number) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
+
+  const existing = await prisma.seller.findUnique({ where: { no } });
+  if (!existing || existing.adminId !== adminId) throw new Error("Akses ditolak.");
+
+  await prisma.seller.update({
+    where: { no },
+    data: { status: "Active" },
+  });
+
+  revalidatePath("/users");
+  return { success: true };
+}
+
 export async function deleteSeller(no: number) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");

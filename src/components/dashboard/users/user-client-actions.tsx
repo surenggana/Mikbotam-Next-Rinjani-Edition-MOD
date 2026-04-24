@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Edit2, Wallet, Trash2, MoreHorizontal } from "lucide-react";
+import { UserPlus, Edit2, Wallet, Trash2, MoreHorizontal, CheckCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserModal } from "@/components/modals/user-modal";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { deleteSeller } from "@/lib/actions/users";
+import { deleteSeller, approveSeller } from "@/lib/actions/users";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -24,6 +24,7 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -37,6 +38,19 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
     } finally {
       setIsDeleting(false);
       setIsConfirmOpen(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    setIsApproving(true);
+    try {
+      await approveSeller(user.no);
+      toast.success("User berhasil disetujui");
+      router.refresh();
+    } catch (error) {
+      toast.error("Gagal menyetujui user");
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -62,6 +76,16 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-40">
+          {user?.status === "Pending" && (
+            <DropdownMenuItem 
+              onClick={handleApprove} 
+              disabled={isApproving}
+              className="flex items-center gap-2 cursor-pointer text-emerald-600 font-bold focus:text-emerald-700 focus:bg-emerald-50"
+            >
+              <CheckCircle className="h-4 w-4" />
+              {isApproving ? "Memproses..." : "Setujui User"}
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
             <Wallet className="h-4 w-4 text-emerald-600" />
             Topup Saldo
