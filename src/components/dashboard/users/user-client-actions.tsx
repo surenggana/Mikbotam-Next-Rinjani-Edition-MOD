@@ -68,41 +68,46 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent align="end" className="w-40">
-          {user?.status === "Pending" && (
-            <DropdownMenuItem 
-              onClick={handleApprove} 
-              disabled={isApproving}
-              className="flex items-center gap-2 cursor-pointer text-emerald-600 font-bold focus:text-emerald-700 focus:bg-emerald-50"
-            >
-              <CheckCircle className="h-4 w-4" />
-              {isApproving ? "Memproses..." : "Setujui User"}
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-            <Wallet className="h-4 w-4 text-emerald-600" />
-            Topup Saldo
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 cursor-pointer">
-            <Edit2 className="h-4 w-4 text-slate-600" />
-            Edit User
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            onClick={() => setIsConfirmOpen(true)} 
-            className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+      <div className="flex items-center justify-end gap-2">
+        {user?.status === "Pending" && (
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={handleApprove} 
+            disabled={isApproving}
+            className="h-8 flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700 font-bold px-3 shadow-sm transition-all"
           >
-            <Trash2 className="h-4 w-4" />
-            Hapus User
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <CheckCircle className="h-3.5 w-3.5" />
+            {isApproving ? "..." : "Approve"}
+          </Button>
+        )}
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+              <Wallet className="h-4 w-4 text-emerald-600" />
+              Topup Saldo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 cursor-pointer">
+              <Edit2 className="h-4 w-4 text-slate-600" />
+              Edit User
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => setIsConfirmOpen(true)} 
+              className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              Hapus User
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <UserModal 
         isOpen={isModalOpen} 

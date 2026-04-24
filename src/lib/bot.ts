@@ -48,6 +48,37 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     return ctx.replyWithHTML(`<b>${botTexts.welcome}</b>\n\nID Anda: <code>${telegramId}</code>`, mainMenu);
   });
 
+  bot.command("approve", async (ctx) => {
+    if (ctx.from.id.toString() !== config.ownerId) return ctx.reply("❌ Akses ditolak. Hanya Admin yang bisa menyetujui reseller.");
+    
+    const args = ctx.message.text.split(" ");
+    if (args.length < 2) return ctx.reply("Format: /approve [ID_TELEGRAM_RESELLER]");
+
+    const targetId = args[1];
+    
+    try {
+      const targetSeller = await prisma.seller.findFirst({ 
+        where: { userId: targetId, adminId: config.adminId } 
+      });
+
+      if (!targetSeller) return ctx.reply("❌ Reseller tidak ditemukan di bawah manajemen Anda.");
+      if (targetSeller.status === "Active") return ctx.reply("✅ Reseller ini sudah aktif.");
+
+      await prisma.seller.update({
+        where: { no: targetSeller.no },
+        data: { status: "Active" }
+      });
+
+      ctx.replyWithHTML(`✅ Reseller <b>${targetSeller.sellerName}</b> (<code>${targetId}</code>) berhasil diaktifkan!`);
+      
+      // Notify the reseller
+      bot.telegram.sendMessage(targetId, "🎊 <b>Selamat!</b> Akun reseller Anda telah diaktifkan oleh Admin. Sekarang Anda bisa melakukan transaksi.", { parse_mode: "HTML" }).catch(() => {});
+      
+    } catch (err: any) {
+      ctx.reply(`❌ Gagal menyetujui: ${err.message}`);
+    }
+  });
+
   bot.command("daftar", async (ctx) => {
     const telegramId = ctx.from.id.toString();
     const username = ctx.from.username || ctx.from.first_name;
