@@ -75,8 +75,8 @@ export async function addHotspotUser(params: {
   limitBytesIn?: number;
   limitBytesOut?: number;
   comment?: string;
-}) {
-  const conn = await getMikrotikConnection();
+}, customConfig?: any) {
+  const conn = await getMikrotikConnection(customConfig);
   try {
     await conn.connect();
     

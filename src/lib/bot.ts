@@ -211,7 +211,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     // Pilih Paket Voucher
     if (data.startsWith("buy_vcr|")) {
       const pkgIndex = parseInt(data.split("|")[1]);
-      const voucherConfig = await prisma.voucherConfig.findFirst();
+      const voucherConfig = await prisma.voucherConfig.findFirst({ where: { adminId: config.adminId } });
       const packages = JSON.parse(voucherConfig?.settings || "[]");
       const pkg = packages[pkgIndex];
 
@@ -248,6 +248,14 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           quotaBytes = Math.round(parseFloat(pkg.quotaGB) * 1024 * 1024 * 1024);
         }
 
+        // --- FIXED: Pass router config directly ---
+        const routerConfig = {
+          routerIp: config.routerIp,
+          routerUsername: config.routerUsername,
+          routerPassword: config.routerPassword,
+          port: config.port
+        };
+
         await addHotspotUser({
           server: "all",
           name: code,
@@ -256,12 +264,15 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           limitBytesIn: quotaBytes,
           limitBytesOut: quotaBytes,
           comment: `vc-bot|${seller?.sellerName}|${price}|${new Date().toLocaleDateString()}`
-        });
+        }, routerConfig);
 
         const caption = `<b>VOUCHER BERHASIL</b>\n\n👤 User: <code>${code}</code>\n🔑 Pass: <code>${code}</code>\n📦 Profil: ${pkg.profile}\n⏰ Masa Aktif: ${pkg.validity || "-"}\n--------------------------\nGUNAKAN INTERNET DENGAN BIJAK`;
         await ctx.deleteMessage();
         return ctx.replyWithHTML(caption);
-      } catch (err: any) { return ctx.reply(`Gagal: ${err.message}`); }
+      } catch (err: any) { 
+        console.error("Voucher creation error:", err);
+        return ctx.reply(`Gagal: ${err.message}`); 
+      }
     }
 
     // Pilih Reseller Penerima Transfer
@@ -375,7 +386,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     const seller = await prisma.seller.findFirst({ where: { userId: telegramId } });
     if (!seller || seller.status !== "Active") return ctx.reply("Akses ditolak.");
 
-    const voucherConfig = await prisma.voucherConfig.findFirst();
+    const voucherConfig = await prisma.voucherConfig.findFirst({ where: { adminId: config.adminId } });
     const packages = JSON.parse(voucherConfig?.settings || "[]");
     if (packages.length === 0) return ctx.reply("Belum ada paket voucher.");
 
@@ -391,7 +402,15 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
   };
 
   bot.hears("🎫 Menu Voucher", showVoucherMenu);
+  bot.command("menu", showVoucherMenu);
+  bot.command("beli", showVoucherMenu);
+
   bot.hears("💰 Cek Saldo", async (ctx) => {
+    const seller = await prisma.seller.findFirst({ where: { userId: ctx.from.id.toString() } });
+    if (!seller) return ctx.reply("Anda tidak terdaftar.");
+    return ctx.replyWithHTML(`💳 Saldo Anda: <b>${formatIDR(parseFloat(seller.balance || "0"))}</b>`);
+  });
+  bot.command("saldo", async (ctx) => {
     const seller = await prisma.seller.findFirst({ where: { userId: ctx.from.id.toString() } });
     if (!seller) return ctx.reply("Anda tidak terdaftar.");
     return ctx.replyWithHTML(`💳 Saldo Anda: <b>${formatIDR(parseFloat(seller.balance || "0"))}</b>`);
@@ -399,14 +418,34 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
 
   bot.hears("📡 Status Router", async (ctx) => {
     try {
-      const stats = await getRouterStats();
+      const routerConfig = {
+        routerIp: config.routerIp,
+        routerUsername: config.routerUsername,
+        routerPassword: config.routerPassword,
+        port: config.port
+      };
+      const stats = await getRouterStats(routerConfig);
       return ctx.replyWithHTML(`📊 <b>Status: ${stats.routerName}</b>\n🌡 CPU: ${stats.cpuLoad}%\n🧠 RAM: ${Math.round(parseInt(stats.freeMemory)/1024/1024)}MB free\n🕒 Uptime: ${stats.uptime}`);
     } catch { return ctx.reply("Gagal ambil status router."); }
   });
 
-  bot.hears("⚙️ Bantuan", (ctx) => {
-    ctx.replyWithHTML(`<b>${botTexts.help}</b>\n\n• /topup - Request Saldo\n• /transfer - Kirim Saldo\n• /daftar - Registrasi\n• /mutasi - Riwayat`);
-  });
+  const helpMsg = (ctx: any) => {
+    ctx.replyWithHTML(`<b>${botTexts.help}</b>\n\n• /topup - Request Saldo\n• /transfer - Kirim Saldo\n• /daftar - Registrasi\n• /mutasi - Riwayat\n• /saldo - Cek Saldo\n• /menu - Daftar Voucher`);
+  };
+  bot.hears("⚙️ Bantuan", helpMsg);
+  bot.command("help", helpMsg);
+
+  // Daftarkan command list ke Telegram
+  bot.telegram.setMyCommands([
+    { command: "beli", description: "Beli Voucher" },
+    { command: "menu", description: "Menu Utama" },
+    { command: "saldo", description: "Cek Saldo" },
+    { command: "transfer", description: "Transfer Saldo Antar Reseller" },
+    { command: "daftar", description: "Daftar sebagai agen reseller" },
+    { command: "mutasi", description: "Riwayat Transaksi" },
+    { command: "report", description: "Laporan Penjualan Hari Ini" },
+    { command: "help", description: "Bantuan" },
+  ]).catch(() => {});
 }
 
 export async function getBotInstance(token: string) {
