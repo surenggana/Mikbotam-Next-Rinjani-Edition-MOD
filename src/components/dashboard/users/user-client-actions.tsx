@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserModal } from "@/components/modals/user-modal";
+import { TopupModal } from "@/components/modals/topup-modal";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { deleteSeller, approveSeller } from "@/lib/actions/users";
 import { toast } from "sonner";
@@ -22,6 +23,7 @@ interface UserClientActionsProps {
 
 export function UserClientActions({ user, mode }: UserClientActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTopupOpen, setIsTopupOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -90,7 +92,10 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+            <DropdownMenuItem 
+              onClick={() => setIsTopupOpen(true)}
+              className="flex items-center gap-2 cursor-pointer"
+            >
               <Wallet className="h-4 w-4 text-emerald-600" />
               Topup Saldo
             </DropdownMenuItem>
@@ -113,6 +118,12 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         user={user} 
+      />
+
+      <TopupModal
+        isOpen={isTopupOpen}
+        onClose={() => setIsTopupOpen(false)}
+        user={user}
       />
 
       <ConfirmDialog
