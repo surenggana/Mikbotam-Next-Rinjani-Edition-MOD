@@ -24,19 +24,20 @@ export async function beliVoucher(params: {
   const dateStr = format(now, "yyyy-MM-dd");
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Get seller (using findFirst because userId is the telegram ID)
+    // 1. Get seller
     const seller = await tx.seller.findFirst({
       where: { userId: params.userId },
     });
 
     if (!seller) throw new Error("Reseller tidak ditemukan.");
 
+    const totalPrice = params.price + params.markup;
     const currentBalance = parseFloat(seller.balance || "0");
-    if (currentBalance < params.price) {
+    if (currentBalance < totalPrice) {
       throw new Error("Saldo tidak mencukupi.");
     }
 
-    const newBalance = currentBalance - params.price;
+    const newBalance = currentBalance - totalPrice;
 
     // 2. Update balance
     await tx.seller.update({
@@ -58,6 +59,7 @@ export async function beliVoucher(params: {
         balanceStart: currentBalance.toString(),
         balanceEnd: newBalance.toString(),
         voucherBuy: params.price.toString(),
+        voucherMarkup: params.markup.toString(), // Record the profit!
         voucherUsername: params.username,
         voucherPassword: params.password,
         voucherExpiry: params.expiry,
@@ -75,10 +77,10 @@ export async function beliVoucher(params: {
         adminId: seller.adminId,
         userId: params.userId,
         userName: params.sellerName,
-        price: params.price.toString(),
+        price: totalPrice.toString(),
         status: "Success",
         transaction: params.service === "ppp" ? "ppp" : "vc",
-        revenue: params.price.toString(),
+        revenue: totalPrice.toString(),
         time: timeStr,
         date: dateStr,
       },
