@@ -86,10 +86,19 @@ export async function beliVoucher(params: {
   });
 }
 
-export async function topupReseller(targetUserId: string, amount: number, origin: string = "WEB") {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-  const adminId = parseInt(session.user.id);
+export async function topupReseller(targetUserId: string, amount: number, origin: string = "WEB", forcedAdminId?: number) {
+  let adminId: number;
+  let adminName: string = "Admin";
+
+  if (forcedAdminId) {
+    adminId = forcedAdminId;
+    adminName = "Bot Admin";
+  } else {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    adminId = parseInt(session.user.id);
+    adminName = session.user.name || "Admin";
+  }
 
   const now = new Date();
   const timeStr = format(now, "HH:mm:ss");
@@ -119,14 +128,14 @@ export async function topupReseller(targetUserId: string, amount: number, origin
     // 3. Log to re_operating
     await tx.transaction.create({
       data: {
-        adminId, // Record tenant ID
+        adminId, 
         userId: targetUserId,
         sellerName: seller.sellerName,
         balanceStart: currentBalance.toString(),
         balanceEnd: newBalance.toString(),
         topUp: amount.toString(),
         description: "topup",
-        topUpFromId: session.user?.name || "Admin",
+        topUpFromId: adminName,
         origin,
         time: timeStr,
         date: dateStr,
@@ -135,6 +144,11 @@ export async function topupReseller(targetUserId: string, amount: number, origin
 
     return { success: true, newBalance };
   });
+}
+
+// Alias for Web Dashboard Action
+export async function topupResellerAction(targetUserId: string, amount: number) {
+  return await topupReseller(targetUserId, amount, "WEB");
 }
 
 export async function transferBalance(senderUserId: string, targetUserId: string, amount: number) {
