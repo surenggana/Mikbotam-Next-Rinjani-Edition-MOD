@@ -48,7 +48,10 @@ export default function SettingsPage() {
   const handleSetWebhook = async () => {
     if (!settings?.botToken) return toast.error("Token bot belum diatur!");
     if (!webhookDomain) return toast.error("Isi domain webhook terlebih dahulu!");
-    const res = await setTelegramWebhook(settings.botToken, webhookDomain.replace(/\/$/, ""));
+    // Strip path apapun, ambil hanya origin (https://domain.com)
+    let baseUrl = webhookDomain.trim().replace(/\/$/, "");
+    try { baseUrl = new URL(baseUrl).origin; } catch {}
+    const res = await setTelegramWebhook(settings.botToken, baseUrl);
     if (res.success) toast.success(res.message);
     else toast.error(res.message);
   };
