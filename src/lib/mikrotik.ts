@@ -64,8 +64,8 @@ export async function getMikrotikConnection(customConfig?: any) {
   return conn;
 }
 
-export async function getRouterStats() {
-  const conn = await getMikrotikConnection();
+export async function getRouterStats(customConfig?: any) {
+  const conn = await getMikrotikConnection(customConfig);
   try {
     await conn.connect();
     
@@ -100,8 +100,8 @@ export async function getRouterStats() {
   }
 }
 
-export async function getInterfaces() {
-  const conn = await getMikrotikConnection();
+export async function getInterfaces(customConfig?: any) {
+  const conn = await getMikrotikConnection(customConfig);
   try {
     await conn.connect();
     const data = await conn.write('/interface/print');
