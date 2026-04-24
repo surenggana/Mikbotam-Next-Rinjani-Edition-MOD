@@ -48,6 +48,8 @@ function calculateRemaining(limit: string, used: string) {
   
   const h = Math.floor(remainSec / 3600);
   const m = Math.floor((remainSec % 3600) / 60);
+  
+  if (h > 24) return `${Math.floor(h/24)}d ${h%24}h`;
   return `${h}j ${m}m`;
 }
 
@@ -68,9 +70,9 @@ export default function ActiveSessionsPage() {
   const fetchData = async () => {
     const res = await getLiveMonitoringData();
     setData({ 
-      hotspot: res.hotspot, 
-      ppp: res.ppp, 
-      interfaces: res.interfaces, 
+      hotspot: res.hotspot || [], 
+      ppp: res.ppp || [], 
+      interfaces: res.interfaces || [], 
       loading: false 
     });
   };
@@ -102,13 +104,13 @@ export default function ActiveSessionsPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <Badge variant="outline" className="bg-white px-4 py-2 rounded-2xl border-slate-200 text-slate-600 font-bold gap-2">
+          <Badge variant="outline" className="bg-white px-4 py-2 rounded-2xl border-slate-200 text-slate-600 font-bold gap-2 shadow-sm">
             <Users size={14} className="text-orange-500" /> {data.hotspot.length} Hotspot
           </Badge>
-          <Badge variant="outline" className="bg-white px-4 py-2 rounded-2xl border-slate-200 text-slate-600 font-bold gap-2">
+          <Badge variant="outline" className="bg-white px-4 py-2 rounded-2xl border-slate-200 text-slate-600 font-bold gap-2 shadow-sm">
             <ShieldCheck size={14} className="text-emerald-500" /> {data.ppp.length} PPPoE
           </Badge>
-          <Button variant="outline" size="icon" onClick={fetchData} className="rounded-xl border-slate-200 text-slate-400 hover:text-emerald-600">
+          <Button variant="outline" size="icon" onClick={fetchData} className="rounded-xl border-slate-200 text-slate-400 hover:text-emerald-600 shadow-sm transition-all">
             <RefreshCcw size={18} />
           </Button>
         </div>
@@ -128,11 +130,12 @@ export default function ActiveSessionsPage() {
           </MonitoringCard>
         )}
 
-        <div className={cn("grid grid-cols-1 gap-8", expandedSection ? "lg:grid-cols-1" : "lg:grid-cols-2")}>
+        <div className="grid grid-cols-1 gap-8">
+          {/* Hotspot Section - Full Width for better detail */}
           {(!expandedSection || expandedSection === 'hotspot') && (
             <MonitoringCard
               title="Hotspot Active Sessions"
-              description="Connected users and voucher remaining time"
+              description="Connected users, MAC address, and voucher remaining time"
               icon={<Wifi size={20} />}
               iconBg="bg-orange-50 text-orange-600 border-orange-100"
               isExpanded={expandedSection === 'hotspot'}
@@ -143,6 +146,7 @@ export default function ActiveSessionsPage() {
             </MonitoringCard>
           )}
 
+          {/* PPP Section */}
           {(!expandedSection || expandedSection === 'ppp') && (
             <MonitoringCard
               title="PPPoE Active Sessions"
@@ -172,7 +176,7 @@ function MonitoringCard({ title, description, icon, iconBg, children, isExpanded
             <div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-base font-black uppercase tracking-wider text-slate-800">{title}</CardTitle>
-                {badge && <Badge className="bg-slate-900 text-white font-black text-[9px] uppercase tracking-tighter">{badge}</Badge>}
+                {badge && <Badge className="bg-slate-900 text-white font-black text-[9px] uppercase tracking-tighter shadow-sm">{badge}</Badge>}
               </div>
               <CardDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-0.5">{description}</CardDescription>
             </div>
@@ -199,7 +203,7 @@ function InterfacesTable({ interfaces }: any) {
       </TableHeader>
       <TableBody>
         {interfaces.map((iface: any) => (
-          <TableRow key={iface[".id"]} className="hover:bg-slate-50/50 border-slate-50">
+          <TableRow key={iface[".id"]} className="hover:bg-slate-50/50 border-slate-50 transition-colors">
             <TableCell className="font-bold text-slate-700 py-4 px-6 flex items-center gap-3">
               <div className={cn("w-2 h-2 rounded-full", iface.running === "true" ? "bg-emerald-500 animate-pulse" : "bg-slate-300")} />
               {iface.name}
@@ -219,12 +223,13 @@ function InterfacesTable({ interfaces }: any) {
 }
 
 function HotspotTable({ users }: any) {
-  if (users.length === 0) return <EmptyState message="Tidak ada user aktif." />;
+  if (users.length === 0) return <EmptyState message="Tidak ada user hotspot aktif." />;
   return (
     <Table>
       <TableHeader className="bg-slate-50/50">
         <TableRow>
-          <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 px-6">User</TableHead>
+          <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 px-6">Active User</TableHead>
+          <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4">IP & MAC Address</TableHead>
           <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4">Uptime</TableHead>
           <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 px-6 text-right">Remaining / Limit</TableHead>
         </TableRow>
@@ -233,25 +238,37 @@ function HotspotTable({ users }: any) {
         {users.map((user: any) => {
           const remain = calculateRemaining(user["limit-uptime"], user.uptime);
           return (
-            <TableRow key={user[".id"]} className="hover:bg-slate-50/50 border-slate-50">
+            <TableRow key={user[".id"]} className="hover:bg-slate-50/50 border-slate-50 transition-colors">
               <TableCell className="py-4 px-6">
-                <div className="flex flex-col">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-[10px] font-black border border-orange-200">
+                    {user.user.substring(0, 2).toUpperCase()}
+                  </div>
                   <span className="font-bold text-slate-800">{user.user}</span>
-                  <span className="text-[10px] text-slate-400 font-mono">{user.address}</span>
                 </div>
               </TableCell>
               <TableCell>
-                <span className="text-xs font-mono font-bold text-slate-600">{formatUptime(user.uptime)}</span>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-bold text-slate-600">{user.address}</span>
+                  <span className="text-[10px] text-slate-400 font-mono tracking-tighter">{user["mac-address"] || "00:00:00:00:00:00"}</span>
+                </div>
+              </TableCell>
+              <TableCell>
+                <span className="text-[11px] font-mono font-black text-slate-600 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                  {formatUptime(user.uptime)}
+                </span>
               </TableCell>
               <TableCell className="px-6 text-right">
                 <div className="flex flex-col items-end">
                   <Badge className={cn(
-                    "text-[10px] font-black uppercase px-2 py-0.5",
-                    remain === "Unlimited" ? "bg-slate-100 text-slate-600" : "bg-orange-100 text-orange-600"
+                    "text-[10px] font-black uppercase px-2 py-0.5 shadow-sm border",
+                    remain === "Unlimited" ? "bg-slate-50 text-slate-600 border-slate-200" : 
+                    remain === "Expired" ? "bg-red-50 text-red-600 border-red-100" :
+                    "bg-emerald-50 text-emerald-600 border-emerald-100"
                   )}>
                     {remain}
                   </Badge>
-                  <span className="text-[9px] text-slate-400 font-mono mt-1">Limit: {user["limit-uptime"] || "∞"}</span>
+                  <span className="text-[9px] text-slate-400 font-mono mt-1 font-bold">Limit: {user["limit-uptime"] || "∞"}</span>
                 </div>
               </TableCell>
             </TableRow>
@@ -269,16 +286,25 @@ function PppTable({ users }: any) {
       <TableHeader className="bg-slate-50/50">
         <TableRow>
           <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 px-6">Account</TableHead>
+          <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4">IP Address</TableHead>
           <TableHead className="font-black text-[10px] uppercase tracking-widest text-slate-500 py-4 px-6 text-right">Session Time</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {users.map((user: any) => (
-          <TableRow key={user[".id"]} className="hover:bg-slate-50/50 border-slate-50">
+          <TableRow key={user[".id"]} className="hover:bg-slate-50/50 border-slate-50 transition-colors">
             <TableCell className="py-4 px-6">
-              <span className="font-bold text-slate-800">{user.name}</span>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-black border border-emerald-200">
+                  PP
+                </div>
+                <span className="font-bold text-slate-800">{user.name}</span>
+              </div>
             </TableCell>
-            <TableCell className="px-6 text-right font-mono font-bold text-emerald-600">{formatUptime(user.uptime)}</TableCell>
+            <TableCell>
+              <span className="text-[11px] font-mono font-bold text-slate-600">{user.address}</span>
+            </TableCell>
+            <TableCell className="px-6 text-right font-mono font-black text-emerald-600 bg-emerald-50/30">{formatUptime(user.uptime)}</TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -288,9 +314,9 @@ function PppTable({ users }: any) {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-2">
-      <Users size={24} className="opacity-20" />
-      <p className="text-[10px] font-bold uppercase tracking-widest">{message}</p>
+    <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-2 border-t border-slate-50">
+      <Users size={24} className="opacity-10" />
+      <p className="text-[10px] font-bold uppercase tracking-widest italic">{message}</p>
     </div>
   );
 }
