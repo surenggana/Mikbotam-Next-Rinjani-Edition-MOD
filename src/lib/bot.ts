@@ -57,6 +57,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
     try {
       await prisma.seller.create({
         data: {
+          adminId: config.adminId, // Crucial: Link to the bot owner's tenant
           userId: telegramId,
           sellerName: username,
           balance: "0",
@@ -65,7 +66,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           date: new Date().toISOString().split("T")[0]
         }
       });
-      return ctx.replyWithHTML(`✅ <b>Pendaftaran Berhasil!</b>\nID: <code>${telegramId}</code>\n\nStatus: <b>Pending (Menunggu Persetujuan Admin)</b>\nMohon tunggu sampai Admin mengaktifkan akun Anda.`, mainMenu);
+      return ctx.replyWithHTML(`✅ <b>Pendaftaran Berhasil!</b>\nID: <code>${telegramId}</code>\n\nStatus: <b>Pending</b>\nMohon hubungi Admin untuk mengaktifkan akun Anda agar bisa muncul di Dashboard.`, mainMenu);
     } catch (err: any) { return ctx.reply(`Gagal mendaftar: ${err.message}`); }
   });
 

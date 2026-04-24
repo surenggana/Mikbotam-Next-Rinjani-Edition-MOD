@@ -32,7 +32,7 @@ function rp(n) {
 }
 
 // ─── Helper: Transaksi Beli Voucher (tanpa auth()) ───────────────────────────
-async function beliVoucher({ userId, sellerName, price, username, password, expiry, routerName }) {
+async function beliVoucher({ userId, sellerName, price, username, password, expiry, routerName, adminId }) {
   const now = new Date();
   const timeStr = now.toTimeString().split(" ")[0];
   const dateStr = now.toISOString().split("T")[0];
@@ -47,6 +47,7 @@ async function beliVoucher({ userId, sellerName, price, username, password, expi
 
     await tx.transaction.create({
       data: {
+        adminId: adminId || seller.adminId, // Ensure adminId is recorded
         userId, sellerName,
         balanceStart: currentBalance.toString(),
         balanceEnd: newBalance.toString(),
@@ -75,6 +76,7 @@ async function beliVoucher({ userId, sellerName, price, username, password, expi
 
     await tx.report.create({
       data: {
+        adminId: adminId || seller.adminId,
         userId, userName: sellerName,
         price: price.toString(),
         status: "Success",
@@ -90,7 +92,7 @@ async function beliVoucher({ userId, sellerName, price, username, password, expi
 }
 
 // ─── Helper: Topup Reseller (tanpa auth()) ────────────────────────────────────
-async function topupReseller(targetUserId, amount, fromName = "Admin") {
+async function topupReseller(targetUserId, amount, fromName = "Admin", adminId) {
   const now = new Date();
   const timeStr = now.toTimeString().split(" ")[0];
   const dateStr = now.toISOString().split("T")[0];
@@ -109,6 +111,7 @@ async function topupReseller(targetUserId, amount, fromName = "Admin") {
 
     await tx.transaction.create({
       data: {
+        adminId: adminId || seller.adminId,
         userId: targetUserId,
         sellerName: seller.sellerName,
         balanceStart: currentBalance.toString(),
