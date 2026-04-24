@@ -366,7 +366,7 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           limitBytesOut: quotaBytes,
           limitBytesTotal: quotaBytes,
           comment: `vc-bot|${seller.sellerName}|${price}|${today}`,
-        });
+        }, config);
 
         await ctx.deleteMessage().catch(() => {});
         const passLine = pkg.type === "up"
