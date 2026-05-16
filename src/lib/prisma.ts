@@ -1,22 +1,19 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaPg } from '@prisma/adapter-pg'
+import pg from 'pg'
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-const initializePrisma = () => {
-  const dbUrl = process.env.DATABASE_URL || 'file:./prisma/mikbotam.db'
-  
-  // Prisma 7 PrismaBetterSqlite3 takes an object with url
-  const adapter = new PrismaBetterSqlite3({ 
-    url: dbUrl 
-  })
-  
-  return new PrismaClient({
-    adapter,
-    log: ['query'],
-  })
-}
+const connectionString = process.env.DATABASE_URL
 
-export const prisma = globalForPrisma.prisma || initializePrisma()
+const pool = new pg.Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    adapter,
+    log: ['error'],
+  })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

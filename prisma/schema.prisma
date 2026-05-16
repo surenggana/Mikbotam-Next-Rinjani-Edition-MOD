@@ -1,111 +1,108 @@
 generator client {
+  engineType = "library"
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Admin {
-  u_id      Int     @id @default(autoincrement())
-  u_user    String  @unique
-  u_pass    String
-  role      String  @default("ADMIN") // SUPERADMIN, ADMIN
-  token     String?
-  enct      String?
-  version   String? @default("")
-  lastlogin String?
-  ip        String?
-  user      String?
-  status    String? @default("Active")
-  
-  // Relations
-  routers      SystemConfig[]
-  sellers      Seller[]
-  transactions Transaction[]
-  reports      Report[]
+  u_id          Int             @id @default(autoincrement())
+  u_user        String          @unique
+  u_pass        String
+  role          String          @default("ADMIN")
+  token         String?
+  enct          String?
+  version       String?         @default("")
+  lastlogin     String?
+  ip            String?
+  user          String?
+  status        String?         @default("Active")
+  transactions  Transaction[]
+  sellers       Seller[]
+  routers       SystemConfig[]
+  reports       Report[]
   topupRequests TopupRequest[]
-  vouchers     VoucherConfig[]
+  vouchers      VoucherConfig[]
 
   @@map("mikhbotam_id")
 }
 
 model Customer {
-  no                Int     @id @default(autoincrement()) @map("No")
-  namaPelanggan     String? @map("Nama_Pelanggan")
-  alamatPelanggan   String? @map("Alamat_Pelanggan")
+  no                 Int     @id @default(autoincrement()) @map("No")
+  namaPelanggan      String? @map("Nama_Pelanggan")
+  alamatPelanggan    String? @map("Alamat_Pelanggan")
   kapasitasPelanggan String? @map("Kapasitas Pelangan")
-  cid               String? @map("CID")
-  ipRouter          String? @map("IP_Router")
-  ipAccessPoint     String? @map("IP_AcessPoint")
-  ipStation         String? @map("IP_Station")
-  locPop            String? @map("Loc_POP")
-  ssid              String  @map("SSID")
-  frequensi         String  @map("FREQUENSI")
-  vlan              String  @map("Vlan")
-  switch            String  @map("Switch")
-  routing           String  @map("Routing")
-  bgp               String  @map("BGP")
+  cid                String? @map("CID")
+  ipRouter           String? @map("IP_Router")
+  ipAccessPoint      String? @map("IP_AcessPoint")
+  ipStation          String? @map("IP_Station")
+  locPop             String? @map("Loc_POP")
+  ssid               String  @map("SSID")
+  frequensi          String  @map("FREQUENSI")
+  vlan               String  @map("Vlan")
+  switch             String  @map("Switch")
+  routing            String  @map("Routing")
+  bgp                String  @map("BGP")
 
   @@map("re_customer")
 }
 
 model Transaction {
-  no               Int     @id @default(autoincrement()) @map("No")
-  adminId          Int?    @map("admin_id") // Scoping for multi-tenant
-  userId           String? @map("id_user")
-  sellerName       String? @map("nama_seller")
-  balanceStart     String? @map("saldo_awal")
-  type             String? @map("Type_")
-  voucherBuy       String? @map("beli_voucher")
-  voucherMarkup    String? @map("markup_voucher")
-  markupFormat     String? @map("format_markup")
+  no                Int     @id @default(autoincrement()) @map("No")
+  adminId           Int?    @map("admin_id")
+  userId            String? @map("id_user")
+  sellerName        String? @map("nama_seller")
+  balanceStart      String? @map("saldo_awal")
+  type              String? @map("Type_")
+  voucherBuy        String? @map("beli_voucher")
+  voucherMarkup     String? @map("markup_voucher")
+  markupFormat      String? @map("format_markup")
   voucherArithmetic String? @map("armatika_voucher")
-  balanceEnd       String? @map("saldo_akhir")
-  topUp            String? @map("top_up")
-  topUpFromId      String? @map("top_up_fromid")
-  transferToId     String? @map("bagi_saldo_to_id")
-  transferAmount   String? @map("bagi_saldo")
-  voucherUsername  String? @map("username_voucher")
-  voucherPassword  String? @map("password_voucher")
-  voucherExpiry    String? @map("exp_voucher")
-  routerName       String? @map("Router_name")
-  sales            String? @map("penjualan")
-  totalVocSold     String? @map("total_voc_terjual")
-  description      String? @map("keterangan")
-  time             String? @map("Waktu")
-  date             String? @map("Tanggal")
-  origin           String? @default("BOT") @map("origin")
-
-  admin            Admin?  @relation(fields: [adminId], references: [u_id])
+  balanceEnd        String? @map("saldo_akhir")
+  topUp             String? @map("top_up")
+  topUpFromId       String? @map("top_up_fromid")
+  transferToId      String? @map("bagi_saldo_to_id")
+  transferAmount    String? @map("bagi_saldo")
+  voucherUsername   String? @map("username_voucher")
+  voucherPassword   String? @map("password_voucher")
+  voucherExpiry     String? @map("exp_voucher")
+  routerName        String? @map("Router_name")
+  sales             String? @map("penjualan")
+  totalVocSold      String? @map("total_voc_terjual")
+  description       String? @map("keterangan")
+  time              String? @map("Waktu")
+  date              String? @map("Tanggal")
+  origin            String? @default("BOT") @map("origin")
+  admin             Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("re_operating")
 }
 
 model Seller {
-  no                Int     @id @default(autoincrement()) @map("No")
-  adminId          Int?    @map("admin_id") // Scoping for multi-tenant
-  userId            String? @map("id_user")
-  sellerName        String? @map("nama_seller")
-  phoneNumber       String? @map("nomer_tlp")
-  balance           String? @default("0") @map("saldo")
-  vouchersSold      String? @default("0") @map("voucher_terjual")
-  debitSold         String? @map("jumlah_debit_terjual")
-  type              String? @map("type")
-  status            String? @map("status")
-  description       String? @map("keterangan")
-  join              String? @map("join")
-  other             String? @map("other")
-  otherTwo          String? @map("othertho")
-  otherThree        String? @map("othertree")
-  settings          String? @map("settings")
-  markupLast        String? @map("markuplast")
-  voucherLast       String? @map("voucherlast")
-  typeLast          String? @map("typelast")
-  time              String  @map("Waktu")
-  date              String  @map("Tanggal")
-
-  admin            Admin?  @relation(fields: [adminId], references: [u_id])
+  no           Int     @id @default(autoincrement()) @map("No")
+  adminId      Int?    @map("admin_id")
+  userId       String? @map("id_user")
+  sellerName   String? @map("nama_seller")
+  phoneNumber  String? @map("nomer_tlp")
+  balance      String? @default("0") @map("saldo")
+  vouchersSold String? @default("0") @map("voucher_terjual")
+  debitSold    String? @map("jumlah_debit_terjual")
+  type         String? @map("type")
+  status       String? @map("status")
+  description  String? @map("keterangan")
+  join         String? @map("join")
+  other        String? @map("other")
+  otherTwo     String? @map("othertho")
+  otherThree   String? @map("othertree")
+  settings     String? @map("settings")
+  markupLast   String? @map("markuplast")
+  voucherLast  String? @map("voucherlast")
+  typeLast     String? @map("typelast")
+  time         String  @map("Waktu")
+  date         String  @map("Tanggal")
+  admin        Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("re_settings")
 }
@@ -131,7 +128,7 @@ model Graphic {
 
 model SystemConfig {
   no               Int     @id @default(autoincrement()) @map("No")
-  adminId          Int?    @map("admin_id") // Scoping for multi-tenant
+  adminId          Int?    @map("admin_id")
   id               String  @map("_id")
   botToken         String? @map("Token_bot")
   botUsername      String? @map("Username_bot")
@@ -162,18 +159,17 @@ model SystemConfig {
   autoRefresh      String? @map("autoreflash")
   other            String? @map("other")
   otherTwo         String? @map("othertho")
-  otherThree        String? @map("othertree")
+  otherThree       String? @map("othertree")
   dateModified     String? @map("Tanggal_diubah")
-
   admin            Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("st_mikbotam")
 }
 
 model Monitoring {
-  id     Int     @id @default(autoincrement())
-  name   String? @map("Name")
-  host   String? @map("Host")
+  id       Int     @id @default(autoincrement())
+  name     String? @map("Name")
+  host     String? @map("Host")
   location String? @map("Lokasi")
 
   @@map("st_monitoring")
@@ -200,18 +196,17 @@ model PppConfig {
 }
 
 model Report {
-  no         Int     @id @default(autoincrement()) @map("No")
-  adminId    Int?    @map("admin_id") // Scoping for multi-tenant
-  userId     String? @map("id_user")
-  userName   String? @map("nama_user")
+  no          Int     @id @default(autoincrement()) @map("No")
+  adminId     Int?    @map("admin_id")
+  userId      String? @map("id_user")
+  userName    String? @map("nama_user")
   transaction String? @map("transaksi")
-  price      String? @default("0") @map("harga")
-  status     String? @map("status")
-  revenue    String? @default("0") @map("pendapatan")
-  time       String? @map("Waktu")
-  date       String? @map("Tanggal")
-
-  admin      Admin?  @relation(fields: [adminId], references: [u_id])
+  price       String? @default("0") @map("harga")
+  status      String? @map("status")
+  revenue     String? @default("0") @map("pendapatan")
+  time        String? @map("Waktu")
+  date        String? @map("Tanggal")
+  admin       Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("st_reportdata")
 }
@@ -227,55 +222,53 @@ model SmsGateway {
 }
 
 model VoucherConfig {
-  no            Int    @id @default(autoincrement()) @map("No")
-  adminId       Int?   @map("admin_id") // Scoping for multi-tenant
-  type          String @map("_type")
-  generate      String @map("_generate")
-  lastDate      String @map("_lastdate")
-  settings      String @map("_settings")
-  settingsOther String @map("_setingsother")
+  no             Int    @id @default(autoincrement()) @map("No")
+  adminId        Int?   @map("admin_id")
+  type           String @map("_type")
+  generate       String @map("_generate")
+  lastDate       String @map("_lastdate")
+  settings       String @map("_settings")
+  settingsOther  String @map("_setingsother")
   voucherHotspot String @map("_voucherhotpot")
-  hotspotUser   String @map("_hotspotuser")
-  hotspotPass   String @map("_hospotpass")
-  username      String @map("_usernamaner")
-  usermanUser   String @map("_usermanuser")
-  usermanPass   String @map("_usermanpass")
-  expiry        String @map("_experide")
-  routerName    String @map("_routername")
-  user          String @map("_user")
-  ip            String @map("_ip")
-  setNow        String @map("_setnow")
-  other         String @map("_other")
-  updateDate    String @map("_updatedate")
-
-  admin         Admin? @relation(fields: [adminId], references: [u_id])
+  hotspotUser    String @map("_hotspotuser")
+  hotspotPass    String @map("_hospotpass")
+  username       String @map("_usernamaner")
+  usermanUser    String @map("_usermanuser")
+  usermanPass    String @map("_usermanpass")
+  expiry         String @map("_experide")
+  routerName     String @map("_routername")
+  user           String @map("_user")
+  ip             String @map("_ip")
+  setNow         String @map("_setnow")
+  other          String @map("_other")
+  updateDate     String @map("_updatedate")
+  admin          Admin? @relation(fields: [adminId], references: [u_id])
 
   @@map("st_voucher")
 }
 
 model TopupRequest {
-  id          Int      @id @default(autoincrement())
-  adminId     Int?     @map("admin_id") // Scoping for multi-tenant
-  userId      String   @map("id_user")
-  sellerName  String   @map("nama_seller")
-  amount      Float
-  method      String
-  status      String   @default("Pending") // Pending, Success, Rejected
-  time        String
-  date        String
-  createdAt   DateTime @default(now())
-
-  admin       Admin?   @relation(fields: [adminId], references: [u_id])
+  id         Int      @id @default(autoincrement())
+  adminId    Int?     @map("admin_id")
+  userId     String   @map("id_user")
+  sellerName String   @map("nama_seller")
+  amount     Float
+  method     String
+  status     String   @default("Pending")
+  time       String
+  date       String
+  createdAt  DateTime @default(now())
+  admin      Admin?   @relation(fields: [adminId], references: [u_id])
 
   @@map("st_topup_request")
 }
 
 model DepositMethod {
-  id      Int     @id @default(autoincrement())
-  name    String  // Bank BCA, Dana, dll
-  number  String  // No Rekening
-  owner   String  // Atas Nama
-  active  Boolean @default(true)
+  id     Int     @id @default(autoincrement())
+  name   String
+  number String
+  owner  String
+  active Boolean @default(true)
 
   @@map("st_deposit_method")
 }
