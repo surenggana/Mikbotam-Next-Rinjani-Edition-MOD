@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { 
   Router, Bot, User, Save, Wifi, 
-  Loader2, Globe, RefreshCw, PowerOff
+  Loader2, Globe, RefreshCw, PowerOff, Bell
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
@@ -24,6 +24,14 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [webhookDomain, setWebhookDomain] = useState("");
   const [webhookInfo, setWebhookInfo] = useState<any>(null);
+
+  const parsedSettings = (() => {
+    try {
+      return settings?.settings ? JSON.parse(settings.settings) : {};
+    } catch {
+      return {};
+    }
+  })();
 
   useEffect(() => {
     getSystemSettings().then((res: any) => {
@@ -270,6 +278,32 @@ export default function SettingsPage() {
                 <Label className="text-[10px] font-bold text-slate-400 uppercase">Admin Chat ID</Label>
                 <Input name="ownerId" defaultValue={settings?.ownerId || ""} className="bg-slate-50/50 border-slate-200" />
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-sm border-slate-200/60">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-50">
+              <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                <Bell size={14} />
+                Voucher Login
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-2">
+              <Label className="text-[10px] font-bold text-slate-400 uppercase">Kirim Notifikasi Ke</Label>
+              <select
+                name="voucherLoginNotificationTarget"
+                defaultValue={parsedSettings.voucherLoginNotificationTarget || "legacy"}
+                className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 text-sm font-semibold text-slate-700 outline-none transition-all focus:bg-white focus:ring-3 focus:ring-ring/50"
+              >
+                <option value="legacy">Ikuti Script Profil</option>
+                <option value="reseller">Reseller / Seller</option>
+                <option value="admin">Admin / Owner</option>
+                <option value="both">Admin + Reseller</option>
+                <option value="none">Nonaktif</option>
+              </select>
+              <p className="text-[10px] leading-relaxed text-slate-400">
+                Berlaku untuk notifikasi voucher mulai dipakai dan expired dari callback MikroTik.
+              </p>
             </CardContent>
           </Card>
 

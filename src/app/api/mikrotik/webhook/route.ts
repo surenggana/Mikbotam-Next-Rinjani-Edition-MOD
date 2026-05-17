@@ -10,6 +10,8 @@ type MikbotamCallback = {
   routerId?: string | null;
 };
 
+type NotificationTarget = "legacy" | "reseller" | "admin" | "both" | "none";
+
 function parseCallbackInfo(info?: string | null) {
   const parts = (info || "").split("|");
   return {
@@ -28,6 +30,18 @@ function parseCallbackInfo(info?: string | null) {
 function shouldBroadcast(rmcde: string, index: number, fallback = true) {
   if (!rmcde) return fallback;
   return rmcde[index] === "1";
+}
+
+function getNotificationTarget(settings?: string | null): NotificationTarget {
+  if (!settings) return "legacy";
+
+  try {
+    const parsed = JSON.parse(settings);
+    const target = parsed?.voucherLoginNotificationTarget;
+    return ["legacy", "reseller", "admin", "both", "none"].includes(target) ? target : "legacy";
+  } catch {
+    return "legacy";
+  }
 }
 
 async function readPostPayload(req: NextRequest): Promise<MikbotamCallback> {
@@ -69,6 +83,39 @@ async function sendTelegram(bot: Telegraf, chatId: string | number | null | unde
     await bot.telegram.sendMessage(chatId, message, { parse_mode: "HTML" });
   } catch (err) {
     console.error(`Gagal mengirim notifikasi Telegram ke ${chatId}:`, err);
+  }
+}
+
+async function sendVoucherNotification({
+  bot,
+  config,
+  resellerChatId,
+  rmcde,
+  message,
+}: {
+  bot: Telegraf;
+  config: Awaited<ReturnType<typeof getConfig>>;
+  resellerChatId: string | number | null | undefined;
+  rmcde: string;
+  message: string;
+}) {
+  const target = getNotificationTarget(config?.settings);
+  const chatIds = new Set<string>();
+
+  if (target === "legacy") {
+    if (shouldBroadcast(rmcde, 3, true) && resellerChatId) chatIds.add(String(resellerChatId));
+    if (shouldBroadcast(rmcde, 0, false) && config?.ownerId) chatIds.add(String(config.ownerId));
+  } else if (target === "reseller") {
+    if (resellerChatId) chatIds.add(String(resellerChatId));
+  } else if (target === "admin") {
+    if (config?.ownerId) chatIds.add(String(config.ownerId));
+  } else if (target === "both") {
+    if (resellerChatId) chatIds.add(String(resellerChatId));
+    if (config?.ownerId) chatIds.add(String(config.ownerId));
+  }
+
+  for (const chatId of chatIds) {
+    await sendTelegram(bot, chatId, message);
   }
 }
 
@@ -122,12 +169,13 @@ async function handleMikbotamStatus(payload: MikbotamCallback) {
       `⏰ Expired: <b>${parsed.endDate || "-"} ${parsed.endTime || "-"}</b>\n` +
       `🏢 Router: <b>${routerName}</b>`;
 
-    if (shouldBroadcast(parsed.rmcde, 3, true)) {
-      await sendTelegram(bot, seller?.userId || resellerKey, message);
-    }
-    if (shouldBroadcast(parsed.rmcde, 0, false)) {
-      await sendTelegram(bot, config.ownerId, message);
-    }
+    await sendVoucherNotification({
+      bot,
+      config,
+      resellerChatId: seller?.userId || resellerKey,
+      rmcde: parsed.rmcde,
+      message,
+    });
   }
 
   if (status === "expired") {
@@ -144,12 +192,13 @@ async function handleMikbotamStatus(payload: MikbotamCallback) {
       `📌 Status: <b>${parsed.rmcde[1] === "1" ? "Masuk masa tenggat / hapus otomatis" : "User dinonaktifkan"}</b>\n` +
       `🏢 Router: <b>${routerName}</b>`;
 
-    if (shouldBroadcast(parsed.rmcde, 3, true)) {
-      await sendTelegram(bot, seller?.userId || resellerKey, message);
-    }
-    if (shouldBroadcast(parsed.rmcde, 0, false)) {
-      await sendTelegram(bot, config.ownerId, message);
-    }
+    await sendVoucherNotification({
+      bot,
+      config,
+      resellerChatId: seller?.userId || resellerKey,
+      rmcde: parsed.rmcde,
+      message,
+    });
   }
 
   return NextResponse.json({ status: "ok" });

@@ -160,6 +160,15 @@ export async function updateSystemSettings(formData: FormData) {
   const adminId = parseInt(session.user.id);
 
   const connectionMode = formData.get("connectionMode") as string;
+  const voucherLoginNotificationTarget = formData.get("voucherLoginNotificationTarget") as string;
+  const existing = await prisma.systemConfig.findFirst({
+    where: { adminId }
+  });
+
+  let settings = {};
+  try {
+    settings = existing?.settings ? JSON.parse(existing.settings) : {};
+  } catch {}
   
   const data: any = {
     adminId,
@@ -175,12 +184,10 @@ export async function updateSystemSettings(formData: FormData) {
     dnsName: formData.get("dnsName") as string,
   };
 
-  if (connectionMode) {
-    data.settings = JSON.stringify({ connectionMode });
-  }
-
-  const existing = await prisma.systemConfig.findFirst({
-    where: { adminId }
+  data.settings = JSON.stringify({
+    ...settings,
+    ...(connectionMode ? { connectionMode } : {}),
+    ...(voucherLoginNotificationTarget ? { voucherLoginNotificationTarget } : {}),
   });
 
   if (existing) {
