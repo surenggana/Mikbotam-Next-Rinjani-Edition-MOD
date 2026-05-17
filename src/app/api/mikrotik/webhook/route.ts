@@ -112,22 +112,7 @@ async function handleMikbotamStatus(payload: MikbotamCallback) {
       },
     });
 
-    const message =
-      `🔔 <b>VOUCHER MULAI DIPAKAI</b>\n\n` +
-      `👤 User: <code>${parsed.user}</code>\n` +
-      `📦 Paket: <b>${parsed.voucher || "-"}</b>\n` +
-      `🔗 MAC: <code>${parsed.mac || "-"}</code>\n` +
-      `👥 Seller: <b>${seller?.sellerName || parsed.reseller || "-"}</b>\n` +
-      `▶️ Mulai: <b>${parsed.startDate || "-"} ${parsed.startTime || "-"}</b>\n` +
-      `⏰ Expired: <b>${parsed.endDate || "-"} ${parsed.endTime || "-"}</b>\n` +
-      `🏢 Router: <b>${routerName}</b>`;
-
-    if (shouldBroadcast(parsed.rmcde, 3, true)) {
-      await sendTelegram(bot, seller?.userId || resellerKey, message);
-    }
-    if (shouldBroadcast(parsed.rmcde, 0, false)) {
-      await sendTelegram(bot, config.ownerId, message);
-    }
+    // Notifikasi voucher mulai dipakai dinonaktifkan atas permintaan user
   }
 
   if (status === "expired") {
@@ -217,18 +202,11 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    message =
-      `🔔 <b>User Login</b>\n\n` +
-      `👤 User: <code>${user}</code>\n` +
-      `📍 IP: <code>${ip}</code>\n` +
-      `🔗 MAC: <code>${mac}</code>\n` +
-      `🏢 Router: <b>${routerName}</b>`;
+    // Notifikasi login dinonaktifkan
+    message = "";
   } else if (action === "logout") {
-    message =
-      `🔕 <b>User Logout</b>\n\n` +
-      `👤 User: <code>${user}</code>\n` +
-      `📍 IP: <code>${ip}</code>\n` +
-      `🏢 Router: <b>${routerName}</b>`;
+    // Notifikasi logout dinonaktifkan
+    message = "";
   } else if (action === "expired") {
     message =
       `⏰ <b>Voucher Expired</b>\n\n` +
