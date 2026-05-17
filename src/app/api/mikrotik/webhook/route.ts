@@ -112,7 +112,22 @@ async function handleMikbotamStatus(payload: MikbotamCallback) {
       },
     });
 
-    // Notifikasi voucher mulai dipakai dinonaktifkan atas permintaan user
+    const message =
+      `🔔 <b>VOUCHER MULAI DIPAKAI</b>\n\n` +
+      `👤 User: <code>${parsed.user}</code>\n` +
+      `📦 Paket: <b>${parsed.voucher || "-"}</b>\n` +
+      `🔗 MAC: <code>${parsed.mac || "-"}</code>\n` +
+      `👥 Seller: <b>${seller?.sellerName || parsed.reseller || "-"}</b>\n` +
+      `▶️ Mulai: <b>${parsed.startDate || "-"} ${parsed.startTime || "-"}</b>\n` +
+      `⏰ Expired: <b>${parsed.endDate || "-"} ${parsed.endTime || "-"}</b>\n` +
+      `🏢 Router: <b>${routerName}</b>`;
+
+    if (shouldBroadcast(parsed.rmcde, 3, true)) {
+      await sendTelegram(bot, seller?.userId || resellerKey, message);
+    }
+    if (shouldBroadcast(parsed.rmcde, 0, false)) {
+      await sendTelegram(bot, config.ownerId, message);
+    }
   }
 
   if (status === "expired") {
