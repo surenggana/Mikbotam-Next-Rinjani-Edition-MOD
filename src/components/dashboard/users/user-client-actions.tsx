@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Edit2, Wallet, Trash2, MoreHorizontal, CheckCircle } from "lucide-react";
+import { UserPlus, Edit2, Wallet, Trash2, MoreHorizontal, CheckCircle, ArrowDownCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +24,7 @@ interface UserClientActionsProps {
 export function UserClientActions({ user, mode }: UserClientActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTopupOpen, setIsTopupOpen] = useState(false);
+  const [topupMode, setTopupMode] = useState<"topup" | "topdown">("topup");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -56,11 +57,24 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
     }
   };
 
+  const openTopup = () => {
+    setTopupMode("topup");
+    setIsTopupOpen(true);
+  };
+
+  const openTopdown = () => {
+    setTopupMode("topdown");
+    setIsTopupOpen(true);
+  };
+
   if (mode === "page-header") {
     return (
       <>
-        <Button onClick={() => setIsModalOpen(true)} className="bg-primary hover:bg-emerald-700 flex items-center gap-2 shadow-sm">
-          <UserPlus size={18} />
+        <Button 
+          onClick={() => setIsModalOpen(true)} 
+          className="bg-primary hover:bg-primary/90 rounded-xl font-bold uppercase text-[10px] tracking-widest h-11 px-6 shadow-lg shadow-primary/20 flex items-center gap-2"
+        >
+          <UserPlus size={16} />
           Tambah User
         </Button>
         <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
@@ -77,35 +91,48 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
             variant="outline"
             onClick={handleApprove} 
             disabled={isApproving}
-            className="h-8 flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 hover:text-emerald-700 font-bold px-3 shadow-sm transition-all"
+            className="rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50 font-bold uppercase text-[10px] tracking-widest h-8 px-3 shadow-sm transition-all flex items-center gap-1.5"
           >
             <CheckCircle className="h-3.5 w-3.5" />
             {isApproving ? "..." : "Approve"}
           </Button>
         )}
 
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={openTopup}
+          className="rounded-xl h-8 border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-bold uppercase text-[10px] tracking-widest px-3 flex items-center gap-1.5"
+        >
+          <Wallet className="h-3.5 w-3.5" />
+          Topup
+        </Button>
+
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={openTopdown}
+          className="rounded-xl h-8 border-amber-100 text-amber-600 hover:bg-amber-50 font-bold uppercase text-[10px] tracking-widest px-3 flex items-center gap-1.5"
+        >
+          <ArrowDownCircle className="h-3.5 w-3.5" />
+          Tarik
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
+            <Button variant="ghost" className="h-8 w-8 p-0 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+              <MoreHorizontal size={16} />
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem 
-              onClick={() => setIsTopupOpen(true)}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <Wallet className="h-4 w-4 text-emerald-600" />
-              Topup Saldo
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 cursor-pointer">
+          <DropdownMenuContent align="end" className="w-44 rounded-xl shadow-xl border-slate-200">
+            <DropdownMenuItem onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 cursor-pointer text-xs font-bold uppercase tracking-wider">
               <Edit2 className="h-4 w-4 text-slate-600" />
               Edit User
             </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={() => setIsConfirmOpen(true)} 
-              className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+              className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 text-xs font-bold uppercase tracking-wider"
             >
               <Trash2 className="h-4 w-4" />
               Hapus User
@@ -124,6 +151,7 @@ export function UserClientActions({ user, mode }: UserClientActionsProps) {
         isOpen={isTopupOpen}
         onClose={() => setIsTopupOpen(false)}
         user={user}
+        mode={topupMode}
       />
 
       <ConfirmDialog

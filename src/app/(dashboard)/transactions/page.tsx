@@ -1,13 +1,12 @@
 import { Suspense } from "react";
 import { getRecentTransactions } from "@/lib/actions/stats";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Search, Filter, History } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { History } from "lucide-react";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { ExportTransactionsButton } from "@/components/dashboard/transactions/export-button";
 import { TransactionTableClient } from "@/components/dashboard/transactions/transaction-table-client";
+import { TableSearch } from "@/components/dashboard/table-search";
 
 export default async function TransactionsPage({
   searchParams,
@@ -33,21 +32,9 @@ export default async function TransactionsPage({
 
       <Card className="shadow-md border-slate-100 overflow-hidden">
         <CardHeader className="pb-4 border-b bg-white">
-          <form className="flex flex-col md:flex-row md:items-center gap-4">
-             <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                <Input 
-                  name="search"
-                  placeholder="Cari seller, voucher, atau keterangan..." 
-                  className="pl-10 bg-slate-50 border-none focus-visible:ring-emerald-500" 
-                  defaultValue={search}
-                />
-             </div>
-             <Button type="submit" variant="secondary" size="sm" className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200">
-               <Filter size={14} />
-               Terapkan Filter
-             </Button>
-          </form>
+          <div className="flex items-center gap-4">
+             <TableSearch placeholder="Cari seller, voucher, atau keterangan..." defaultValue={search} />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Suspense key={search + page} fallback={<TableSkeleton columns={7} rows={15} />}>

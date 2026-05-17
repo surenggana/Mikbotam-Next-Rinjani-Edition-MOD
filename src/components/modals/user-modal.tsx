@@ -32,6 +32,7 @@ const userSchema = z.object({
   balance: z.string().refine((val) => !isNaN(parseFloat(val)), {
     message: "Saldo harus berupa angka",
   }),
+  voucherGroup: z.string().min(1, "Group voucher wajib diisi"),
 });
 
 type UserFormValues = z.infer<typeof userSchema>;
@@ -50,6 +51,13 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
       sellerName: user?.sellerName || "",
       userId: user?.userId || "",
       balance: user?.balance?.toString() || "0",
+      voucherGroup: (() => {
+        try {
+          return JSON.parse(user?.settings || "{}").voucherGroup || "default";
+        } catch {
+          return "default";
+        }
+      })(),
     },
   });
 
@@ -70,6 +78,7 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
         formData.append("sellerName", payload.sellerName);
         formData.append("userId", payload.userId);
         formData.append("balance", payload.balance.toString());
+        formData.append("voucherGroup", payload.voucherGroup || "default");
         await addSeller(formData);
         toast.success("User berhasil ditambahkan");
       }
@@ -134,12 +143,26 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
               )}
             />
 
-            <DialogFooter className="pt-4">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <FormField
+              control={form.control}
+              name="voucherGroup"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Group Voucher</FormLabel>
+                  <FormControl>
+                    <Input placeholder="default / 1 / 2" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter className="pt-4 gap-2">
+              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="rounded-xl h-11 px-6 font-bold uppercase text-[10px] tracking-widest border-slate-200">
                 Batal
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-emerald-700">
-                {isSubmitting && <Loader2 className="animate-spin mr-2" size={16} />}
+              <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-6 font-bold uppercase text-[10px] tracking-widest shadow-lg shadow-primary/20">
+                {isSubmitting ? <Loader2 className="animate-spin mr-2" size={16} /> : null}
                 {user ? "Simpan Perubahan" : "Tambah User"}
               </Button>
             </DialogFooter>

@@ -1,22 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import SessionProvider from "@/components/session-provider";
 
-const geistSans = Geist({
-  subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-geist-sans',
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-geist-mono',
-});
-
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mikbotam.angelicadigital.id"),
   title: "Mikbotam Next - Rinjani Edition",
   description: "Modern Evolution of MikroTik Bot Management using Next.js 16. Support RouterOS 7, Multi-Router, and Advanced Bandwidth Management.",
   keywords: ["mikrotik", "bot telegram", "hotspot manager", "pppoe manager", "mikbotam", "rinjani edition"],
@@ -28,7 +16,7 @@ export const metadata: Metadata = {
     siteName: "Mikbotam Next",
     images: [
       {
-        url: "/logo-outline.svg",
+        url: "/logo-mark.svg",
         width: 800,
         height: 600,
         alt: "Mikbotam Next Logo",
@@ -41,13 +29,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Mikbotam Next - Rinjani Edition",
     description: "Modern MikroTik Bot Management System",
-    images: ["/logo-outline.svg"],
+    images: ["/logo-mark.svg"],
   },
   icons: {
     icon: [
-      { url: "/logo-outline.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
     ],
-    apple: "/logo-outline.svg",
+    apple: "/logo-mark.svg",
   }
 };
 
@@ -59,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      className="antialiased"
     >
       <body className="min-h-screen bg-background font-sans">
         <SessionProvider>

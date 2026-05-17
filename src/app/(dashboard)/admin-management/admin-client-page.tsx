@@ -51,7 +51,7 @@ const AdminRow = memo(({ admin, onDelete, onEdit }: { admin: any, onDelete: (id:
         <Button 
           variant="outline" 
           size="icon" 
-          className="h-8 w-8 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50"
+          className="h-9 w-9 rounded-xl text-emerald-500 border-slate-200 hover:text-emerald-700 hover:bg-emerald-50 shadow-sm transition-all"
           onClick={() => onEdit(admin)}
         >
           <Edit2 size={14} />
@@ -59,7 +59,7 @@ const AdminRow = memo(({ admin, onDelete, onEdit }: { admin: any, onDelete: (id:
         <Button 
           variant="outline" 
           size="icon" 
-          className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
+          className="h-9 w-9 rounded-xl text-slate-400 border-slate-200 hover:text-red-600 hover:bg-red-50 shadow-sm transition-all"
           onClick={() => onDelete(admin.u_id)}
         >
           <Trash2 size={14} />

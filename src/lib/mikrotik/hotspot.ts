@@ -1,4 +1,5 @@
 import { getMikrotikConnection, getActiveConfig } from "../mikrotik";
+import { buildHotspotVoucherOnLoginScript } from "./scripts";
 
 export async function getHotspotUsers() {
   const conn = await getMikrotikConnection();
@@ -37,21 +38,20 @@ export async function addHotspotProfile(params: {
     const config = await getActiveConfig();
     const serverUrl = config?.dnsName || "https://mikbotam.angelicadigital.id";
     
-    // SCRIPT AUTO DELETE & LOCK MAC (Sesuai Mikbotam Master PHP)
     let onLoginScript = params.onLogin || "";
     
     if (!onLoginScript && params.validity && params.validity !== "0") {
-      const lockMacCmd = params.lockMac ? `[/ip hotspot user set mac-address=$"mac-address" [find where name=$user]];` : "";
-      
-      // Logika asli BangAchil: Membuat scheduler otomatis saat login pertama kali
-      onLoginScript = `{:local date [/system clock get date ];:local time [/system clock get time ];:local uptime (${params.validity});:local macadd $"mac-address";${lockMacCmd}[/system scheduler add disabled=no interval=$uptime name=$user on-event="[/ip hotspot active remove [find where user=$user]];[/ip hotspot user remove [find where name=$user]];[/ip hotspot cookie remove [find user=$user]];[/sys sch re [find where name=$user]]" start-date=$date start-time=$time];}`;
+      onLoginScript = buildHotspotVoucherOnLoginScript({
+        validity: params.validity,
+        serverUrl,
+        lockMac: params.lockMac,
+        removeAccount: true,
+        broadcastAdmin: false,
+        broadcastReseller: true,
+      });
     }
 
-    // Tambahkan notifikasi webhook ke Dashboard (Opsional, untuk monitoring real-time)
-    const webhookLogin = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=login&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
-    onLoginScript = webhookLogin + (onLoginScript ? " " + onLoginScript : "");
-
-    const defaultOnLogout = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=logout&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
+    const defaultOnLogout = `:local ipaddr $"address";/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=logout&user=$user&ip=$ipaddr" mode=http keep-result=no;`;
 
     const cmd = ["/ip/hotspot/user/profile/add", "=name=" + params.name];
     if (params.sharedUsers) cmd.push("=shared-users=" + params.sharedUsers);
@@ -135,17 +135,19 @@ export async function updateHotspotProfile(id: string, params: {
     const config = await getActiveConfig();
     const serverUrl = config?.dnsName || "https://mikbotam.angelicadigital.id";
     
-    // RE-GENERATE SCRIPTS (Sesuai Mikbotam Master PHP)
     let onLoginScript = "";
     if (params.validity && params.validity !== "0") {
-      const lockMacCmd = params.lockMac ? `[/ip hotspot user set mac-address=$"mac-address" [find where name=$user]];` : "";
-      onLoginScript = `{:local date [/system clock get date ];:local time [/system clock get time ];:local uptime (${params.validity});:local macadd $"mac-address";${lockMacCmd}[/system scheduler add disabled=no interval=$uptime name=$user on-event="[/ip hotspot active remove [find where user=$user]];[/ip hotspot user remove [find where name=$user]];[/ip hotspot cookie remove [find user=$user]];[/sys sch re [find where name=$user]]" start-date=$date start-time=$time];}`;
+      onLoginScript = buildHotspotVoucherOnLoginScript({
+        validity: params.validity,
+        serverUrl,
+        lockMac: params.lockMac,
+        removeAccount: true,
+        broadcastAdmin: false,
+        broadcastReseller: true,
+      });
     }
     
-    const webhookLogin = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=login&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
-    onLoginScript = webhookLogin + (onLoginScript ? " " + onLoginScript : "");
-
-    const onLogoutScript = `/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=logout&user=$user&mac=$mac-address&ip=$address" mode=http keep-result=no;`;
+    const onLogoutScript = `:local ipaddr $"address";/tool fetch url="${serverUrl}/api/mikrotik/webhook?action=logout&user=$user&ip=$ipaddr" mode=http keep-result=no;`;
 
     const cmd = ["/ip/hotspot/user/profile/set", "=.id=" + id, "=name=" + params.name];
     if (params.sharedUsers) cmd.push("=shared-users=" + params.sharedUsers);

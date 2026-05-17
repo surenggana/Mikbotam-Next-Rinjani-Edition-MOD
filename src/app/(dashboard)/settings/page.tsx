@@ -6,24 +6,24 @@ import {
   updateSystemSettings, 
   testRouterConnection, 
   setTelegramWebhook,
-  downloadDatabaseAction 
+  unsetTelegramWebhook,
+  getTelegramWebhookInfo,
 } from "@/lib/actions/settings";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Router, Bot, User, Save, Wifi, 
-  Loader2, Database, Download, Globe, ShieldCheck, Zap
+  Loader2, Globe, RefreshCw, PowerOff
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [webhookDomain, setWebhookDomain] = useState("");
+  const [webhookInfo, setWebhookInfo] = useState<any>(null);
 
   useEffect(() => {
     getSystemSettings().then((res: any) => {
@@ -56,17 +56,26 @@ export default function SettingsPage() {
     else toast.error(res.message);
   };
 
-  const handleDownloadBackup = async () => {
-    const res = await downloadDatabaseAction();
-    if (!res) return toast.error("File database tidak ditemukan");
-    
-    const blob = new Blob([new Uint8Array(res.data)], { type: 'application/octet-stream' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = res.name;
-    a.click();
-    toast.success("Backup database berhasil didownload.");
+  const handleUnsetWebhook = async () => {
+    if (!settings?.botToken) return toast.error("Token bot belum diatur!");
+    const res = await unsetTelegramWebhook(settings.botToken);
+    if (res.success) {
+      toast.success(res.message);
+      setWebhookInfo(null);
+    } else {
+      toast.error(res.message);
+    }
+  };
+
+  const handleGetWebhookInfo = async () => {
+    if (!settings?.botToken) return toast.error("Token bot belum diatur!");
+    const res = await getTelegramWebhookInfo(settings.botToken);
+    if (res.success) {
+      setWebhookInfo(res.info);
+      toast.success("Info webhook berhasil diambil.");
+    } else {
+      toast.error(res.message);
+    }
   };
 
   if (loading) return (
@@ -185,14 +194,59 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                <Button
-                  type="button"
-                  onClick={handleSetWebhook}
-                  className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-11 px-6 shadow-md shadow-emerald-200"
-                >
-                  <Globe size={14} className="mr-2" />
-                  Aktifkan Webhook
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleSetWebhook}
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-11 px-6 shadow-md shadow-emerald-200"
+                  >
+                    <Globe size={14} className="mr-2" />
+                    Aktifkan Webhook
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGetWebhookInfo}
+                    className="rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 font-black uppercase text-[10px] tracking-widest h-11 px-5"
+                  >
+                    <RefreshCw size={14} className="mr-2" />
+                    Cek Info
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleUnsetWebhook}
+                    className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-black uppercase text-[10px] tracking-widest h-11 px-5"
+                  >
+                    <PowerOff size={14} className="mr-2" />
+                    Unset
+                  </Button>
+                </div>
+
+                {webhookInfo && (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-xs space-y-2">
+                    <div>
+                      <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Status URL</div>
+                      <div className="font-mono text-[11px] text-slate-700 break-all">{webhookInfo.url || "Belum aktif"}</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Pending</div>
+                        <div className="font-black text-slate-900">{webhookInfo.pendingUpdateCount}</div>
+                      </div>
+                      <div>
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Max Conn</div>
+                        <div className="font-black text-slate-900">{webhookInfo.maxConnections || "-"}</div>
+                      </div>
+                    </div>
+                    {webhookInfo.lastErrorMessage && (
+                      <div className="rounded-lg bg-red-50 border border-red-100 p-3 text-red-700">
+                        <div className="text-[9px] font-black uppercase tracking-widest">Last Error</div>
+                        <div>{webhookInfo.lastErrorMessage}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -216,22 +270,6 @@ export default function SettingsPage() {
                 <Label className="text-[10px] font-bold text-slate-400 uppercase">Admin Chat ID</Label>
                 <Input name="ownerId" defaultValue={settings?.ownerId || ""} className="bg-slate-50/50 border-slate-200" />
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-sm border-amber-100 bg-amber-50/30">
-            <CardHeader className="border-b border-amber-100/50">
-              <CardTitle className="text-xs font-black uppercase tracking-widest text-amber-700 flex items-center gap-2">
-                <Database size={14} />
-                Maintenance
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <Button type="button" variant="outline" onClick={handleDownloadBackup} className="w-full bg-white border-amber-200 text-amber-700 hover:bg-amber-100 rounded-xl font-bold uppercase text-[10px] tracking-widest h-11 shadow-sm">
-                <Download size={14} className="mr-2" />
-                Backup Database
-              </Button>
-              <p className="text-[9px] text-amber-600 font-medium italic text-center">Disarankan backup rutin secara berkala.</p>
             </CardContent>
           </Card>
 

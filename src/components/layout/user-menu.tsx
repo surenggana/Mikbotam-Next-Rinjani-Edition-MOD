@@ -35,16 +35,24 @@ export function UserMenu({ name }: UserMenuProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel className="text-xs text-slate-500 font-medium">{name}</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs text-slate-500 font-medium">
+          {name}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/dashboard/profile" className="cursor-pointer flex items-center gap-2">
+          <Link
+            href="/profile"
+            className="cursor-pointer flex items-center gap-2"
+          >
             <User size={14} />
             Edit Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/dashboard/settings" className="cursor-pointer flex items-center gap-2">
+          <Link
+            href="/dashboard/settings"
+            className="cursor-pointer flex items-center gap-2"
+          >
             <Settings size={14} />
             Settings
           </Link>

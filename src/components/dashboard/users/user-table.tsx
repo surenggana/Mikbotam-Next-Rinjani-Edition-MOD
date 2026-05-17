@@ -19,6 +19,14 @@ const rupiah = (amount: string | null) => {
   }).format(parseFloat(amount || "0"));
 };
 
+const getVoucherGroup = (settings?: string | null) => {
+  try {
+    return JSON.parse(settings || "{}").voucherGroup || "default";
+  } catch {
+    return "default";
+  }
+};
+
 const UserRow = memo(({ user }: { user: any }) => (
   <TableRow key={user.no} className="hover:bg-slate-50/50 transition-colors group">
     <TableCell className="py-4 px-6">
@@ -34,6 +42,11 @@ const UserRow = memo(({ user }: { user: any }) => (
     <TableCell className="font-mono text-[11px] text-slate-400">{user.userId}</TableCell>
     <TableCell>
       <span className="text-slate-900 font-black tracking-tight">{rupiah(user.balance)}</span>
+    </TableCell>
+    <TableCell>
+      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-[9px] font-black text-slate-600 uppercase border border-slate-200">
+        {getVoucherGroup(user.settings)}
+      </span>
     </TableCell>
     <TableCell>
       <div className="flex items-center gap-2">
@@ -87,6 +100,7 @@ export function UserTable({ users }: { users: any[] }) {
             <TableHead className="w-[250px] py-4 font-black text-[10px] uppercase tracking-widest text-slate-400 px-6">Nama Seller</TableHead>
             <TableHead className="py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">ID Telegram</TableHead>
             <TableHead className="py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Saldo</TableHead>
+            <TableHead className="py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Group</TableHead>
             <TableHead className="py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Voucher</TableHead>
             <TableHead className="py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Status</TableHead>
             <TableHead className="text-right py-4 font-black text-[10px] uppercase tracking-widest text-slate-400 px-6">Aksi</TableHead>

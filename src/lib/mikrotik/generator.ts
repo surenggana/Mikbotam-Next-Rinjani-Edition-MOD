@@ -3,7 +3,7 @@
  */
 export function generateVoucher(params: {
   length: number;
-  type: "up" | "low" | "num" | "mix";
+  type: "up" | "low" | "num" | "mix" | "letters" | "full" | "lowNum";
   prefix?: string;
 }) {
   let charset = "";
@@ -15,6 +15,9 @@ export function generateVoucher(params: {
     case "up": charset = uppercase; break;
     case "low": charset = lowercase; break;
     case "num": charset = numbers; break;
+    case "letters": charset = uppercase + lowercase; break;
+    case "full": charset = uppercase + lowercase + numbers; break;
+    case "lowNum": charset = lowercase + numbers; break;
     case "mix": charset = uppercase + numbers; break;
     default: charset = uppercase + numbers;
   }

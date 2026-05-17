@@ -74,6 +74,8 @@ model Transaction {
   description       String? @map("keterangan")
   time              String? @map("Waktu")
   date              String? @map("Tanggal")
+  useTime           String? @map("Waktu_pakai")
+  expiredTime       String? @map("Waktu_expired")
   origin            String? @default("BOT") @map("origin")
   admin             Admin?  @relation(fields: [adminId], references: [u_id])
 

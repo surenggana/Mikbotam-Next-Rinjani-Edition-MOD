@@ -2,9 +2,11 @@
 
 import { prisma } from "../prisma";
 import { format } from "date-fns";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { sendBotMessage } from "@/lib/bot";
 import { formatIDR } from "@/lib/formatters";
+import { formatToMikbotamDate } from "@/lib/mikrotik/utils";
 
 export async function beliVoucher(params: {
   userId: string;
@@ -65,7 +67,7 @@ export async function beliVoucher(params: {
         voucherMarkup: params.markup.toString(), // Reseller profit
         voucherUsername: params.username,
         voucherPassword: params.password,
-        voucherExpiry: params.expiry,
+        voucherExpiry: params.expiry, // Duration string (e.g., 3h, 1d)
         description: params.service === "ppp" ? "PPP Success" : "Hotspot Success",
         routerName: params.routerName,
         origin: params.origin || "BOT",
@@ -149,18 +151,30 @@ export async function topupReseller(targetUserId: string, amount: number, origin
       },
     });
 
-    return { success: true, newBalance };
+    return {
+      success: true,
+      sellerName: seller.sellerName,
+      balanceStart: currentBalance,
+      newBalance,
+      adminName,
+      time: timeStr,
+      date: dateStr,
+    };
   });
 
   // NOTIFICATION: Inform the reseller about the topup
   if (result.success) {
     const msg = 
-      `💰 <b>SALDO DITAMBAHKAN!</b>\n\n` +
-      `Halo, Admin telah menambahkan saldo ke akun Anda.\n\n` +
-      `💵 Jumlah: <b>${formatIDR(amount)}</b>\n` +
-      `💳 Saldo Sekarang: <b>${formatIDR(result.newBalance)}</b>\n` +
-      `🕒 Waktu: ${timeStr} ${dateStr}\n\n` +
-      `Terima kasih telah bergabung!`;
+      `✅ <b>TOPUP BERHASIL</b>\n\n` +
+      `👤 Reseller: <b>${result.sellerName || "-"}</b>\n` +
+      `🆔 ID Telegram: <code>${targetUserId}</code>\n` +
+      `💵 Nominal Topup: <b>${formatIDR(amount)}</b>\n\n` +
+      `💳 Saldo Sebelumnya: ${formatIDR(result.balanceStart)}\n` +
+      `💰 Saldo Sekarang: <b>${formatIDR(result.newBalance)}</b>\n\n` +
+      `📌 Status: <b>Success</b>\n` +
+      `👮 Diproses oleh: ${result.adminName}\n` +
+      `🕒 Waktu: ${result.date} ${result.time}\n\n` +
+      `Silakan gunakan saldo untuk membeli voucher melalui /menu.`;
     
     // Non-blocking notification
     sendBotMessage(adminId, targetUserId, msg).catch(() => {});
@@ -172,6 +186,89 @@ export async function topupReseller(targetUserId: string, amount: number, origin
 // Alias for Web Dashboard Action
 export async function topupResellerAction(targetUserId: string, amount: number) {
   return await topupReseller(targetUserId, amount, "WEB");
+}
+
+export async function topdownReseller(targetUserId: string, amount: number, origin: string = "WEB", forcedAdminId?: number) {
+  let adminId: number;
+  let adminName = "Admin";
+
+  if (forcedAdminId) {
+    adminId = forcedAdminId;
+    adminName = "Bot Admin";
+  } else {
+    const session = await auth();
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    adminId = parseInt(session.user.id);
+    adminName = session.user.name || "Admin";
+  }
+
+  const now = new Date();
+  const { time: timeStr, date: dateStr } = formatToMikbotamDate(now);
+
+  const result = await prisma.$transaction(async (tx) => {
+    // 1. Get current balance
+    const seller = await tx.seller.findFirst({
+      where: { userId: targetUserId, adminId },
+    });
+
+    if (!seller) throw new Error("Seller tidak ditemukan.");
+
+    const currentBalance = parseFloat(seller.balance || "0");
+    if (currentBalance < amount) throw new Error("Saldo reseller tidak mencukupi untuk ditarik.");
+    
+    const newBalance = currentBalance - amount;
+
+    // 2. Update balance
+    await tx.seller.update({
+      where: { no: seller.no },
+      data: {
+        balance: newBalance.toString(),
+        time: timeStr,
+        date: dateStr,
+      },
+    });
+
+    // 3. Log to re_operating
+    await tx.transaction.create({
+      data: {
+        adminId, 
+        userId: targetUserId,
+        sellerName: seller.sellerName,
+        balanceStart: currentBalance.toString(),
+        balanceEnd: newBalance.toString(),
+        topUp: `-${amount}`, // Negative topup means topdown
+        description: "topdown",
+        topUpFromId: adminName,
+        origin,
+        time: timeStr,
+        date: dateStr,
+      },
+    });
+
+    return {
+      success: true,
+      sellerName: seller.sellerName,
+      balanceStart: currentBalance,
+      newBalance,
+    };
+  });
+
+  // NOTIFICATION: Inform the reseller
+  if (result.success) {
+    const msg = 
+      `📉 <b>PENARIKAN SALDO!</b>\n\n` +
+      `Halo, Admin telah menarik saldo dari akun Anda.\n\n` +
+      `👤 Reseller: <b>${result.sellerName || "-"}</b>\n` +
+      `💵 Jumlah: <b>${formatIDR(amount)}</b>\n` +
+      `💳 Saldo Sebelumnya: ${formatIDR(result.balanceStart)}\n` +
+      `💳 Saldo Sekarang: <b>${formatIDR(result.newBalance)}</b>\n` +
+      `🕒 Waktu: ${timeStr} ${dateStr}`;
+    
+    sendBotMessage(adminId, targetUserId, msg).catch(() => {});
+  }
+
+  revalidatePath("/users");
+  return result;
 }
 
 export async function transferBalance(senderUserId: string, targetUserId: string, amount: number, adminId?: number) {
@@ -287,4 +384,47 @@ export async function transferBalance(senderUserId: string, targetUserId: string
   }
 
   return result;
+}
+
+export async function getTopupRequests({
+  page = 1,
+  limit = 20,
+  search = "",
+}: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
+
+  const skip = (page - 1) * limit;
+  const where: any = {
+    adminId,
+    ...(search ? {
+      OR: [
+        { sellerName: { contains: search } },
+        { userId: { contains: search } },
+        { method: { contains: search } },
+        { status: { contains: search } },
+      ],
+    } : {})
+  };
+
+  const [requests, total] = await Promise.all([
+    prisma.topupRequest.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.topupRequest.count({ where }),
+  ]);
+
+  return {
+    requests,
+    totalPages: Math.ceil(total / limit),
+    totalCount: total,
+  };
 }

@@ -1,14 +1,13 @@
 #!/bin/bash
 
-# --- MIKBOTAM NEXT - RINJANI EDITION (MOD v2.3.0) ---
-# Auto Deployment Script for Linux (Ubuntu/Debian)
+# --- MIKBOTAM NEXT - RINJANI EDITION (MOD v2.4.0) ---
+# Auto Deployment Script for Linux (Ubuntu/Debian) - PostgreSQL Version
 
 APP_PORT=3560
 APP_DOMAIN="mikbotam.angelicadigital.id"
-APP_DIR="/var/www/mikbotam"
 PM2_NAME="mikbotam-next"
 
-echo "🚀 Starting Mikbotam Next Deployment (v2.3.0)..."
+echo "🚀 Starting Mikbotam Next Deployment (v2.4.0)..."
 
 # 1. Update & Check Node.js
 sudo apt update
@@ -26,52 +25,49 @@ then
     sudo npm install -g pm2
 fi
 
-# 3. Install Nginx
-if ! command -v nginx &> /dev/null
+# 3. Check for PostgreSQL
+if ! command -v psql &> /dev/null
 then
-    echo "📦 Installing Nginx..."
-    sudo apt install -y nginx
+    echo "⚠️ Warning: PostgreSQL is not detected on this system."
+    echo "Please ensure PostgreSQL is installed and running before proceeding."
+    echo "Run: sudo apt install postgresql postgresql-contrib"
 fi
 
 # 4. Setup Environment Variables
 if [ ! -f .env ]; then
     echo "📝 Creating .env file..."
-    if [ -f .env.example ]; then
-        cp .env.example .env
-    else
-        echo "AUTH_SECRET=$(openssl rand -base64 32)" > .env
-    fi
-    echo "✅ .env created with random AUTH_SECRET."
+    cat > .env <<EOF
+DATABASE_URL="postgresql://user:password@localhost:5432/mikbotam"
+NEXTAUTH_SECRET="$(openssl rand -base64 32)"
+NEXTAUTH_URL="http://$APP_DOMAIN"
+EOF
+    echo "✅ .env created. PLEASE UPDATE DATABASE_URL manually!"
 fi
 
 # 5. Fresh Install Dependencies
-echo "📦 Installing/Refreshing Dependencies..."
+echo "📦 Installing Dependencies..."
 rm -rf node_modules package-lock.json
 npm install
 
-# 6. Fix SQLite Binary Compatibility
-echo "🔧 Rebuilding SQLite binaries for current Node.js version..."
-npm rebuild better-sqlite3
-
-# 7. Database Setup
-echo "🗄️ Syncing Database Schema..."
+# 6. Database Setup
+echo "🗄️ Generating Prisma Client..."
 npx prisma generate
-npx prisma db push
+# Note: db push is skipped here to avoid data loss on production
+# Run it manually if you are sure: npx prisma db push
 
-# 8. Build Project
+# 7. Build Project
 echo "🏗️ Building Next.js Application..."
 npm run build
 
-# 9. Run with PM2 on port 3560
-echo "🏁 Launching Application on port $APP_PORT..."
+# 8. Run with PM2
+echo "🏁 Launching Application..."
 pm2 delete $PM2_NAME 2>/dev/null
-PORT=$APP_PORT pm2 start npm --name "$PM2_NAME" -- start
+pm2 start npm --name "$PM2_NAME" -- run start
 
-# 10. Auto Start on Reboot
+# 9. Auto Start on Reboot
 pm2 save
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u $USER --hp $HOME
 
-# 11. Configure Nginx reverse proxy
+# 10. Configure Nginx reverse proxy
 echo "🌐 Configuring Nginx for $APP_DOMAIN..."
 sudo tee /etc/nginx/sites-available/$APP_DOMAIN > /dev/null <<EOF
 server {
@@ -93,8 +89,8 @@ server {
 EOF
 
 sudo ln -sf /etc/nginx/sites-available/$APP_DOMAIN /etc/nginx/sites-enabled/$APP_DOMAIN
-sudo nginx -t && sudo systemctl reload nginx
+# sudo nginx -t && sudo systemctl reload nginx
 
 echo "✅ Mikbotam Next is now running!"
-echo "🔗 Local:  http://localhost:$APP_PORT"
-echo "🔗 Domain: http://$APP_DOMAIN"
+echo "🔗 Access: http://$APP_DOMAIN"
+echo "⚠️ IMPORTANT: Update your .env with real database credentials!"

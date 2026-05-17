@@ -13,11 +13,12 @@ export async function getDashboardStats() {
   const start = format(startOfMonth(now), "yyyy-MM-dd");
   const end = format(endOfMonth(now), "yyyy-MM-dd");
 
-  // 1. Count Vouchers (milik admin ini)
-  const voucherCount = await prisma.transaction.count({
+  // 1. Count Vouchers (Hanya Hotspot 'vc' yang sukses di bulan ini)
+  const voucherCount = await prisma.report.count({
     where: {
       adminId,
-      description: "Success",
+      transaction: "vc",
+      status: "Success",
       date: {
         gte: start,
         lte: end,

@@ -54,6 +54,7 @@ export async function addSeller(formData: FormData) {
   const userId = formData.get("userId") as string;
   const sellerName = formData.get("sellerName") as string;
   const balance = formData.get("balance") as string;
+  const voucherGroup = (formData.get("voucherGroup") as string) || "default";
   const now = new Date();
 
   await prisma.seller.create({
@@ -63,6 +64,7 @@ export async function addSeller(formData: FormData) {
       sellerName,
       balance: balance || "0",
       vouchersSold: "0",
+      settings: JSON.stringify({ voucherGroup }),
       status: "Active",
       time: now.toLocaleTimeString(),
       date: now.toISOString().split("T")[0],
@@ -82,9 +84,18 @@ export async function updateSeller(no: number, data: any) {
   const existing = await prisma.seller.findUnique({ where: { no } });
   if (!existing || existing.adminId !== adminId) throw new Error("Akses ditolak.");
 
+  const { voucherGroup, ...sellerData } = data;
+  if (voucherGroup !== undefined) {
+    let settings: any = {};
+    try {
+      settings = JSON.parse(existing.settings || "{}");
+    } catch {}
+    sellerData.settings = JSON.stringify({ ...settings, voucherGroup: voucherGroup || "default" });
+  }
+
   await prisma.seller.update({
     where: { no },
-    data,
+    data: sellerData,
   });
 
   revalidatePath("/users");

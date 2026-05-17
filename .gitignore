@@ -3,6 +3,7 @@
 # Claude Code local instructions
 CLAUDE.md
 AGENTS.md
+.claude/
 
 # dependencies
 /node_modules
@@ -29,6 +30,7 @@ AGENTS.md
 *.pem
 
 # debug
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -43,6 +45,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
 
 /src/generated/
 /src/generated/prisma

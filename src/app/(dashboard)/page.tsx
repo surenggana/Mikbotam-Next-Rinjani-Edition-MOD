@@ -348,11 +348,11 @@ export default async function DashboardPage() {
                       <TableCell className="py-4 px-6">
                         <span className={cn(
                           "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
-                          tx.description === 'Success' || tx.description === 'topup' 
+                          tx.description?.toLowerCase().includes('success') || tx.description === 'topup' 
                             ? "bg-emerald-50 text-emerald-600 border-emerald-100" 
                             : "bg-amber-50 text-amber-700 border-amber-100"
                         )}>
-                          {tx.description === 'Success' || tx.description === 'topup' ? 'Success' : 'Process'}
+                          {tx.description?.toLowerCase().includes('success') || tx.description === 'topup' ? 'Success' : 'Process'}
                         </span>
                       </TableCell>
                     </TableRow>

@@ -1,20 +1,20 @@
 import { Suspense } from "react";
 import { getSellers } from "@/lib/actions/users";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { UserTable } from "@/components/dashboard/users/user-table";
 import { UserClientActions } from "@/components/dashboard/users/user-client-actions";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { TableSearch } from "@/components/dashboard/table-search";
 
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: { page?: string; search?: string };
+  searchParams: Promise<{ page?: string; search?: string }>;
 }) {
-  const page = parseInt(searchParams.page || "1");
-  const search = searchParams.search || "";
+  const resolvedParams = await searchParams;
+  const page = parseInt(resolvedParams.page || "1");
+  const search = resolvedParams.search || "";
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -29,16 +29,7 @@ export default async function UsersPage({
       <Card className="shadow-md border-slate-100 overflow-hidden">
         <CardHeader className="pb-4 border-b bg-white">
           <div className="flex items-center gap-4">
-             <form className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                <Input 
-                  name="search" 
-                  placeholder="Cari nama atau ID user..." 
-                  className="pl-10 bg-slate-50 border-none focus-visible:ring-emerald-500" 
-                  defaultValue={search}
-                />
-                {/* Submit on Enter is default for single input forms */}
-             </form>
+             <TableSearch placeholder="Cari nama atau ID user..." defaultValue={search} />
           </div>
         </CardHeader>
         <CardContent className="p-0">

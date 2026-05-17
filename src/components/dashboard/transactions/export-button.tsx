@@ -39,10 +39,9 @@ export function ExportTransactionsButton() {
   return (
     <Button 
       variant="outline" 
-      size="sm" 
       onClick={handleExport}
       disabled={loading}
-      className="flex items-center gap-2 border-slate-200 hover:bg-slate-50 transition-colors"
+      className="rounded-xl border-slate-200 h-11 px-6 font-bold uppercase text-[10px] tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2"
     >
       {loading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
       Export CSV

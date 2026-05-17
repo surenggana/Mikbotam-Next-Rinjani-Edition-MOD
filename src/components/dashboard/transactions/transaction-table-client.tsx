@@ -22,6 +22,13 @@ const rupiah = (amount: string | null) => {
   }).format(parseFloat(amount || "0"));
 };
 
+const splitDateTime = (value?: string | null) => {
+  if (!value) return null;
+  const parts = value.trim().split(/\s+/);
+  if (parts.length >= 2) return { date: parts[0], time: parts.slice(1).join(" ") };
+  return { date: "", time: value };
+};
+
 const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => void }) => (
   <TableRow key={tx.no} className="hover:bg-slate-50/30 transition-colors group">
     <TableCell className="text-xs text-slate-500 font-mono">
@@ -52,9 +59,39 @@ const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => v
       </div>
       {tx.voucherUsername && (
         <div className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-1 font-mono">
-          ID: {tx.voucherUsername}
+          U: {tx.voucherUsername} {tx.voucherPassword ? `/ P: ${tx.voucherPassword}` : ""}
         </div>
       )}
+    </TableCell>
+    <TableCell>
+      {tx.voucherUsername ? (
+        <div className="space-y-1">
+          {(() => {
+            const start = splitDateTime(tx.useTime);
+            const exp = splitDateTime(tx.expiredTime);
+            if (!start) {
+              return (
+                <span className="text-[10px] font-black px-2 py-1 rounded-md inline-block border bg-amber-50 text-amber-700 border-amber-100 uppercase tracking-wider">
+                  belum terdata
+                </span>
+              );
+            }
+            return (
+              <>
+                <div className="text-[10px] font-bold px-1.5 py-0.5 rounded-md inline-block border bg-blue-50 text-blue-700 border-blue-100">
+                  Start : {start.time} | {start.date}
+                </div>
+                <div className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-100">
+                  Expired : {exp ? `${exp.time} | ${exp.date}` : "-"}
+                </div>
+              </>
+            );
+          })()}
+          {tx.description === "Hotspot Expired" && (
+            <div className="text-[9px] font-black text-red-600 uppercase tracking-widest">Expired</div>
+          )}
+        </div>
+      ) : "-"}
     </TableCell>
     <TableCell className={cn("text-right font-bold", tx.topUp ? "text-emerald-600" : "text-slate-900")}>
       {tx.topUp ? "+" : ""}{rupiah(tx.voucherBuy || tx.topUp)}
@@ -101,7 +138,8 @@ export function TransactionTableClient({ transactions }: { transactions: any[] }
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-[180px] font-bold">Waktu & Tanggal</TableHead>
             <TableHead className="font-bold">Reseller</TableHead>
-            <TableHead className="font-bold">Aktivitas</TableHead>
+            <TableHead className="font-bold">Aktivitas / Voucher</TableHead>
+            <TableHead className="font-bold">Masa Aktif</TableHead>
             <TableHead className="font-bold text-right">Nominal</TableHead>
             <TableHead className="font-bold text-right">Saldo Akhir</TableHead>
             <TableHead className="text-center font-bold">Aksi</TableHead>

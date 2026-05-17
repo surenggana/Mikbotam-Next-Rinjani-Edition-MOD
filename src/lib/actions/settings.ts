@@ -5,8 +5,6 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { RouterOSAPI } from 'node-routeros';
 import { Telegraf } from 'telegraf';
-import fs from 'fs';
-import path from 'path';
 
 export async function setTelegramWebhook(token: string, url: string) {
   const session = await auth();
@@ -22,24 +20,40 @@ export async function setTelegramWebhook(token: string, url: string) {
   }
 }
 
-export async function downloadDatabaseAction() {
+export async function unsetTelegramWebhook(token: string) {
   const session = await auth();
-  // SECURITY: Only Superadmin can download the entire physical DB
-  if (!session || (session.user as any).role !== "SUPERADMIN") {
-    throw new Error("Unauthorized: Superadmin only can backup database");
-  }
-
-  const dbPath = path.join(process.cwd(), 'prisma', 'mikbotam.db');
-  if (!fs.existsSync(dbPath)) return null;
-
-  const stats = fs.statSync(dbPath);
-  const data = fs.readFileSync(dbPath);
+  if (!session?.user?.id) throw new Error("Unauthorized");
   
-  return {
-    name: 'mikbotam_master_backup.db',
-    data: Array.from(data),
-    size: stats.size
-  };
+  const bot = new Telegraf(token);
+  try {
+    await bot.telegram.deleteWebhook();
+    return { success: true, message: "Webhook berhasil dinonaktifkan." };
+  } catch (e: any) {
+    return { success: false, message: `Gagal unset webhook: ${e.message}` };
+  }
+}
+
+export async function getTelegramWebhookInfo(token: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const bot = new Telegraf(token);
+  try {
+    const info = await bot.telegram.getWebhookInfo();
+    return {
+      success: true,
+      info: {
+        url: info.url || "",
+        pendingUpdateCount: info.pending_update_count || 0,
+        lastErrorDate: info.last_error_date || null,
+        lastErrorMessage: info.last_error_message || "",
+        maxConnections: info.max_connections || null,
+        allowedUpdates: info.allowed_updates || [],
+      },
+    };
+  } catch (e: any) {
+    return { success: false, message: `Gagal mengambil info webhook: ${e.message}` };
+  }
 }
 
 export async function getSystemSettings() {
@@ -184,5 +198,64 @@ export async function updateSystemSettings(formData: FormData) {
   }
 
   revalidatePath("/settings");
+  return { success: true };
+}
+
+export async function getBotTexts() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
+
+  const config = await prisma.systemConfig.findFirst({
+    where: { adminId },
+    select: { textSetup: true }
+  });
+
+  const defaults = {
+    daftar: "Selamat datang! Silakan ketik /daftar untuk registrasi.",
+    menu: "Silakan pilih menu di bawah ini:",
+    informasi: "Layanan Hotspot & PPP Aktif 24 Jam.",
+    saldoFooter: "Terima kasih telah berlangganan.",
+    voucherFooter: "Simpan voucher ini baik-baik.",
+    depositInfo: "Transfer ke Rekening BRI 1234-5678-90 a/n Admin"
+  };
+
+  if (!config?.textSetup) return defaults;
+
+  try {
+    const saved = JSON.parse(config.textSetup);
+    return { ...defaults, ...saved };
+  } catch (e) {
+    return defaults;
+  }
+}
+
+export async function updateBotTexts(texts: any) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+  const adminId = parseInt(session.user.id);
+
+  const existing = await prisma.systemConfig.findFirst({
+    where: { adminId }
+  });
+
+  const jsonStr = JSON.stringify(texts);
+
+  if (existing) {
+    await prisma.systemConfig.update({
+      where: { no: existing.no },
+      data: { textSetup: jsonStr },
+    });
+  } else {
+    await prisma.systemConfig.create({
+      data: {
+        adminId,
+        id: Date.now().toString(),
+        textSetup: jsonStr,
+      },
+    });
+  }
+
+  revalidatePath("/settings/bot-editor");
   return { success: true };
 }

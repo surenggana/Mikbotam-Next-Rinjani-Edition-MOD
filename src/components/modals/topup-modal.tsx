@@ -6,20 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Wallet, Loader2 } from "lucide-react";
-import { topupResellerAction } from "@/lib/actions/transactions";
+import { topupResellerAction, topdownReseller } from "@/lib/actions/transactions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface TopupModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: any;
+  mode?: "topup" | "topdown";
 }
 
-export function TopupModal({ isOpen, onClose, user }: TopupModalProps) {
+export function TopupModal({ isOpen, onClose, user, mode = "topup" }: TopupModalProps) {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const isTopup = mode === "topup";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,15 +31,18 @@ export function TopupModal({ isOpen, onClose, user }: TopupModalProps) {
 
     setLoading(true);
     try {
-      const res = await topupResellerAction(user.userId, parseFloat(amount));
+      const res = isTopup 
+        ? await topupResellerAction(user.userId, parseFloat(amount))
+        : await topdownReseller(user.userId, parseFloat(amount));
+
       if (res.success) {
-        toast.success(`Berhasil topup ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(parseFloat(amount))} ke ${user.sellerName}`);
+        toast.success(`Berhasil ${isTopup ? 'topup' : 'menarik'} ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(parseFloat(amount))} ${isTopup ? 'ke' : 'dari'} ${user.sellerName}`);
         onClose();
         setAmount("");
         router.refresh();
       }
     } catch (error: any) {
-      toast.error(error.message || "Gagal melakukan topup");
+      toast.error(error.message || `Gagal melakukan ${mode}`);
     } finally {
       setLoading(false);
     }
@@ -46,8 +53,8 @@ export function TopupModal({ isOpen, onClose, user }: TopupModalProps) {
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Wallet className="text-emerald-600" size={20} />
-            Topup Saldo Reseller
+            <Wallet className={isTopup ? "text-emerald-600" : "text-amber-600"} size={20} />
+            {isTopup ? "Topup Saldo Reseller" : "Tarik Saldo Reseller"}
           </DialogTitle>
         </DialogHeader>
         
@@ -59,26 +66,26 @@ export function TopupModal({ isOpen, onClose, user }: TopupModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount" className="text-xs font-bold uppercase text-slate-500">Jumlah Topup (Rp)</Label>
+            <Label htmlFor="amount" className="text-xs font-bold uppercase text-slate-500">Jumlah {isTopup ? "Topup" : "Penarikan"} (Rp)</Label>
             <Input
               id="amount"
               type="number"
               placeholder="Contoh: 50000"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="h-12 text-lg font-bold text-emerald-600"
+              className={cn("h-12 text-lg font-bold", isTopup ? "text-emerald-600" : "text-amber-600")}
               required
               autoFocus
             />
           </div>
 
-          <DialogFooter className="pt-2">
-            <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
+          <DialogFooter className="pt-2 gap-2">
+            <Button type="button" variant="outline" onClick={onClose} disabled={loading} className="rounded-xl h-11 px-6 font-bold uppercase text-[10px] tracking-widest border-slate-200">
               Batal
             </Button>
-            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-100" disabled={loading}>
+            <Button type="submit" className={cn("rounded-xl h-11 px-6 font-bold uppercase text-[10px] tracking-widest shadow-lg transition-all", isTopup ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200" : "bg-amber-600 hover:bg-amber-700 shadow-amber-200")} disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wallet className="mr-2 h-4 w-4" />}
-              Proses Topup
+              Proses {isTopup ? "Topup" : "Tarik Saldo"}
             </Button>
           </DialogFooter>
         </form>

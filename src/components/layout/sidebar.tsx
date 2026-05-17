@@ -51,7 +51,7 @@ const menuItems = [
   ]},
   { group: "Communication", items: [
     { name: "Broadcast Center", href: "/broadcast", icon: Send },
-    { name: "Bot Configuration", href: "/settings/bot-editor", icon: MessageSquare },
+    { name: "Global Bot Texts", href: "/settings/bot-editor", icon: MessageSquare },
   ]},
   { group: "System", items: [
     { name: "My Profile", href: "/profile", icon: UserCircle },

@@ -1,13 +1,14 @@
 # 🚀 Mikbotam Next - Rinjani Edition
 
-### _Modern Evolution MOD v2.3.0_
+### _Modern Evolution MOD v2.4.0_
 
-![Mikbotam Banner](https://img.shields.io/badge/Mikrotik-Hotspot%20Bot-emerald?style=for-the-badge&logo=mikrotik)
+![Mikrotik](https://img.shields.io/badge/Mikrotik-Hotspot%20Bot-emerald?style=for-the-badge&logo=mikrotik)
 ![Next.js 16](https://img.shields.io/badge/Next.js%2016-black?style=for-the-badge&logo=next.js)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Prisma ORM](https://img.shields.io/badge/Prisma%20ORM-blue?style=for-the-badge&logo=prisma)
-![Version](https://img.shields.io/badge/version-2.3.0-emerald?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-2.4.0-emerald?style=for-the-badge)
 
-**Mikbotam Next** adalah evolusi revolusioner dari versi **Krakatau (Master)**. Dibangun ulang dari nol menggunakan **Next.js 16**, aplikasi ini menawarkan performa kilat, keamanan tingkat tinggi, dan fitur yang sepenuhnya mendukung **RouterOS 7**.
+**Mikbotam Next** adalah evolusi revolusioner dari versi **Krakatau (Master)**. Dibangun ulang dari nol menggunakan **Next.js 16**, aplikasi ini menawarkan performa kilat, keamanan tingkat tinggi, dan fitur yang sepenuhnya mendukung **RouterOS 7**. Versi Rinjani Edition ini telah ditingkatkan untuk penggunaan skala industri dengan basis data **PostgreSQL**.
 
 ---
 
@@ -18,46 +19,75 @@
 
 ---
 
-## 🆕 Changelog v2.3.0
+## 🔑 Login Default (Admin Master)
 
-- ✅ **Interactive Admin Notifications** — Notifikasi instan ke Telegram Admin untuk pendaftaran reseller baru dan request topup, lengkap dengan tombol interaktif **[SETUJUI]** dan **[TOLAK]**.
-- ✅ **Dynamic Voucher Generation** — Pengaturan panjang karakter, tipe karakter (Angka/Huruf/Campur), dan mode (User=Pass atau Beda) kini bisa diatur per paket voucher melalui dashboard.
-- ✅ **Commission-Based Deduction** — Penyesuaian alur keuangan: Saldo reseller dipotong berdasarkan **(Harga Jual - Komisi)**, sesuai dengan logika asli Mikbotam Master.
-- ✅ **Advanced Active Monitoring** — Halaman monitoring kini menampilkan detail real-time yang lengkap: Nama User, IP Address, **MAC Address**, Uptime, dan **Sisa Waktu (Remaining Time)** voucher.
-- ✅ **Enhanced SEO & Branding** — Metadata media sosial (WhatsApp/FB/Twitter) kini menampilkan logo asli Mikbotam dan deskripsi profesional. Favicon juga sudah diseragamkan.
-- ✅ **Strict Access Control** — Pembatasan akses command bot yang lebih ketat antara Admin dan Reseller untuk menjamin keamanan multi-tenant.
-- ✅ **Automatic Binary Rebuild** — Skrip deployment otomatis membangun ulang modul `better-sqlite3` untuk menjamin stabilitas database di berbagai versi Node.js.
+Untuk login pertama kali ke dashboard, gunakan akun berikut:
+- **Username:** `admin`
+- **Password:** `admin123`
+
+_Segera ubah password Anda di menu Profile setelah berhasil masuk._
+
+---
+
+## 🆕 Changelog v2.4.0 (Latest Updates)
+
+- ✅ **Database Migration to PostgreSQL** — Migrasi penuh dari SQLite ke PostgreSQL untuk performa yang lebih stabil, konkurensi tinggi, dan skalabilitas data reseller yang lebih besar.
+- ✅ **Voucher Usage Tracking (HilwaNet Logic)** — Fitur pelacakan waktu nyata: Sekarang riwayat transaksi mencatat kapan voucher **Mulai Digunakan (Start Time)** dan kapan akan **Habis (Expiry Time)** secara otomatis saat user login pertama kali di MikroTik.
+- ✅ **Balance Correction (Top Up & Top Down)** — Admin kini memiliki kontrol penuh untuk menambah atau **menarik kembali (Withdraw/Top Down)** saldo reseller langsung melalui dashboard dengan notifikasi instan ke Bot.
+- ✅ **Global Bot Text Editor** — Kustomisasi balasan otomatis Bot Telegram (teks /daftar, menu, informasi, footer saldo/voucher) sekarang bisa dilakukan langsung melalui UI Dashboard tanpa menyentuh kodingan.
+- ✅ **Premium UI/UX Standardization** — Seluruh antarmuka telah distandardisasi menggunakan desain "Premium" dengan tombol *rounded-xl*, tipografi *uppercase bold*, dan bayangan lembut untuk pengalaman pengguna yang lebih profesional.
+- ✅ **Advanced Data Tables** — Fitur pencarian cerdas (**Debounced Search**) dan navigasi halaman (**Pagination**) yang sinkron dengan URL di seluruh tabel utama (Users, Transaksi, Topup).
+- ✅ **Next.js 16 & Turbopack Ready** — Optimalisasi performa pengembangan dan runtime menggunakan mesin *bundling* terbaru untuk efisiensi tinggi.
 
 ---
 
 ## 🚀 Panduan Instalasi
 
-### 1. VPS Linux (Ubuntu/Debian) - Rekomendasi Utama
+### 1. Prasyarat
+*   Node.js v20 atau lebih baru.
+*   Database **PostgreSQL** sudah terpasang dan berjalan.
 
-Gunakan skrip otomatis untuk instalasi yang paling stabil dan cepat:
+### 2. Instalasi (Development)
 
-```bash
-wget -qO- https://raw.githubusercontent.com/surenggana/Mikbotam-Next-Rinjani-Edition-MOD/main/deploy.sh | bash
-```
-
-> **Note:** Skrip ini akan otomatis menginstal Node.js 20, PM2, dependencies, dan melakukan build aplikasi serta setting port otomatis.
-
-### 2. Instalasi Manual (Development)
-
-1.  **Clone Repository:** `git clone https://github.com/surenggana/Mikbotam-Next-Rinjani-Edition-MOD.git`
-2.  **Instal Dependencies:** `npm install`
-3.  **Database Sync:** `npx prisma generate && npx prisma db push`
-4.  **Jalankan:** `npm run dev`
+1.  **Clone Repository:**
+    ```bash
+    git clone https://github.com/theworldinyourhand/Mikbotam-Next-Rinjani-Edition-MOD.git
+    cd Mikbotam-Next-Rinjani-Edition-MOD
+    ```
+2.  **Konfigurasi Environment:**
+    Buat file `.env` di root direktori:
+    ```env
+    DATABASE_URL="postgresql://user:password@localhost:5432/mikbotam"
+    NEXTAUTH_SECRET="rahasia-anda"
+    NEXTAUTH_URL="http://localhost:3560"
+    ```
+3.  **Instal Dependencies:**
+    ```bash
+    npm install
+    ```
+4.  **Sinkronisasi Database:**
+    ```bash
+    npx prisma generate
+    npx prisma db push
+    ```
+5.  **Jalankan:**
+    ```bash
+    npm run dev
+    ```
+    Akses dashboard di: `http://localhost:3560`
 
 ---
 
-## ✨ Fitur Utama Rinjani Edition
+## ✨ Fitur Utama Rinjani Edition (Next-Gen)
 
-- ✅ **Native ROS 7 Support:** Cloud Cleaner logic untuk hapus voucher otomatis di MikroTik.
-- ✅ **Interactive Telegram Bot:** Full menu keyboard & perintah interaktif untuk kemudahan reseller.
-- ✅ **Multi-Router:** Kelola banyak router MikroTik dalam satu dashboard admin.
-- ✅ **Security First:** Password BCrypt, Stateless JWT, dan integrasi Webhook Telegram yang aman.
-- ✅ **Real-time Analytics:** Dashboard interaktif dengan grafik pendapatan harian menggunakan Recharts.
+- 🗄️ **Industrial Grade Database** — Migrasi penuh ke **PostgreSQL** untuk performa yang lebih tangguh, konkurensi tinggi, dan skalabilitas data reseller tanpa batas.
+- 🕒 **Real-time Voucher Tracking** — Pantau siklus hidup voucher secara presisi: Mencatat otomatis waktu **Start Login** dan menghitung waktu **Expired** langsung di dashboard.
+- 💰 **Precision Balance Control** — Manajemen saldo reseller yang fleksibel dengan fitur **Top-Up** dan **Top-Down (Tarik Saldo)** disertai notifikasi Telegram instan.
+- 🤖 **Global Bot Customizer** — Ubah semua teks balasan Bot Telegram (Daftar, Menu, Info, Footer) secara dinamis melalui UI Dashboard tanpa menyentuh kode.
+- ⚡ **Premium UI & Search Engine** — Antarmuka modern dengan standar desain premium, dilengkapi fitur **Debounced Search** dan **Pagination** yang sangat cepat di semua tabel.
+- 📡 **Native RouterOS 7 Support** — Dukungan penuh untuk firmware MikroTik terbaru, termasuk sistem pembersihan voucher expired otomatis yang lebih cerdas.
+- 🏢 **Single Router Management** — Kelola satu router MikroTik Anda dengan ribuan reseller dalam satu dashboard tersentralisasi secara efisien.
+- 🔐 **Enterprise Security** — Pengamanan berlapis dengan **BCrypt Hashing**, Middleware Protection, dan integrasi Webhook Telegram yang aman.
 
 ---
 

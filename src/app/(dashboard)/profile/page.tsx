@@ -31,7 +31,7 @@ export default async function AdminProfilePage() {
       data: updateData
     });
 
-    revalidatePath("/dashboard/profile");
+    revalidatePath("/profile");
   }
 
   return (
