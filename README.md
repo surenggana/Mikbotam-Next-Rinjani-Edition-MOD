@@ -69,6 +69,7 @@ _Segera ubah password Anda di menu Profile setelah berhasil masuk._
     ```bash
     npx prisma generate
     npx prisma db push
+    npx prisma db seed
     ```
 5.  **Jalankan:**
     ```bash

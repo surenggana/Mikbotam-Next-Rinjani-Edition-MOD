@@ -12,17 +12,21 @@ export function TrafficChart({ interfaceName = "ether1" }: { interfaceName?: str
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const stats = await getInterfaceTraffic(interfaceName);
-      if (stats.success) {
-        const now = new Date();
-        const time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-        
-        setData(prev => {
-          const newData = [...prev, { time, rx: stats.rx / 1024, tx: stats.tx / 1024 }];
-          if (newData.length > 20) return newData.slice(1);
-          return newData;
-        });
-        setCurrent({ rx: stats.rx, tx: stats.tx });
+      try {
+        const stats = await getInterfaceTraffic(interfaceName);
+        if (stats && stats.success) {
+          const now = new Date();
+          const time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+          
+          setData(prev => {
+            const newData = [...prev, { time, rx: stats.rx / 1024, tx: stats.tx / 1024 }];
+            if (newData.length > 20) return newData.slice(1);
+            return newData;
+          });
+          setCurrent({ rx: stats.rx, tx: stats.tx });
+        }
+      } catch (err) {
+        console.debug("Traffic poll failed:", err);
       }
     }, 3000);
 
