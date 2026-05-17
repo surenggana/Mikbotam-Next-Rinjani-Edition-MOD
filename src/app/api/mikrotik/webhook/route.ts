@@ -79,6 +79,7 @@ async function getConfig(routerId?: string | null, adminId?: number | null) {
 
 async function sendTelegram(bot: Telegraf, chatId: string | number | null | undefined, message: string) {
   if (!chatId) return;
+  if (!message.trim()) return;
   try {
     await bot.telegram.sendMessage(chatId, message, { parse_mode: "HTML" });
   } catch (err) {
