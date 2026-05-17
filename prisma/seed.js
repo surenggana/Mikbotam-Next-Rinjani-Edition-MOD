@@ -1,12 +1,11 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+const { PrismaClient } = require("@prisma/client");
+const bcrypt = require("bcrypt");
 
 const prisma = new PrismaClient();
 
 async function main() {
   const hashedPassword = await bcrypt.hash("admin123", 10);
   
-  // Create or Update default SUPERADMIN
   const admin = await prisma.admin.upsert({
     where: { u_user: "admin" },
     update: {
@@ -26,7 +25,6 @@ async function main() {
     },
   });
 
-  console.log({ admin });
   console.log("✅ Seed database success: User 'admin' is now SUPERADMIN");
 }
 
