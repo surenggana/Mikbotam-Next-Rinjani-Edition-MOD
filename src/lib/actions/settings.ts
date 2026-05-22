@@ -135,6 +135,9 @@ export async function deleteRouterConfig(no: number) {
 }
 
 export async function testRouterConnection(data: any) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
   const conn = new RouterOSAPI({
     host: data.routerIp,
     user: data.routerUsername,

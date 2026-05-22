@@ -12,6 +12,8 @@ import {
 } from "@/lib/mikrotik/hotspot";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { format } from "date-fns";
 
 async function validateSession() {
   const session = await auth();
@@ -35,9 +37,30 @@ export async function addHotspotUserAction(params: {
   profile: string;
   limitUptime?: string;
 }) {
-  await validateSession();
+  const adminId = await validateSession();
   const res = await addHotspotUser({ server: "all", ...params });
+  const now = new Date();
+
+  await prisma.transaction.create({
+    data: {
+      adminId,
+      userId: `admin:${adminId}`,
+      sellerName: "Admin",
+      balanceStart: "0",
+      balanceEnd: "0",
+      voucherBuy: "0",
+      voucherUsername: params.name,
+      voucherPassword: params.password,
+      voucherExpiry: params.limitUptime,
+      description: "Hotspot Manual Add",
+      origin: "WEB",
+      time: format(now, "HH:mm:ss"),
+      date: format(now, "yyyy-MM-dd"),
+    },
+  });
+
   revalidatePath("/hotspot-users");
+  revalidatePath("/transactions");
   return res;
 }
 

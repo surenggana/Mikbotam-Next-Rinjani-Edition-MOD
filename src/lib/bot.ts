@@ -1,8 +1,8 @@
 import { Telegraf, Markup } from "telegraf";
 import { prisma } from "./prisma";
-import { addHotspotUser } from "./mikrotik/hotspot";
+import { addHotspotUser, getHotspotUsers, removeHotspotUser } from "./mikrotik/hotspot";
 import { generateVoucher } from "./mikrotik/generator";
-import { beliVoucher, topdownReseller, topupReseller, transferBalance } from "./actions/transactions";
+import { beliVoucher, logVoucherFailure, topdownReseller, topupReseller, transferBalance } from "./actions/transactions";
 import { getMikrotikConnection, getRouterStats } from "./mikrotik";
 import { formatBytes, formatIDR, formatUptime } from "./formatters";
 
@@ -424,7 +424,11 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
       );
     }
 
-    const methods = await prisma.depositMethod.findMany({ where: { active: true }, take: 5 }).catch(() => []);
+    const methods = await prisma.depositMethod.findMany({
+      where: { adminId: config.adminId, active: true },
+      take: 5,
+      orderBy: { id: "asc" },
+    }).catch(() => []);
     const methodText = methods.length
       ? methods.map((m) => `• ${m.name}: <code>${m.number}</code> a.n. ${m.owner}`).join("\n")
       : "Metode pembayaran belum diatur di dashboard. Hubungi admin setelah membuat request.";
@@ -751,6 +755,10 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
         return ctx.answerCbQuery("❌ Saldo tidak cukup!", { show_alert: true });
       }
 
+      let vUser = "";
+      let vPass = "";
+      let routerUserCreated = false;
+
       try {
         const vCode = generateVoucher({
           length: parseInt(pkg.length || "6"),
@@ -759,8 +767,8 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
         });
 
         // type='up' → username ≠ password (seperti PHP), selainnya voucher code (user=pass)
-        const vUser = vCode;
-        const vPass = pkg.type === "up"
+        vUser = vCode;
+        vPass = pkg.type === "up"
           ? generateVoucher({ length: parseInt(pkg.length || "6"), type: normalizeVoucherTypeChar(pkg.typechar) as any, prefix: pkg.prefix || "" })
           : vCode;
 
@@ -771,20 +779,6 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
         const quotaDownload = mbToBytes(pkg.limit_download);
         const quotaUpload = mbToBytes(pkg.limit_upload);
         const quotaTotal = mbToBytes(pkg.limit_total || pkg.quotaGB);
-
-        const txResult = await beliVoucher({
-          userId: telegramId,
-          adminId: config.adminId,
-          sellerName: seller.sellerName || "Unknown",
-          price,
-          markup,
-          username: vUser,
-          password: vPass,
-          expiry: pkg.validity || "30d",
-          status: "Success",
-          routerName: config.routerName || "MikroTik",
-          origin: "BOT",
-        });
 
         const today = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\//g, "-");
         const packageName = getPackageName(pkg, pkgIdx);
@@ -799,6 +793,21 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           limitBytesTotal: quotaTotal,
           comment: `| ID : ${seller.sellerName || telegramId} | voc : ${packageName} | tgl : ${today} | MIKBOTAM |`,
         }, config);
+        routerUserCreated = true;
+
+        const txResult = await beliVoucher({
+          userId: telegramId,
+          adminId: config.adminId,
+          sellerName: seller.sellerName || "Unknown",
+          price,
+          markup,
+          username: vUser,
+          password: vPass,
+          expiry: pkg.validity || "30d",
+          status: "Success",
+          routerName: config.routerName || "MikroTik",
+          origin: "BOT",
+        });
 
         await ctx.deleteMessage().catch(() => {});
         const passLine = pkg.type === "up"
@@ -824,6 +833,32 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
           `GUNAKAN INTERNET DENGAN BIJAK`
         );
       } catch (e: any) {
+        if (routerUserCreated && vUser) {
+          try {
+            const users = await getHotspotUsers(config);
+            const createdUser = users.find((user: any) => user.name === vUser);
+            if (createdUser?.[".id"]) await removeHotspotUser(createdUser[".id"], config);
+          } catch (rollbackError) {
+            console.error("Failed to rollback hotspot user after transaction failure:", rollbackError);
+          }
+        }
+
+        await logVoucherFailure({
+          userId: telegramId,
+          adminId: config.adminId,
+          sellerName: seller.sellerName || "Unknown",
+          price,
+          markup,
+          username: vUser || undefined,
+          password: vPass || undefined,
+          expiry: pkg.validity || "30d",
+          routerName: config.routerName || "MikroTik",
+          origin: "BOT",
+          errorMessage: e.message,
+        }).catch((logError) => {
+          console.error("Failed to log voucher failure:", logError);
+        });
+
         return ctx.reply(`❌ Gagal: ${e.message}`);
       }
     }
@@ -875,12 +910,37 @@ export async function attachBotLogic(bot: Telegraf, config: any) {
       if (telegramId !== config.ownerId) return ctx.answerCbQuery("Akses ditolak.");
       const [, tId, amt, reqId] = data.split("|");
       const amount = parseFloat(amt);
-      const result = await topupReseller(tId, amount, "Admin Bot", parseInt(config.adminId));
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return ctx.answerCbQuery("Nominal tidak valid.", { show_alert: true });
+      }
+
       if (reqId) {
-        await prisma.topupRequest.updateMany({
+        const lockedRequest = await prisma.topupRequest.updateMany({
           where: { id: parseInt(reqId), adminId: config.adminId, status: "Pending" },
-          data: { status: "Success" },
+          data: { status: "Processing" },
         });
+        if (lockedRequest.count === 0) {
+          return ctx.answerCbQuery("Request ini sudah diproses.", { show_alert: true });
+        }
+      }
+
+      let result;
+      try {
+        result = await topupReseller(tId, amount, "Admin Bot", parseInt(config.adminId));
+        if (reqId) {
+          await prisma.topupRequest.updateMany({
+            where: { id: parseInt(reqId), adminId: config.adminId, status: "Processing" },
+            data: { status: "Success" },
+          });
+        }
+      } catch (e: any) {
+        if (reqId) {
+          await prisma.topupRequest.updateMany({
+            where: { id: parseInt(reqId), adminId: config.adminId, status: "Processing" },
+            data: { status: "Pending" },
+          });
+        }
+        return ctx.answerCbQuery(`Gagal topup: ${e.message}`, { show_alert: true });
       }
       await ctx.editMessageText(
         `✅ TOPUP DISETUJUI\n\n` +

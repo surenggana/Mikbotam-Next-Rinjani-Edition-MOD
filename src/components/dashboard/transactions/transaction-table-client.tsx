@@ -29,7 +29,10 @@ const splitDateTime = (value?: string | null) => {
   return { date: "", time: value };
 };
 
-const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => void }) => (
+const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => void }) => {
+  const isFailed = /failed|gagal/i.test(tx.description || "");
+
+  return (
   <TableRow key={tx.no} className="hover:bg-slate-50/30 transition-colors group">
     <TableCell className="text-xs text-slate-500 font-mono">
       <div className="font-bold text-slate-700">{tx.date}</div>
@@ -43,7 +46,9 @@ const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => v
     </TableCell>
     <TableCell>
       <div className="text-sm font-medium flex items-center gap-2">
-        {tx.voucherUsername ? (
+        {isFailed ? (
+          <span className="text-red-600">{tx.description}</span>
+        ) : tx.voucherUsername ? (
           <>
             <Ticket size={14} className="text-emerald-500" />
             <span>Voucher {tx.voucherExpiry || ""}</span>
@@ -58,7 +63,10 @@ const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => v
         )}
       </div>
       {tx.voucherUsername && (
-        <div className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 inline-block mt-1 font-mono">
+        <div className={cn(
+          "text-[10px] px-1.5 py-0.5 rounded border inline-block mt-1 font-mono",
+          isFailed ? "bg-red-50 text-red-700 border-red-100" : "bg-slate-100 text-slate-600 border-slate-200"
+        )}>
           U: {tx.voucherUsername} {tx.voucherPassword ? `/ P: ${tx.voucherPassword}` : ""}
         </div>
       )}
@@ -93,14 +101,14 @@ const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => v
         </div>
       ) : "-"}
     </TableCell>
-    <TableCell className={cn("text-right font-bold", tx.topUp ? "text-emerald-600" : "text-slate-900")}>
+    <TableCell className={cn("text-right font-bold", isFailed ? "text-red-600" : tx.topUp ? "text-emerald-600" : "text-slate-900")}>
       {tx.topUp ? "+" : ""}{rupiah(tx.voucherBuy || tx.topUp)}
     </TableCell>
     <TableCell className="text-right text-slate-500 font-mono text-xs italic">
       {rupiah(tx.balanceEnd)}
     </TableCell>
     <TableCell className="text-center">
-      {tx.voucherUsername && (
+      {tx.voucherUsername && !isFailed && (
         <Button 
           variant="ghost" 
           size="sm" 
@@ -112,7 +120,8 @@ const TransactionRow = memo(({ tx, onPrint }: { tx: any, onPrint: (tx: any) => v
       )}
     </TableCell>
   </TableRow>
-));
+  );
+});
 
 TransactionRow.displayName = "TransactionRow";
 

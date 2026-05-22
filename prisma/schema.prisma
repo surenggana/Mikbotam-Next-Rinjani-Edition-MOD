@@ -25,6 +25,7 @@ model Admin {
   reports       Report[]
   topupRequests TopupRequest[]
   vouchers      VoucherConfig[]
+  depositMethods DepositMethod[]
 
   @@map("mikhbotam_id")
 }
@@ -266,11 +267,13 @@ model TopupRequest {
 }
 
 model DepositMethod {
-  id     Int     @id @default(autoincrement())
-  name   String
-  number String
-  owner  String
-  active Boolean @default(true)
+  id      Int     @id @default(autoincrement())
+  adminId Int?    @map("admin_id")
+  name    String
+  number  String
+  owner   String
+  active  Boolean @default(true)
+  admin   Admin?  @relation(fields: [adminId], references: [u_id])
 
   @@map("st_deposit_method")
 }

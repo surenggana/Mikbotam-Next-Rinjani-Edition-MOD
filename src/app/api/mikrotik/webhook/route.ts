@@ -77,6 +77,20 @@ async function getConfig(routerId?: string | null, adminId?: number | null) {
   return await prisma.systemConfig.findFirst();
 }
 
+async function findVoucherTransaction(user: string, adminId?: number | null) {
+  const where: any = {
+    voucherUsername: user,
+    description: { not: { contains: "Failed" } },
+  };
+
+  if (adminId) where.adminId = adminId;
+
+  return await prisma.transaction.findFirst({
+    where,
+    orderBy: { no: "desc" },
+  });
+}
+
 async function sendTelegram(bot: Telegraf, chatId: string | number | null | undefined, message: string) {
   if (!chatId) return;
   if (!message.trim()) return;
@@ -128,14 +142,15 @@ async function handleMikbotamStatus(payload: MikbotamCallback) {
     return NextResponse.json({ error: "Payload tidak valid" }, { status: 400 });
   }
 
-  const transaction = await prisma.transaction.findFirst({
-    where: { voucherUsername: parsed.user },
-    orderBy: { no: "desc" },
-  });
-
-  const config = await getConfig(payload.routerId, transaction?.adminId);
+  const routerConfig = payload.routerId ? await getConfig(payload.routerId) : null;
+  const transaction = await findVoucherTransaction(parsed.user, routerConfig?.adminId);
+  const config = routerConfig || await getConfig(null, transaction?.adminId);
   if (!config || !config.botToken) {
     return NextResponse.json({ error: "Sistem belum dikonfigurasi" }, { status: 500 });
+  }
+
+  if (!transaction) {
+    return NextResponse.json({ status: "ignored", reason: "Transaksi voucher tidak ditemukan" });
   }
 
   const bot = new Telegraf(config.botToken);
@@ -151,14 +166,18 @@ async function handleMikbotamStatus(payload: MikbotamCallback) {
     : null;
 
   if (status === "start") {
-    await prisma.transaction.updateMany({
-      where: { voucherUsername: parsed.user, useTime: null },
+    const updateResult = await prisma.transaction.updateMany({
+      where: { no: transaction.no, useTime: null },
       data: {
         useTime: `${parsed.startDate} ${parsed.startTime}`.trim(),
         expiredTime: `${parsed.endDate} ${parsed.endTime}`.trim(),
         description: "Hotspot Active",
       },
     });
+
+    if (updateResult.count === 0) {
+      return NextResponse.json({ status: "ok", duplicate: true });
+    }
 
     const message =
       `🔔 <b>VOUCHER MULAI DIPAKAI</b>\n\n` +
@@ -180,10 +199,14 @@ async function handleMikbotamStatus(payload: MikbotamCallback) {
   }
 
   if (status === "expired") {
-    await prisma.transaction.updateMany({
-      where: { voucherUsername: parsed.user },
+    const updateResult = await prisma.transaction.updateMany({
+      where: { no: transaction.no, description: { not: "Hotspot Expired" } },
       data: { description: "Hotspot Expired" },
     });
+
+    if (updateResult.count === 0) {
+      return NextResponse.json({ status: "ok", duplicate: true });
+    }
 
     const message =
       `⏰ <b>VOUCHER EXPIRED</b>\n\n` +
@@ -227,14 +250,9 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const transaction = user
-    ? await prisma.transaction.findFirst({
-        where: { voucherUsername: user },
-        orderBy: { no: "desc" },
-      })
-    : null;
-
-  const config = await getConfig(routerId, transaction?.adminId);
+  const routerConfig = routerId ? await getConfig(routerId) : null;
+  const transaction = user ? await findVoucherTransaction(user, routerConfig?.adminId) : null;
+  const config = routerConfig || await getConfig(null, transaction?.adminId);
   if (!config || !config.botToken || !config.ownerId) {
     return NextResponse.json({ error: "Sistem belum dikonfigurasi" }, { status: 500 });
   }

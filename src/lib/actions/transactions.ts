@@ -27,9 +27,18 @@ export async function beliVoucher(params: {
   const dateStr = format(now, "yyyy-MM-dd");
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Get seller
-    const seller = await tx.seller.findFirst({
+    const sellerRef = await tx.seller.findFirst({
       where: { userId: params.userId, adminId: params.adminId },
+      select: { no: true },
+    });
+
+    if (!sellerRef) throw new Error("Reseller tidak ditemukan.");
+
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(${sellerRef.no})`;
+
+    // 1. Get seller after the lock, so parallel purchases see the latest balance.
+    const seller = await tx.seller.findUnique({
+      where: { no: sellerRef.no },
     });
 
     if (!seller) throw new Error("Reseller tidak ditemukan.");
@@ -95,7 +104,91 @@ export async function beliVoucher(params: {
   });
 }
 
+export async function logVoucherFailure(params: {
+  userId: string;
+  adminId: number;
+  sellerName: string;
+  price: number;
+  markup: number;
+  username?: string;
+  password?: string;
+  expiry: string;
+  routerName: string;
+  service?: "hotspot" | "ppp";
+  origin?: string;
+  errorMessage?: string;
+}) {
+  const now = new Date();
+  const timeStr = format(now, "HH:mm:ss");
+  const dateStr = format(now, "yyyy-MM-dd");
+
+  const seller = await prisma.seller.findFirst({
+    where: { userId: params.userId, adminId: params.adminId },
+  });
+
+  if (!seller) throw new Error("Reseller tidak ditemukan.");
+
+  const currentBalance = parseFloat(seller.balance || "0");
+  const adminPrice = params.price - params.markup;
+  const serviceName = params.service === "ppp" ? "PPP" : "Hotspot";
+  const errorMessage = (params.errorMessage || "Gagal membuat voucher").slice(0, 180);
+
+  if (params.username) {
+    const existingFailure = await prisma.transaction.findFirst({
+      where: {
+        adminId: params.adminId,
+        voucherUsername: params.username,
+        description: { contains: `${serviceName} Failed` },
+      },
+      select: { no: true },
+    });
+    if (existingFailure) return { success: false, balance: currentBalance, adminPrice, skipped: true };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.transaction.create({
+      data: {
+        adminId: seller.adminId,
+        userId: params.userId,
+        sellerName: params.sellerName,
+        balanceStart: currentBalance.toString(),
+        balanceEnd: currentBalance.toString(),
+        voucherBuy: "0",
+        voucherMarkup: params.markup.toString(),
+        voucherUsername: params.username,
+        voucherPassword: params.password,
+        voucherExpiry: params.expiry,
+        description: `${serviceName} Failed: ${errorMessage}`,
+        routerName: params.routerName,
+        origin: params.origin || "BOT",
+        time: timeStr,
+        date: dateStr,
+      },
+    });
+
+    await tx.report.create({
+      data: {
+        adminId: seller.adminId,
+        userId: params.userId,
+        userName: params.sellerName,
+        price: params.price.toString(),
+        status: "Failed",
+        transaction: params.service === "ppp" ? "ppp" : "vc",
+        revenue: "0",
+        time: timeStr,
+        date: dateStr,
+      },
+    });
+  });
+
+  return { success: false, balance: currentBalance, adminPrice };
+}
+
 export async function topupReseller(targetUserId: string, amount: number, origin: string = "WEB", forcedAdminId?: number) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Nominal topup tidak valid.");
+  }
+
   let adminId: number;
   let adminName: string = "Admin";
 
@@ -114,9 +207,18 @@ export async function topupReseller(targetUserId: string, amount: number, origin
   const dateStr = format(now, "yyyy-MM-dd");
 
   const result = await prisma.$transaction(async (tx) => {
-    // 1. Get current balance (filtered by adminId for security)
-    const seller = await tx.seller.findFirst({
+    const sellerRef = await tx.seller.findFirst({
       where: { userId: targetUserId, adminId },
+      select: { no: true },
+    });
+
+    if (!sellerRef) throw new Error("Seller tidak ditemukan di bawah manajemen Anda.");
+
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(${sellerRef.no})`;
+
+    // 1. Get current balance (filtered by adminId for security)
+    const seller = await tx.seller.findUnique({
+      where: { no: sellerRef.no },
     });
 
     if (!seller) throw new Error("Seller tidak ditemukan di bawah manajemen Anda.");
@@ -189,6 +291,10 @@ export async function topupResellerAction(targetUserId: string, amount: number) 
 }
 
 export async function topdownReseller(targetUserId: string, amount: number, origin: string = "WEB", forcedAdminId?: number) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Nominal penarikan tidak valid.");
+  }
+
   let adminId: number;
   let adminName = "Admin";
 
@@ -206,9 +312,18 @@ export async function topdownReseller(targetUserId: string, amount: number, orig
   const { time: timeStr, date: dateStr } = formatToMikbotamDate(now);
 
   const result = await prisma.$transaction(async (tx) => {
-    // 1. Get current balance
-    const seller = await tx.seller.findFirst({
+    const sellerRef = await tx.seller.findFirst({
       where: { userId: targetUserId, adminId },
+      select: { no: true },
+    });
+
+    if (!sellerRef) throw new Error("Seller tidak ditemukan.");
+
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(${sellerRef.no})`;
+
+    // 1. Get current balance
+    const seller = await tx.seller.findUnique({
+      where: { no: sellerRef.no },
     });
 
     if (!seller) throw new Error("Seller tidak ditemukan.");
@@ -272,23 +387,46 @@ export async function topdownReseller(targetUserId: string, amount: number, orig
 }
 
 export async function transferBalance(senderUserId: string, targetUserId: string, amount: number, adminId?: number) {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Nominal transfer tidak valid.");
+  }
+
   const now = new Date();
   const timeStr = format(now, "HH:mm:ss");
   const dateStr = format(now, "yyyy-MM-dd");
 
   const result = await prisma.$transaction(async (tx) => {
-    // 1. Get sender
-    const sender = await tx.seller.findFirst({
+    const senderRef = await tx.seller.findFirst({
       where: adminId ? { userId: senderUserId, adminId } : { userId: senderUserId },
+      select: { no: true, adminId: true },
     });
-    if (!sender) throw new Error("Akun pengirim tidak ditemukan.");
+
+    if (!senderRef) throw new Error("Akun pengirim tidak ditemukan.");
 
     // 2. Get receiver
-    const receiver = await tx.seller.findFirst({
+    const receiverRef = await tx.seller.findFirst({
       where: { userId: targetUserId },
+      select: { no: true, adminId: true },
     });
     
     // VALIDASI TENANT: Pastikan penerima ada DAN satu adminId dengan pengirim
+    if (!receiverRef || receiverRef.adminId !== senderRef.adminId) {
+      throw new Error("Akun tujuan tidak ditemukan dalam grup reseller Anda.");
+    }
+
+    for (const sellerNo of [senderRef.no, receiverRef.no].sort((a, b) => a - b)) {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(${sellerNo})`;
+    }
+
+    // 1. Get sender after locks.
+    const sender = await tx.seller.findUnique({
+      where: { no: senderRef.no },
+    });
+    if (!sender) throw new Error("Akun pengirim tidak ditemukan.");
+
+    const receiver = await tx.seller.findUnique({
+      where: { no: receiverRef.no },
+    });
     if (!receiver || receiver.adminId !== sender.adminId) {
       throw new Error("Akun tujuan tidak ditemukan dalam grup reseller Anda.");
     }

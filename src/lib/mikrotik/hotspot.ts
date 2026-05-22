@@ -1,8 +1,8 @@
 import { getMikrotikConnection, getActiveConfig } from "../mikrotik";
 import { buildHotspotVoucherOnLoginScript } from "./scripts";
 
-export async function getHotspotUsers() {
-  const conn = await getMikrotikConnection();
+export async function getHotspotUsers(customConfig?: any) {
+  const conn = await getMikrotikConnection(customConfig);
   try {
     await conn.connect();
     return await conn.write("/ip/hotspot/user/print");
@@ -101,8 +101,8 @@ export async function addHotspotUser(params: {
   }
 }
 
-export async function removeHotspotUser(id: string) {
-  const conn = await getMikrotikConnection();
+export async function removeHotspotUser(id: string, customConfig?: any) {
+  const conn = await getMikrotikConnection(customConfig);
   try {
     await conn.connect();
     return await conn.write(["/ip/hotspot/user/remove", "=.id=" + id]);
